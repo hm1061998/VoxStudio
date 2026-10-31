@@ -64,3 +64,16 @@ Not possible until licensed recordings exist. When they do (details in `docs/upg
 | Docker          | `docker compose --profile ai up` adds the model service (never built by QA)                                                                                                             | optional                                                                                                      |
 
 Rollback: redeploy the previous build; the new columns and table are ignored. To remove them: drop `ai_usage`, the two columns and the index, and delete the migration row.
+
+## 8. Addendum: AI voices by default, roles and account security (2026-11-01, ADR 0009)
+
+| Area            | Change                                                                                                    | Action                                                                                                                                                     |
+| --------------- | --------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Engines         | `ENABLED_ENGINES` defaults to `vieneu`; eSpeak and vnunit voices disappear from the catalog               | set `ENABLED_ENGINES=vieneu,espeak` to keep the old behaviour; existing projects using eSpeak voices then fail with a voice-unavailable error until you do |
+| Database        | migration `20261101090000_security_hardening`: `auth_throttles`, `audit_events`, session activity columns | `migrate:deploy`                                                                                                                                           |
+| Administrators  | `ADMIN_EMAILS` only creates the first admin; it no longer grants rights on later sign-ins                 | promote others in the dashboard or with `scripts/user-admin.mjs`                                                                                           |
+| Cookies         | SameSite=Strict, `__Host-` prefix under HTTPS; all users are signed out once                              | none                                                                                                                                                       |
+| New environment | `ENABLED_ENGINES`, `ALLOW_REGISTRATION`, `SESSION_IDLE_HOURS`, `TRUST_PROXY`                              | set `TRUST_PROXY` correctly behind a proxy                                                                                                                 |
+| Docker          | the `vieneu` service is no longer behind a profile (never built by QA)                                    | set `VIENEU_SERVICE_TOKEN`                                                                                                                                 |
+
+Rollback: redeploy the previous build; the new tables are ignored.

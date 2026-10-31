@@ -96,6 +96,7 @@ beforeAll(async () => {
   await new Promise<void>((r) => fake.listen(0, '127.0.0.1', r));
   const url = `http://127.0.0.1:${(fake.address() as AddressInfo).port}`;
   h = await createHarness({
+    ENABLED_ENGINES: 'espeak,vieneu',
     VIENEU_SERVICE_URLS: url,
     VIENEU_SERVICE_TOKEN: TOKEN,
     VIENEU_APPROVED: 'true',

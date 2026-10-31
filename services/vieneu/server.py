@@ -158,6 +158,33 @@ def _set_error(fut, err) -> None:
 STATE: dict = {"scheduler": None, "voices": {}, "ready": False, "version": "unknown", "error": None}
 app = FastAPI(title="VoxStudio VieNeu model service", docs_url=None, redoc_url=None, openapi_url=None)
 
+MAX_BODY_BYTES = 64 * 1024  # a request is a few kilobytes of text at most
+
+
+class LimitBody:
+    """Pure ASGI middleware: refuse oversized or length-less POST bodies before anything reads them.
+
+    (A BaseHTTPMiddleware would hide client disconnects from the endpoint, which the queue relies on.)"""
+
+    def __init__(self, inner):
+        self.inner = inner
+
+    async def __call__(self, scope, receive, send):
+        if scope["type"] == "http" and scope["method"] == "POST":
+            declared = dict(scope["headers"]).get(b"content-length")
+            code = None
+            if declared is None:
+                code = 411
+            elif not declared.isdigit() or int(declared) > MAX_BODY_BYTES:
+                code = 413
+            if code is not None:
+                await JSONResponse({"detail": "request body rejected"}, status_code=code)(scope, receive, send)
+                return
+        await self.inner(scope, receive, send)
+
+
+app.add_middleware(LimitBody)
+
 
 def load_models() -> None:
     try:

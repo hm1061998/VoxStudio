@@ -15,8 +15,12 @@ model User {
   email        String   @unique
   passwordHash String   @map("password_hash")
   displayName  String   @map("display_name")
+  /// 'user' | 'admin'
   role         String   @default("user")
+  /// 'active' | 'suspended' (suspended accounts cannot sign in and lose every session)
   status       String   @default("active")
+  lastLoginAt         DateTime? @map("last_login_at") @db.Timestamptz(3)
+  passwordChangedAt   DateTime? @map("password_changed_at") @db.Timestamptz(3)
   createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
   updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
 
@@ -326,17 +330,31 @@ model ProjectVersion {
 
 model AuditEvent {
   id           String    @id @default(uuid()) @db.Uuid
-  workspaceId  String    @map("workspace_id") @db.Uuid
+  /// null for account-level and system events (sign-ins, lockouts, role changes)
+  workspaceId  String?   @map("workspace_id") @db.Uuid
   actorUserId  String?   @map("actor_user_id") @db.Uuid
   eventType    String    @map("event_type")
   resourceType String    @map("resource_type")
   resourceId   String    @map("resource_id")
   metadataJson Json      @map("metadata_json")
   createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  workspace    Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([createdAt(sort: Desc)])
   @@map("audit_events")
+}
+
+/// Sign-in failure counters used for lockout. One row per account key ("acct:<sha256 of email>") and per client
+/// address ("ip:<address>"). Unknown emails get rows too, so locking never reveals whether an account exists.
+model AuthThrottle {
+  key           String    @id
+  failures      Int       @default(0)
+  lastFailureAt DateTime  @default(now()) @map("last_failure_at") @db.Timestamptz(3)
+  lockedUntil   DateTime? @map("locked_until") @db.Timestamptz(3)
+
+  @@index([lastFailureAt])
+  @@map("auth_throttles")
 }
 
 model WorkerHeartbeat {

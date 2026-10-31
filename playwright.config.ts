@@ -21,6 +21,8 @@ export default defineConfig({
     command: 'node scripts/start-all.mjs',
     url: 'http://localhost:4000/api/v1/health/ready',
     reuseExistingServer: true,
+    // Rule-based voices are not offered by default; the suites that exercise them enable the engine explicitly.
+    env: { ENABLED_ENGINES: process.env.E2E_AI ? 'espeak,vieneu' : 'espeak' },
     timeout: 120_000,
   },
 });

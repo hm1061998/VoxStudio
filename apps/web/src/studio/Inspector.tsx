@@ -22,6 +22,7 @@ import {
   engineShortName,
   labelFor,
 } from '../components/VoiceProfilePanel';
+import { VoiceGalleryDialog } from '../components/VoiceGallery';
 import { VoiceSample } from '../components/VoiceSample';
 import {
   accentName,
@@ -138,6 +139,7 @@ export function Inspector() {
   const [presetDialog, setPresetDialog] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
   const [details, setDetails] = useState(false);
+  const [gallery, setGallery] = useState(false);
   const qc = useQueryClient();
 
   if (!seg || !selectedId) return <div className="p-4 text-sm text-muted">{t('editor.noSelection')}</div>;
@@ -251,6 +253,9 @@ export function Inspector() {
           >
             <VoiceOptions voices={voices.data ?? []} current={seg.voiceId} />
           </select>
+          <button className="btn btn-sm mt-2 w-full" onClick={() => setGallery(true)}>
+            {t('gallery.open')}
+          </button>
         </div>
         {(accents.length > 1 || genders.length > 0) && (
           <div className="grid grid-cols-2 gap-2">
@@ -321,7 +326,9 @@ export function Inspector() {
                 ? voice.data.dataset.complete
                   ? t('insp.dataset.complete')
                   : t('insp.dataset.incomplete')
-                : t('insp.dataset.rules')}
+                : voice.data.usesAi
+                  ? t('insp.dataset.neural')
+                  : t('insp.dataset.rules')}
               {voice.data.dataset?.provenance.kind === 'ai-generated' && ' ' + t('insp.dataset.ai')}
             </dd>
           </dl>
@@ -449,6 +456,18 @@ export function Inspector() {
             ))}
           </ul>
         </details>
+      )}
+      {gallery && (
+        <VoiceGalleryDialog
+          voices={(voices.data ?? []).filter((v) => v.locale === (currentVoice?.locale ?? seg.locale))}
+          all={voices.data ?? []}
+          value={seg.voiceId}
+          onPick={(id) => {
+            const v = voices.data?.find((x) => x.id === id);
+            if (v) void changeVoice(v, targets);
+          }}
+          onClose={() => setGallery(false)}
+        />
       )}
       {presetDialog && caps && (
         <PresetDialog targets={targets} caps={caps} onClose={() => setPresetDialog(false)} />

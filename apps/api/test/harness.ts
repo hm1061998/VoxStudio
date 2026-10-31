@@ -56,6 +56,8 @@ export async function createHarness(overrides: Record<string, string> = {}): Pro
     STORAGE_LOCAL_ROOT: path.join(tmp, 'storage'),
     TEMP_DIR: path.join(tmp, 'tmp'),
     ADMIN_EMAILS: 'admin@example.test',
+    // The product default is the AI engine only; the existing suites exercise the rule-based engine.
+    ENABLED_ENGINES: 'espeak',
     CORS_ORIGINS: 'http://localhost:5173',
     ...overrides,
   });

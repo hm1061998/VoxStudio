@@ -3,7 +3,8 @@ import { Link, useParams } from 'react-router';
 import { useQueryClient } from '@tanstack/react-query';
 import type { JobEventDto, ProjectDto, ProjectVersionDto, SegmentInput } from '@voxstudio/contracts';
 import { api, describeError } from '../api/client';
-import { qk, useJobEvents, useProject, useVoice } from '../api/hooks';
+import { qk, useJobEvents, useProject, useVoice, useVoices } from '../api/hooks';
+import { defaultVoiceFor } from './voicePick';
 import { Confirm, Dialog, ErrorNote, Spinner, fmtDate } from '../components/ui';
 import { newSegment, previewSegment, refreshServer } from './actions';
 import { Inspector, defaultsFrom } from './Inspector';
@@ -204,7 +205,10 @@ export function StudioPage() {
 }
 
 function SegmentListWithAdd({ project }: { project: ProjectDto }) {
-  const voiceId = project.settings.defaultVoiceId ?? 'espeak:en-us';
+  const allVoices = useVoices();
+  const voiceId =
+    project.settings.defaultVoiceId ??
+    (allVoices.data ? (defaultVoiceFor(allVoices.data, project.defaultLocale)?.id ?? null) : null);
   const voice = useVoice(voiceId);
   const add = () => {
     const st = useStudio.getState();

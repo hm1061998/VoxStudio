@@ -185,3 +185,14 @@ Owner feedback after listening: the AI voice is good and smooth; users must be a
 | ------ | --------------------------------------------------------------------------------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------ |
 | UP-047 | Gender and region choice (new project dialog, Inspector, Voices page); `gender` on voices; Southern male voice (Adam) | COMPLETED | `voicePick.test.ts` (6), API test for genders per region, Playwright AI test over all six combinations |
 | UP-048 | Listening pack of all six AI voices                                                                                   | COMPLETED | `qa-output/ai-voices-pack/` 42 files, no automated artifact flags; **not yet heard by a listener**     |
+
+## UP-049 log (UI/UX review, AI voice as default, roles, admin dashboard, security, 2026-11-01)
+
+| ID     | Task                                                                                                   | Status      | Evidence                                                              |
+| ------ | ------------------------------------------------------------------------------------------------------ | ----------- | --------------------------------------------------------------------- |
+| UP-049 | Voice gallery with per-voice sample, accent and gender filters; AI badge; engine switch reconciliation | COMPLETED   | `voicePick.test.ts`, Playwright gallery test, AI E2E (`E2E_AI=1`)     |
+| UP-050 | eSpeak and vnunit hidden by default (`ENABLED_ENGINES=vieneu`), ADR 0009                               | COMPLETED   | `ai-only.test.ts` (4 tests)                                           |
+| UP-051 | Roles, admin-only guard, last-admin protection, admin dashboard, audit trail                           | COMPLETED   | `security.test.ts`, Playwright admin test                             |
+| UP-052 | Lockout, password policy, session limits, Origin/CSRF, headers, first-admin bootstrap, operator CLI    | COMPLETED   | `qa-security.mjs` 31/31; `password-policy.test.ts`                    |
+| UP-053 | Accessibility pass (axe-core) on login, studio, admin                                                  | COMPLETED   | Playwright axe test                                                   |
+| UP-054 | 2FA, email verification, mailed reset, penetration test, Docker build                                  | NOT_STARTED | out of scope or needs infrastructure; see `10-SECURITY-AND-ACCESS.md` |

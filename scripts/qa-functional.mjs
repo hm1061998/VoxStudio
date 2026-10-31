@@ -10,9 +10,10 @@ import path from 'node:path';
 import core from '../packages/core/dist/index.js';
 
 const arg = (n, d) => (process.argv.includes(n) ? process.argv[process.argv.indexOf(n) + 1] : d);
-const VOICE = arg('--voice', 'espeak:vi');
-const AI = VOICE.startsWith('vieneu:');
-const ENGINE = AI ? 'vieneu@' : 'espeak@';
+// Without --voice the first Vietnamese voice the server offers is used (the AI voices in the default deployment).
+let VOICE = arg('--voice', '');
+let AI = VOICE.startsWith('vieneu:');
+let ENGINE = AI ? 'vieneu@' : 'espeak@';
 const BASE = arg('--base', 'http://localhost:4000').replace(/\/$/, '');
 const OUT = path.resolve(arg('--out', 'qa-output/functional'));
 mkdirSync(OUT, { recursive: true });
@@ -79,9 +80,14 @@ const ws = data(reg).user.workspaces[0].id;
 
 // ---- voices
 const vi = data(await call('GET', '/voices?locale=vi'));
+if (!VOICE) {
+  VOICE = (vi.find((v) => v.usesAi) ?? vi[0])?.id ?? '';
+  AI = VOICE.startsWith('vieneu:');
+  ENGINE = AI ? 'vieneu@' : 'espeak@';
+}
 check(
   'Vietnamese voices offered',
-  vi.some((v) => v.id === VOICE) && vi.filter((v) => v.engineId === 'espeak').length === 3,
+  vi.length > 0 && vi.some((v) => v.id === VOICE),
   vi.map((v) => v.id).join(', '),
 );
 
@@ -228,7 +234,7 @@ const prev = data(
   await call('POST', '/text/normalize-preview', {
     text: 'Làm marketing.',
     locale: 'vi-VN',
-    voiceId: 'espeak:vi',
+    voiceId: VOICE,
   }),
 );
 check(

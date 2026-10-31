@@ -12,7 +12,7 @@ import type { Response } from 'express';
 import { z } from 'zod';
 import { CurrentUser, ZodPipe, type SessionUser, type VoxRequest } from '../common/http';
 import { CONFIG } from '../common/infra';
-import { AuthService, SESSION_COOKIE, SESSION_TTL_MS } from './auth.service';
+import { AuthService, SESSION_TTL_MS } from './auth.service';
 import { Public } from './guards';
 
 const changePasswordSchema = z.strictObject({
@@ -33,9 +33,9 @@ export class AuthController {
   ) {}
 
   private setCookie(res: Response, token: string): void {
-    res.cookie(SESSION_COOKIE, token, {
+    res.cookie(this.auth.cookieName, token, {
       httpOnly: true,
-      sameSite: 'lax',
+      sameSite: 'strict',
       secure: this.config.cookieSecure,
       path: '/',
       maxAge: SESSION_TTL_MS,
@@ -52,9 +52,10 @@ export class AuthController {
   @Post('register')
   async register(
     @Body(new ZodPipe(registerSchema)) body: RegisterInput,
+    @Req() req: VoxRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<SessionDto> {
-    const { token, userId } = await this.auth.register(body);
+    const { token, userId } = await this.auth.register(body, { ip: req.ip ?? 'unknown' });
     this.setCookie(res, token);
     return this.sessionFor(userId, token);
   }
@@ -65,9 +66,10 @@ export class AuthController {
   @HttpCode(200)
   async login(
     @Body(new ZodPipe(loginSchema)) body: LoginInput,
+    @Req() req: VoxRequest,
     @Res({ passthrough: true }) res: Response,
   ): Promise<SessionDto> {
-    const { token, userId } = await this.auth.login(body);
+    const { token, userId } = await this.auth.login(body, { ip: req.ip ?? 'unknown' });
     this.setCookie(res, token);
     return this.sessionFor(userId, token);
   }
@@ -79,8 +81,27 @@ export class AuthController {
     @Res({ passthrough: true }) res: Response,
   ): Promise<{ ok: true }> {
     await this.auth.logout(user.sessionId);
-    res.clearCookie(SESSION_COOKIE, { path: '/' });
+    res.clearCookie(this.auth.cookieName, {
+      path: '/',
+      secure: this.config.cookieSecure,
+      httpOnly: true,
+      sameSite: 'strict',
+    });
     return { ok: true };
+  }
+
+  /** Sign out every other device; the current session stays. */
+  @Post('logout-others')
+  @HttpCode(200)
+  async logoutOthers(@CurrentUser() user: SessionUser): Promise<{ revoked: number }> {
+    return { revoked: await this.auth.revokeSessions(user.id, user.sessionId) };
+  }
+
+  /** What the sign-in pages need to know before anyone is signed in. */
+  @Public()
+  @Get('config')
+  authConfig(): { registrationOpen: boolean } {
+    return { registrationOpen: this.config.allowRegistration };
   }
 
   @Post('refresh')
@@ -121,7 +142,7 @@ export class AuthController {
     @CurrentUser() user: SessionUser,
     @Body(new ZodPipe(changePasswordSchema)) body: z.infer<typeof changePasswordSchema>,
   ) {
-    await this.auth.changePassword(user.id, body.currentPassword, body.newPassword);
+    await this.auth.changePassword(user.id, user.sessionId, body.currentPassword, body.newPassword);
     return { ok: true };
   }
 

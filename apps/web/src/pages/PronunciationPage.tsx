@@ -8,6 +8,7 @@ import type {
 } from '@voxstudio/contracts';
 import { api, assetUrl, describeError } from '../api/client';
 import { usePronunciation, useVoices, waitForJob } from '../api/hooks';
+import { defaultVoiceFor } from '../studio/voicePick';
 import { Confirm, Dialog, Empty, ErrorNote, Spinner } from '../components/ui';
 import { useUiMode } from '../app/uiMode';
 import { useI18n } from '../i18n';
@@ -240,7 +241,15 @@ function EntryEditor({
   const [d, setD] = useState<Draft>(entry ? { ...entry } : { ...EMPTY, locale: defaultLocale });
   const [error, setError] = useState<string | null>(null);
   const voices = useVoices();
-  const [voiceId, setVoiceId] = useState(defaultLocale === 'vi' ? 'espeak:vi' : 'espeak:en-us');
+  const phonemeEngineOffered = (voices.data ?? []).some((v) => v.engineId === 'espeak');
+  const [chosenVoice, setVoiceId] = useState('');
+  const voiceId =
+    chosenVoice ||
+    (voices.data
+      ? (defaultVoiceFor(voices.data, defaultLocale === 'vi' ? 'vi-VN' : 'en-US')?.id ??
+        voices.data[0]?.id ??
+        '')
+      : '');
   const [testText, setTestText] = useState('');
   const [preview, setPreview] = useState<NormalizationPreviewDto | null>(null);
   const [audioId, setAudioId] = useState<string | null>(null);
@@ -344,7 +353,10 @@ function EntryEditor({
                 }
               >
                 <option value="">{t('pron.f.typePlain')}</option>
-                <option value="espeak">{t('pron.f.typePhoneme')}</option>
+                {/* Phoneme codes only exist for the rule-based eSpeak engine; hidden when it is not offered. */}
+                {(d.phonemeFormat === 'espeak' || phonemeEngineOffered) && (
+                  <option value="espeak">{t('pron.f.typePhoneme')}</option>
+                )}
               </select>
             </div>
             <div>

@@ -141,7 +141,9 @@ export function DatasetPanel({ d }: { d: VoiceProfileDto }) {
   if (!ds)
     return (
       <Section title={t('profile.dataset')}>
-        <p className="text-xs text-muted">{t('profile.dataset.none')}</p>
+        <p className="text-xs text-muted">
+          {d.usesAi ? t('profile.dataset.neural') : t('profile.dataset.none')}
+        </p>
       </Section>
     );
   const r = ds.recording;

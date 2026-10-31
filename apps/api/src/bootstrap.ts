@@ -17,7 +17,8 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
     bodyParser: false,
   });
   const logger = app.get(Logger);
-  app.set('trust proxy', 'loopback');
+  // Only the configured proxies may set X-Forwarded-For (see TRUST_PROXY); rate limits and lockouts key on req.ip.
+  app.set('trust proxy', /^\d+$/.test(config.trustProxy) ? Number(config.trustProxy) : config.trustProxy);
   app.disable('x-powered-by');
   app.use(
     helmet({
@@ -37,7 +38,37 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
       crossOriginEmbedderPolicy: false,
     }),
   );
+  app.use((_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Permissions-Policy', 'camera=(), microphone=(), geolocation=(), payment=(), usb=()');
+    next();
+  });
   app.use((req: VoxRequest, res: Response, next: NextFunction) => requestContext(logger)(req, res, next));
+  // API answers are private and never cached by browsers or proxies (individual routes may override).
+  app.use('/api', (_req: Request, res: Response, next: NextFunction) => {
+    res.setHeader('Cache-Control', 'no-store');
+    next();
+  });
+  // Defence in depth against cross-site requests: a state-changing call that names a foreign Origin is refused
+  // before any handler runs (the CSRF token and SameSite=Strict cookies are the primary defences).
+  const allowedOrigins = new Set([
+    ...config.corsOrigins,
+    ...(() => {
+      try {
+        return [new URL(config.publicBaseUrl).origin];
+      } catch {
+        return [];
+      }
+    })(),
+  ]);
+  app.use('/api', (req: VoxRequest, res: Response, next: NextFunction) => {
+    const origin = req.headers.origin;
+    if (!['GET', 'HEAD', 'OPTIONS'].includes(req.method) && origin && !allowedOrigins.has(origin))
+      return void res.status(403).json({
+        error: { code: 'CSRF_INVALID', message: 'Cross-site request refused.' },
+        meta: { requestId: req.requestId },
+      });
+    next();
+  });
   app.use(cookieParser());
   app.use('/api', express.json({ limit: '2mb' }));
   // Body-parser errors occur before Nest routing, so map them to the API error envelope here.

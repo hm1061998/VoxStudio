@@ -118,18 +118,24 @@ export async function selectEngineForLocale(
 
 /** The engines this deployment ships. Only engines with an approved admission record belong in the default set. */
 export function createEngineRegistry(config: AppConfig): EngineRegistry {
-  const registry = new EngineRegistry().register(
-    new EspeakAdapter({ executable: config.tools.espeak, approvedVersion: config.espeakApprovedVersion }),
-  );
-  // The Vietnamese unit-selection engine exists only where an operator supplies a unit database.
-  if (config.vnUnitDbDir)
+  const registry = new EngineRegistry();
+  const on = (id: string) => config.enabledEngines.includes(id);
+  // The rule-based eSpeak NG engine: offered only when listed in ENABLED_ENGINES.
+  if (on('espeak'))
+    registry.register(
+      new EspeakAdapter({ executable: config.tools.espeak, approvedVersion: config.espeakApprovedVersion }),
+    );
+  // The Vietnamese unit-selection engine exists only where it is enabled and an operator supplies a unit database.
+  if (on('vnunit') && config.vnUnitDbDir)
     registry.register(
       new VnUnitAdapter({ dbRoot: config.vnUnitDbDir, bench: loadBenchSyllables(config.repoRoot) }),
     );
-  // The AI engine (ADR 0008) exists only where an operator runs the model service and configures its URL.
-  if (config.vieneuServiceUrls.length) {
+  // The AI engine (ADR 0008) exists only where it is enabled and the operator runs the model service.
+  if (on('vieneu')) {
+    if (!config.vieneuServiceUrls.length)
+      throw new Error('ENABLED_ENGINES includes vieneu but VIENEU_SERVICE_URLS is empty.');
     if (!config.vieneuServiceToken)
-      throw new Error('VIENEU_SERVICE_TOKEN is required when VIENEU_SERVICE_URLS is set.');
+      throw new Error('VIENEU_SERVICE_TOKEN is required when the vieneu engine is enabled.');
     registry.register(
       new VieneuAdapter({
         urls: config.vieneuServiceUrls,
@@ -138,5 +144,6 @@ export function createEngineRegistry(config: AppConfig): EngineRegistry {
       }),
     );
   }
+  if (!registry.all().length) throw new Error('No speech engine is enabled (check ENABLED_ENGINES).');
   return registry;
 }

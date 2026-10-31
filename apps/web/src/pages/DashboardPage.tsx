@@ -14,8 +14,8 @@ import { useAuth } from '../app/auth';
 import { Confirm, Dialog, Empty, ErrorNote, JobBadge, Spinner, fmtDate, fmtMs } from '../components/ui';
 import { accentName, languageName, useI18n } from '../i18n';
 import type { MessageKey } from '../i18n/en';
-import { labelFor } from '../components/VoiceProfilePanel';
-import { availableAccents, availableGenders, type Gender } from '../studio/voicePick';
+import { VoiceGallery } from '../components/VoiceGallery';
+import { availableAccents, availableGenders, defaultVoiceFor, type Gender } from '../studio/voicePick';
 
 const SEGMENT_MAX = 5000;
 
@@ -124,7 +124,7 @@ export function DashboardPage() {
                   <td className="px-4 py-2.5 text-muted">
                     {p.latestExport ? (
                       <a
-                        className="text-accent hover:underline"
+                        className="text-accent underline underline-offset-2"
                         href={assetUrl(p.latestExport.id, 'download')}
                       >
                         ⤓ {p.latestExport.format.toUpperCase()} · {fmtMs(p.latestExport.durationMs)}
@@ -227,8 +227,8 @@ function CreateProjectDialog({
   const { t, lang } = useI18n();
   const voices = useVoices();
   const [name, setName] = useState(() => t('create.untitled'));
-  const [locale, setLocale] = useState(lang === 'vi' ? 'vi-VN' : 'en-US');
-  const [voiceId, setVoiceId] = useState(lang === 'vi' ? 'espeak:vi' : 'espeak:en-us');
+  const [wantedLocale, setLocale] = useState(lang === 'vi' ? 'vi-VN' : 'en-US');
+  const [voiceId, setVoiceId] = useState('');
   const [text, setText] = useState('');
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
@@ -239,6 +239,8 @@ function CreateProjectDialog({
         .sort((a, b) => a[1].localeCompare(b[1], lang)),
     [voices.data, lang],
   );
+  // Only languages that have an installed voice are offered; the wish falls back to the first available one.
+  const locale = locales.some(([l]) => l === wantedLocale) ? wantedLocale : (locales[0]?.[0] ?? wantedLocale);
   const [accent, setAccent] = useState('');
   const [gender, setGender] = useState('');
   const forLocale = (voices.data ?? []).filter((v) => v.locale === locale);
@@ -246,7 +248,9 @@ function CreateProjectDialog({
   const accentChoices = availableAccents(voices.data ?? [], locale, (gender || null) as Gender | null);
   const genderChoices = availableGenders(voices.data ?? [], locale, accent || null);
   // Keep the chosen voice valid when region or gender narrows the list.
-  const effectiveVoice = shown.some((v) => v.id === voiceId) ? voiceId : (shown[0]?.id ?? '');
+  const effectiveVoice = shown.some((v) => v.id === voiceId)
+    ? voiceId
+    : (defaultVoiceFor(shown, locale)?.id ?? shown[0]?.id ?? '');
 
   const submit = async (e: FormEvent) => {
     e.preventDefault();
@@ -328,23 +332,6 @@ function CreateProjectDialog({
               ))}
             </select>
           </div>
-          <div>
-            <label className="label" htmlFor="pvoice">
-              {t('create.voice')}
-            </label>
-            <select
-              id="pvoice"
-              className="input"
-              value={effectiveVoice}
-              onChange={(e) => setVoiceId(e.target.value)}
-            >
-              {shown.map((v) => (
-                <option key={v.id} value={v.id}>
-                  {labelFor(v, voices.data ?? [], lang)} · {t(`tier.${v.supportTier}`)}
-                </option>
-              ))}
-            </select>
-          </div>
         </div>
         {(accentChoices.length > 1 || genderChoices.length > 0) && (
           <div className="grid grid-cols-2 gap-3">
@@ -386,7 +373,11 @@ function CreateProjectDialog({
             </div>
           </div>
         )}
-        {shown.length === 0 && <p className="text-sm text-warn">{t('create.noMatch')}</p>}
+        {shown.length === 0 ? (
+          <p className="text-sm text-warn">{t('create.noMatch')}</p>
+        ) : (
+          <VoiceGallery voices={shown} all={voices.data ?? []} value={effectiveVoice} onChange={setVoiceId} />
+        )}
         <p className="text-xs text-muted">{t('create.voiceHint')}</p>
         <div>
           <label className="label" htmlFor="ptext">

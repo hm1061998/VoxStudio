@@ -77,7 +77,7 @@ describe('auth', () => {
     expect(ok.status).toBe(200);
     const setCookie = (ok.headers['set-cookie'] as unknown as string[])[0]!;
     expect(setCookie).toMatch(/HttpOnly/);
-    expect(setCookie).toMatch(/SameSite=Lax/);
+    expect(setCookie).toMatch(/SameSite=Strict/);
     const u = { cookie: setCookie.split(';')[0]!, csrf: ok.body.data.csrfToken, workspaceId: '', userId: '' };
     expect((await as(h, u).get('/auth/me')).status).toBe(200);
     expect((await as(h, u).post('/auth/logout')).status).toBe(200);

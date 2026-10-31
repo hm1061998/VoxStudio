@@ -166,6 +166,7 @@ export function Player() {
       </div>
       <div
         ref={container}
+        role="group"
         className="min-h-[72px] rounded-md border border-line bg-bg"
         aria-label={t('player.waveform')}
       />

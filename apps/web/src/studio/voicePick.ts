@@ -10,6 +10,28 @@ export interface VoiceWish {
 
 const sameLanguageLocale = (a: VoiceDto, b: VoiceDto) => a.locale === b.locale;
 
+const ACCENT_ORDER = ['northern', 'central', 'southern'];
+
+/**
+ * The voice offered first for a language: Northern before Central before Southern, female before male, then by name.
+ * Used wherever a screen needs a voice before the user has chosen one; it never names an engine.
+ */
+export function defaultVoiceFor(voices: VoiceDto[], locale: string): VoiceDto | undefined {
+  const lang = locale.split('-')[0]!.toLowerCase();
+  const list = voices.filter((v) => v.locale === locale || v.locale.split('-')[0]!.toLowerCase() === lang);
+  const rank = (v: VoiceDto) => {
+    const a = ACCENT_ORDER.indexOf(v.accent ?? '');
+    return a < 0 ? ACCENT_ORDER.length : a;
+  };
+  return [...list].sort(
+    (a, b) =>
+      Number(b.locale === locale) - Number(a.locale === locale) ||
+      rank(a) - rank(b) ||
+      Number(b.gender === 'female') - Number(a.gender === 'female') ||
+      a.displayName.localeCompare(b.displayName),
+  )[0];
+}
+
 /** Accents offered for a locale, optionally only those that exist for the given gender. Sorted, no duplicates. */
 export function availableAccents(voices: VoiceDto[], locale: string, gender?: Gender | null): string[] {
   return [

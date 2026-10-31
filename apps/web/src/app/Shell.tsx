@@ -15,6 +15,9 @@ const NAV: { to: string; label: MessageKey; icon: string; end: boolean }[] = [
   { to: '/settings', label: 'nav.settings', icon: '⚙', end: false },
 ];
 
+/** Shown to administrators only (the server enforces the role on every admin route). */
+const ADMIN_NAV: (typeof NAV)[number] = { to: '/admin', label: 'nav.admin', icon: '⛨', end: false };
+
 /** Simple/Advanced switch (shared by the navigation and the studio top bar). */
 export function ModeSwitch() {
   const { t } = useI18n();
@@ -69,7 +72,7 @@ export function Shell() {
           {!collapsed && <span className="font-semibold tracking-tight">VoxStudio</span>}
         </div>
         <ul className="flex-1 space-y-0.5 p-2">
-          {NAV.map((n) => (
+          {[...NAV, ...(user?.role === 'admin' ? [ADMIN_NAV] : [])].map((n) => (
             <li key={n.to}>
               <NavLink
                 to={n.to}

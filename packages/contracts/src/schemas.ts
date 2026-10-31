@@ -164,6 +164,26 @@ export const pronunciationPreviewSchema = z.strictObject({
 export type PronunciationEntryInput = z.infer<typeof pronunciationEntrySchema>;
 
 // ---- admin
+export const adminUserUpdateSchema = z
+  .strictObject({
+    role: z.enum(['user', 'admin']).optional(),
+    status: z.enum(['active', 'suspended']).optional(),
+  })
+  .refine((v) => v.role !== undefined || v.status !== undefined, { message: 'Nothing to change.' });
+export const adminUserQuerySchema = z.strictObject({
+  q: z.string().trim().max(100).optional(),
+  page: z.coerce.number().int().min(1).max(10_000).default(1),
+  pageSize: z.coerce.number().int().min(1).max(50).default(20),
+});
+export const adminAuditQuerySchema = z.strictObject({
+  prefix: z
+    .string()
+    .trim()
+    .max(40)
+    .regex(/^[a-z_.]*$/)
+    .optional(),
+  limit: z.coerce.number().int().min(1).max(200).default(50),
+});
 export const engineToggleSchema = z.strictObject({ enabled: z.boolean() });
 export const voiceToggleSchema = z.strictObject({ enabled: z.boolean() });
 

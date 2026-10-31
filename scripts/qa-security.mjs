@@ -44,6 +44,10 @@ async function account(tag) {
 }
 
 const a = await account('a');
+// Whatever Vietnamese voice this deployment offers (the AI voices by default).
+const VOICE =
+  ((await (await raw('GET', '/voices?locale=vi', { cookie: a.cookie })).json()).data ?? [])[0]?.id ??
+  'none:none';
 const b = await account('b');
 
 // Authentication
@@ -57,20 +61,20 @@ check('unauthenticated voices list is rejected', (await raw('GET', '/voices')).s
 const sess = a.setCookie.find((c) => /session|sid/i.test(c)) ?? a.setCookie[0] ?? '';
 check(
   'session cookie is HttpOnly and SameSite',
-  /HttpOnly/i.test(sess) && /SameSite=(Lax|Strict)/i.test(sess),
+  /HttpOnly/i.test(sess) && /SameSite=Strict/i.test(sess),
   sess.replace(/=[^;]+/, '=…'),
 );
 
 // CSRF
 const noCsrf = await raw('POST', `/workspaces/${a.ws}/projects`, {
   cookie: a.cookie,
-  body: { name: 'x', defaultLocale: 'vi-VN', defaultVoiceId: 'espeak:vi' },
+  body: { name: 'x', defaultLocale: 'vi-VN', defaultVoiceId: VOICE },
 });
 check('state-changing request without CSRF token is rejected', noCsrf.status === 403, noCsrf.status);
 const badCsrf = await raw('POST', `/workspaces/${a.ws}/projects`, {
   cookie: a.cookie,
   csrf: 'wrong',
-  body: { name: 'x', defaultLocale: 'vi-VN', defaultVoiceId: 'espeak:vi' },
+  body: { name: 'x', defaultLocale: 'vi-VN', defaultVoiceId: VOICE },
 });
 check('wrong CSRF token is rejected', badCsrf.status === 403, badCsrf.status);
 
@@ -80,7 +84,7 @@ const proj = (
     await raw('POST', `/workspaces/${a.ws}/projects`, {
       cookie: a.cookie,
       csrf: a.csrf,
-      body: { name: 'private', defaultLocale: 'vi-VN', defaultVoiceId: 'espeak:vi' },
+      body: { name: 'private', defaultLocale: 'vi-VN', defaultVoiceId: VOICE },
     })
   ).json()
 ).data;
@@ -99,7 +103,7 @@ check(
       await raw('POST', `/workspaces/${a.ws}/projects`, {
         cookie: b.cookie,
         csrf: b.csrf,
-        body: { name: 'intrusion', defaultLocale: 'vi-VN', defaultVoiceId: 'espeak:vi' },
+        body: { name: 'intrusion', defaultLocale: 'vi-VN', defaultVoiceId: VOICE },
       })
     ).status,
   ),
@@ -143,13 +147,13 @@ check('search input is treated as data', sqli.status === 200 && (await sqli.json
 const longPrev = await raw('POST', '/previews', {
   cookie: a.cookie,
   csrf: a.csrf,
-  body: { text: 'a'.repeat(5000), voiceId: 'espeak:vi', locale: 'vi-VN' },
+  body: { text: 'a'.repeat(5000), voiceId: VOICE, locale: 'vi-VN' },
 });
 check('preview text over the limit is refused', [400, 413].includes(longPrev.status), longPrev.status);
 const ctl = await raw('POST', '/previews', {
   cookie: a.cookie,
   csrf: a.csrf,
-  body: { text: 'xin chào; $(calc) `id` | & ../../etc', voiceId: 'espeak:vi', locale: 'vi-VN' },
+  body: { text: 'xin chào; $(calc) `id` | & ../../etc', voiceId: VOICE, locale: 'vi-VN' },
 });
 check(
   'shell metacharacters in text are accepted as plain text',
@@ -182,6 +186,82 @@ check(
   !/\bat .*\.(js|ts):\d+|node_modules|D:\\|C:\\/.test(errText),
   errText.slice(0, 100),
 );
+
+// ---- Hardening added with the administrator dashboard (lockout, sessions, origin, roles)
+const xff = (ip) => ({ 'x-forwarded-for': ip });
+const rnd = () => Math.floor(Math.random() * 250) + 1;
+const ipA = `10.55.${rnd()}.${rnd()}`;
+const victimEmail = `sec-victim-${Date.now()}@example.test`;
+const victimPw = `sec-${crypto.randomUUID()}`;
+const reg = await raw('POST', '/auth/register', {
+  headers: xff(`10.56.${rnd()}.${rnd()}`),
+  body: { email: victimEmail, password: victimPw, displayName: 'Victim' },
+});
+check('registration works or is closed by policy', [201, 403].includes(reg.status), reg.status);
+if (reg.status === 201) {
+  for (let i = 0; i < 5; i++)
+    await raw('POST', '/auth/login', {
+      headers: xff(ipA),
+      body: { email: victimEmail, password: 'wrong-' + i + crypto.randomUUID() },
+    });
+  const locked = await raw('POST', '/auth/login', {
+    headers: xff(`10.57.${rnd()}.${rnd()}`),
+    body: { email: victimEmail, password: victimPw },
+  });
+  check(
+    'account is locked after 5 failures even from another address and with the right password',
+    locked.status === 429,
+    locked.status,
+  );
+  const ghost = `sec-ghost-${Date.now()}@example.test`;
+  for (let i = 0; i < 5; i++)
+    await raw('POST', '/auth/login', {
+      headers: xff(ipA),
+      body: { email: ghost, password: 'wrong-' + i + crypto.randomUUID() },
+    });
+  const ghostLocked = await raw('POST', '/auth/login', {
+    headers: xff(`10.58.${rnd()}.${rnd()}`),
+    body: { email: ghost, password: victimPw },
+  });
+  check(
+    'an unknown address is locked the same way (no account enumeration through locking)',
+    ghostLocked.status === 429 &&
+      (await ghostLocked.json()).error.message === (await locked.json()).error.message,
+  );
+}
+const weak = await raw('POST', '/auth/register', {
+  headers: xff(`10.59.${rnd()}.${rnd()}`),
+  body: { email: `sec-weak-${Date.now()}@example.test`, password: 'password1234', displayName: 'Weak' },
+});
+check('a common password is refused at registration', [400, 403].includes(weak.status), weak.status);
+const evilOrigin = await raw('POST', '/auth/logout', {
+  cookie: b.cookie,
+  csrf: b.csrf,
+  headers: { origin: 'https://evil.example' },
+  body: {},
+});
+check(
+  'state-changing request from a foreign Origin is refused even with a valid CSRF token',
+  evilOrigin.status === 403,
+  evilOrigin.status,
+);
+check(
+  'API responses are not cacheable',
+  /no-store/.test(
+    (await raw('GET', '/auth/session', { cookie: b.cookie })).headers.get('cache-control') ?? '',
+  ),
+);
+const esc = await raw('PATCH', '/auth/me', {
+  cookie: b.cookie,
+  csrf: b.csrf,
+  body: { displayName: 'B', role: 'admin' },
+});
+check('a role cannot be smuggled into a profile update', esc.status === 400, esc.status);
+check(
+  'an ordinary user still has no admin rights afterwards',
+  (await raw('GET', '/admin/users', { cookie: b.cookie })).status === 403,
+);
+check('admin user list is closed to anonymous callers', (await raw('GET', '/admin/users')).status === 401);
 
 const failed = results.filter((x) => !x).length;
 console.log(`\n${results.length - failed}/${results.length} checks passed`);

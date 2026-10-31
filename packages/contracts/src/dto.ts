@@ -1,3 +1,4 @@
+import type { PlanId } from './plans';
 import type {
   OutputProfile,
   ParameterSupport,
@@ -363,7 +364,56 @@ export interface HealthDto {
   checks: Record<string, { ok: boolean; detail?: string }>;
 }
 
+export interface AdminUserDto {
+  id: string;
+  email: string;
+  displayName: string;
+  role: 'user' | 'admin';
+  status: 'active' | 'suspended';
+  createdAt: string;
+  lastLoginAt: string | null;
+  workspaceId: string | null;
+  plan: PlanId;
+  aiUsedChars: number;
+  projects: number;
+  pendingJobs: number;
+  activeSessions: number;
+}
+
+export interface AdminUserPageDto {
+  items: AdminUserDto[];
+  total: number;
+  page: number;
+  pageSize: number;
+}
+
+export interface AdminAuditDto {
+  id: string;
+  eventType: string;
+  resourceType: string;
+  resourceId: string;
+  actorEmail: string | null;
+  workspaceId: string | null;
+  createdAt: string;
+  metadata: Record<string, unknown>;
+}
+
 export interface AdminOverviewDto {
+  /** Accounts, plans and AI usage, for the administrator dashboard. */
+  users: { total: number; active: number; suspended: number; admins: number; newLast7Days: number };
+  plans: Record<PlanId, number>;
+  ai: {
+    enabled: boolean;
+    service: { ok: boolean; detail: string } | null;
+    usedCharsThisMonth: number;
+    month: string;
+  };
+  security: {
+    failedSignIns24h: number;
+    lockedNow: number;
+    activeSessions: number;
+    registrationOpen: boolean;
+  };
   engines: EngineDto[];
   voices: VoiceDto[];
   storage: { assetCount: number; totalBytes: number; root: 'local' };

@@ -57,7 +57,7 @@ function buildFixture(version: string): void {
 }
 
 async function newCatalog(): Promise<CatalogService> {
-  const config = { ...h.config, repoRoot: tmp, vnUnitDbDir: unitsDir };
+  const config = { ...h.config, repoRoot: tmp, vnUnitDbDir: unitsDir, enabledEngines: ['espeak', 'vnunit'] };
   const c = new CatalogService(h.prisma, createEngineRegistry(config), config, new Logger('error'));
   await c.refresh();
   return c;

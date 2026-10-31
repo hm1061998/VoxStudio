@@ -75,8 +75,9 @@ export function SegmentList({ onAdd }: { onAdd: () => void }) {
                     }
                   }}
                   aria-current={selectedId === s.id}
-                  aria-label={t('seg.aria', { n: i + 1, text: s.sourceText.slice(0, 60) || t('seg.empty') })}
                 >
+                  {/* The accessible name is the visible content, prefixed for screen readers (WCAG 2.5.3). */}
+                  <span className="sr-only">{t('editor.title', { n: i + 1 })}: </span>
                   <div className="flex items-center gap-2">
                     <span className="font-mono text-[11px] text-dim">{String(i + 1).padStart(2, '0')}</span>
                     <AudioStateBadge state={previewing === s.id ? 'rendering' : state} />

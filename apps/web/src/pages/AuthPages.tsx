@@ -1,4 +1,4 @@
-import { useState, type FormEvent, type ReactNode } from 'react';
+import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { api, describeError } from '../api/client';
 import { useAuth } from '../app/auth';
@@ -54,11 +54,11 @@ export function LoginPage() {
       footer={
         <>
           {t('auth.noAccount')}{' '}
-          <Link className="text-accent hover:underline" to="/register">
+          <Link className="text-accent underline underline-offset-2" to="/register">
             {t('auth.createOne')}
           </Link>{' '}
           ·{' '}
-          <Link className="text-accent hover:underline" to="/reset">
+          <Link className="text-accent underline underline-offset-2" to="/reset">
             {t('auth.resetPassword')}
           </Link>
         </>
@@ -109,6 +109,13 @@ export function RegisterPage() {
   const [f, setF] = useState({ email: '', password: '', displayName: '' });
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  // Self-registration can be closed by the operator (ALLOW_REGISTRATION=false); say so instead of offering a dead form.
+  const [open, setOpen] = useState(true);
+  useEffect(() => {
+    api<{ registrationOpen: boolean }>('/auth/config')
+      .then((c) => setOpen(c.registrationOpen))
+      .catch(() => undefined);
+  }, []);
   const submit = async (e: FormEvent) => {
     e.preventDefault();
     if (f.password.length < 10) return setError(t('auth.passwordTooShort'));
@@ -129,13 +136,18 @@ export function RegisterPage() {
       footer={
         <>
           {t('auth.haveAccount')}{' '}
-          <Link className="text-accent hover:underline" to="/login">
+          <Link className="text-accent underline underline-offset-2" to="/login">
             {t('auth.signIn')}
           </Link>
         </>
       }
     >
-      <form onSubmit={submit} className="space-y-3">
+      {!open && (
+        <p role="status" className="rounded-md border border-line bg-panel-2 p-3 text-sm text-muted">
+          {t('auth.registrationClosed')}
+        </p>
+      )}
+      <form onSubmit={submit} className="space-y-3" hidden={!open}>
         <div>
           <label className="label" htmlFor="name">
             {t('auth.displayName')}
@@ -212,7 +224,7 @@ export function ResetPage() {
     <AuthCard
       title={t('auth.resetTitle')}
       footer={
-        <Link className="text-accent hover:underline" to="/login">
+        <Link className="text-accent underline underline-offset-2" to="/login">
           {t('auth.backToSignIn')}
         </Link>
       }

@@ -114,8 +114,14 @@ const espeak = new core.EspeakAdapter({
   executable: config.tools.espeak,
   approvedVersion: config.espeakApprovedVersion,
 });
-const health = await espeak.healthCheck();
-check(health.ok, `eSpeak NG is the approved version (${config.espeakApprovedVersion})`, health.detail);
+const espeakOn = config.enabledEngines.includes('espeak');
+const health = await espeak.healthCheck().catch((e) => ({ ok: false, version: null, detail: e.message }));
+if (espeakOn)
+  check(health.ok, `eSpeak NG is the approved version (${config.espeakApprovedVersion})`, health.detail);
+else
+  pass.push(
+    `eSpeak NG is not offered to users (ENABLED_ENGINES=${config.enabledEngines.join(',')}); its data checks below still run if it is installed`,
+  );
 const ff = await core.inspectFfmpeg(config.tools.ffmpeg).catch((e) => ({ error: e.message }));
 if ('error' in ff) check(false, 'FFmpeg available', ff.error);
 else {
@@ -129,9 +135,9 @@ else {
       `FFmpeg includes inert filters never invoked by VoxStudio: ${ff.flaggedFilters.join(', ')} (no model files present — see check 3)`,
     );
 }
-const versionOut = (
-  await core.runProcess(config.tools.espeak, ['--version'], { timeoutMs: 10_000 })
-).stdout.toString();
+const versionOut = health.ok
+  ? (await core.runProcess(config.tools.espeak, ['--version'], { timeoutMs: 10_000 })).stdout.toString()
+  : '';
 const dataDir = /Data at:\s*(.+)$/m
   .exec(versionOut)?.[1]
   ?.trim()
@@ -152,8 +158,10 @@ if (dataDir && existsSync(dataDir)) {
   })(dataDir);
   check(engineModels.length === 0, 'No model files in eSpeak NG data directory', engineModels.join(', '));
 } else warnings.push('Could not locate espeak-ng-data directory for MBROLA/model checks');
-const installed = await espeak.listInstalledVoices();
-check(!installed.some((v) => core.isMbrolaFile(v.file)), 'Adapter never lists MBROLA voices');
+if (health.ok) {
+  const installed = await espeak.listInstalledVoices();
+  check(!installed.some((v) => core.isMbrolaFile(v.file)), 'Adapter never lists MBROLA voices');
+}
 
 // 5. Allowlist: every allowlisted voice belongs to an approved engine; QA report matches installed engine.
 const allow = core.loadAllowlist(root);
@@ -188,12 +196,14 @@ if (aiVoices.length || config.vieneuServiceUrls.length) {
   if (config.vieneuServiceUrls.length)
     check(config.vieneuServiceToken.length >= 16, 'AI model service token is set (at least 16 characters)');
 }
-const qa = core.loadQaReport(root);
-check(
-  !!qa && qa.engineVersion === health.version,
-  'QA report matches installed engine version',
-  qa ? `report ${qa.engineVersion}` : 'missing (run pnpm qa:voices)',
-);
+if (espeakOn) {
+  const qa = core.loadQaReport(root);
+  check(
+    !!qa && qa.engineVersion === health.version,
+    'QA report matches installed engine version',
+    qa ? `report ${qa.engineVersion}` : 'missing (run pnpm qa:voices)',
+  );
+}
 
 // 5b. Vietnamese unit databases: never ship the test fixture, and every database must declare a license.
 if (config.vnUnitDbDir) {

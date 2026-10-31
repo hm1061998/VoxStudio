@@ -11,6 +11,7 @@ import { PresetsPage } from '../pages/PresetsPage';
 import { PronunciationPage } from '../pages/PronunciationPage';
 import { RenderCenterPage } from '../pages/RenderCenterPage';
 import { SettingsPage } from '../pages/SettingsPage';
+import { AdminPage } from '../pages/AdminPage';
 
 export function App() {
   const { user, loading } = useAuth();
@@ -42,6 +43,7 @@ export function App() {
         <Route path="/pronunciation" element={<PronunciationPage />} />
         <Route path="/renders" element={<RenderCenterPage />} />
         <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/admin" element={<AdminPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/register" element={<Navigate to="/" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />

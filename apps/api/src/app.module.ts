@@ -10,6 +10,7 @@ import { SessionGuard } from './auth/guards';
 import { CatalogController } from './catalog/catalog.controller';
 import { CatalogService } from './catalog/catalog.service';
 import { AccessService } from './common/access';
+import { AuditService } from './common/audit';
 import { EnvelopeInterceptor, ErrorFilter } from './common/http';
 import { InfraModule } from './common/infra';
 import { HealthController } from './health/health.controller';
@@ -47,6 +48,7 @@ export class AppModule {
       providers: [
         AuthService,
         AccessService,
+        AuditService,
         CatalogService,
         PlannerService,
         ProjectsService,

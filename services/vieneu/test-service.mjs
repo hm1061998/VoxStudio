@@ -39,6 +39,12 @@ check(
   (await post({ text: 'xin chào', voice: 'ai-do-khac' })).status === 404,
 );
 check('text over the limit → 413', (await post({ text: 'a '.repeat(5000), voice })).status === 413);
+const huge = await fetch(`${URL_}/v1/synthesize`, {
+  method: 'POST',
+  headers,
+  body: JSON.stringify({ text: 'a'.repeat(200_000), voice }),
+});
+check('oversized request body → 413 before it is read', huge.status === 413, String(huge.status));
 check('control characters → 400', (await post({ text: 'xin\u0000chào', voice })).status === 400);
 
 const r = await post({ text: 'Xin chào các bạn.', voice });

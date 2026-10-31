@@ -5,6 +5,24 @@ import { z } from 'zod';
 import { resolvePlanLimits, type PlanId, type PlanLimits } from './plans';
 import { resolveToolPaths, type ToolPaths } from './tools';
 
+export const KNOWN_ENGINES = ['espeak', 'vnunit', 'vieneu'] as const;
+
+/** Parse ENABLED_ENGINES; unknown names are an error so a typo cannot silently drop an engine. */
+export function parseEnabledEngines(value: string): string[] {
+  const list = [
+    ...new Set(
+      value
+        .split(',')
+        .map((s) => s.trim().toLowerCase())
+        .filter(Boolean),
+    ),
+  ];
+  const unknown = list.filter((n) => !(KNOWN_ENGINES as readonly string[]).includes(n));
+  if (unknown.length) throw new Error(`ENABLED_ENGINES: unknown engine(s) ${unknown.join(', ')}.`);
+  if (!list.length) throw new Error('ENABLED_ENGINES must list at least one engine.');
+  return list;
+}
+
 /** Find the repository root (directory containing pnpm-workspace.yaml) for default relative paths. */
 export function findRepoRoot(start = __dirname): string {
   let dir = start;
@@ -57,9 +75,23 @@ const envSchema = z.object({
   ESPEAK_APPROVED_VERSION: z.string().default('1.52.0'),
   FFMPEG_PATH: z.string().default(''),
   FFPROBE_PATH: z.string().default(''),
+  /**
+   * Engines offered to users (comma separated: espeak, vnunit, vieneu). Default: the AI voice engine only. The
+   * rule-based eSpeak engine is not offered unless listed (development, tests, languages other than Vietnamese).
+   */
+  ENABLED_ENGINES: z.string().default('vieneu'),
   /** Directory of Vietnamese unit databases; the unit-selection engine is registered only when set. */
   VN_UNIT_DB_DIR: z.string().default(''),
   /** Comma-separated base URLs of the VieNeu model service (ADR 0008). Empty = the AI engine is not registered. */
+  /** When false, nobody can self-register: accounts are created by an administrator or the operator. */
+  ALLOW_REGISTRATION: z.enum(['true', 'false']).default('true'),
+  /** A session unused for this many hours is signed out even if it has not expired. */
+  SESSION_IDLE_HOURS: z.coerce.number().int().min(1).max(168).default(24),
+  /**
+   * Which proxies may set X-Forwarded-For (Express "trust proxy" value: loopback, a CIDR list, or a hop count).
+   * Wrong values let clients spoof their address and dodge rate limits, or put every client behind the proxy address.
+   */
+  TRUST_PROXY: z.string().default('loopback'),
   /** Seconds of waiting that add one priority point to a queued job (anti-starvation). */
   QUEUE_AGING_SECONDS: z.coerce.number().int().min(1).max(3600).default(30),
   /** Optional JSON overriding plan limits, e.g. {"pro":{"aiMonthlyChars":1000000}}. */
@@ -91,6 +123,10 @@ export interface AppConfig {
   engineTimeoutMs: number;
   queueMaxPendingPerWorkspace: number;
   espeakApprovedVersion: string;
+  allowRegistration: boolean;
+  sessionIdleMs: number;
+  trustProxy: string;
+  enabledEngines: string[];
   vnUnitDbDir: string | null;
   queueAgingSeconds: number;
   planLimits: Record<PlanId, PlanLimits>;
@@ -141,6 +177,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     engineTimeoutMs: e.ENGINE_TIMEOUT_SECONDS * 1000,
     queueMaxPendingPerWorkspace: e.QUEUE_MAX_PENDING_PER_WORKSPACE,
     espeakApprovedVersion: e.ESPEAK_APPROVED_VERSION,
+    allowRegistration: e.ALLOW_REGISTRATION === 'true',
+    sessionIdleMs: e.SESSION_IDLE_HOURS * 3600_000,
+    trustProxy: e.TRUST_PROXY,
+    enabledEngines: parseEnabledEngines(e.ENABLED_ENGINES),
     vnUnitDbDir: e.VN_UNIT_DB_DIR ? abs(e.VN_UNIT_DB_DIR) : null,
     queueAgingSeconds: e.QUEUE_AGING_SECONDS,
     planLimits: resolvePlanLimits(e.PLAN_LIMITS_JSON),

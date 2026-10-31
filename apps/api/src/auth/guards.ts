@@ -3,7 +3,7 @@ import { Reflector } from '@nestjs/core';
 import { ErrorCodes, VoxError } from '@voxstudio/contracts';
 import { timingSafeEqual } from 'node:crypto';
 import type { VoxRequest } from '../common/http';
-import { AuthService, SESSION_COOKIE } from './auth.service';
+import { AuthService } from './auth.service';
 
 export const PUBLIC = 'vox:public';
 /** Route needs no session (register/login/health). */
@@ -27,7 +27,7 @@ export class SessionGuard implements CanActivate {
   async canActivate(ctx: ExecutionContext): Promise<boolean> {
     const req = ctx.switchToHttp().getRequest<VoxRequest>();
     const cookies = (req as { cookies?: Record<string, string> }).cookies ?? {};
-    const user = await this.auth.resolveSession(cookies[SESSION_COOKIE]);
+    const user = await this.auth.resolveSession(cookies[this.auth.cookieName]);
     if (user) req.user = user;
     const isPublic = this.reflector.getAllAndOverride<boolean>(PUBLIC, [ctx.getHandler(), ctx.getClass()]);
     if (isPublic) return true;

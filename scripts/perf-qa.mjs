@@ -107,6 +107,7 @@ const reg = await call('POST', '/auth/register', {
 });
 csrf = reg.data.csrfToken;
 const ws = reg.data.user.workspaces[0].id;
+const VOICE = ((await call('GET', '/voices?locale=vi')).data ?? [])[0]?.id ?? 'none:none';
 
 const SENT = [
   'Xin chào các bạn, hôm nay chúng ta sẽ học một bài mới về thiên nhiên và con người.',
@@ -123,7 +124,7 @@ async function makeProject(tag, count) {
     await call('POST', `/workspaces/${ws}/projects`, {
       name: `perf ${tag}`,
       defaultLocale: 'vi-VN',
-      defaultVoiceId: 'espeak:vi',
+      defaultVoiceId: VOICE,
     })
   ).data;
   const defaults = (await call('GET', `/projects/${p.id}/segment-defaults`)).data.settings;
@@ -132,7 +133,7 @@ async function makeProject(tag, count) {
     id: crypto.randomUUID(),
     sourceText: `${SENT[i % SENT.length]} Mã ${tag} số ${i + 1}.`,
     locale: 'vi-VN',
-    voiceId: 'espeak:vi',
+    voiceId: VOICE,
     settings: defaults,
   }));
   p = (await call('PUT', `/projects/${p.id}/segments`, { projectRevision: p.revision, segments })).data;
@@ -238,7 +239,7 @@ const report = {
       (
         await call('POST', `/segments/${segments[0].id}/preview`, {
           sourceText: `${SENT[i % SENT.length]} Lần ${i} ${Date.now()}.`,
-          voiceId: 'espeak:vi',
+          voiceId: VOICE,
           locale: 'vi-VN',
           settings: defaults,
         })

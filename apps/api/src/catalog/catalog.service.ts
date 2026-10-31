@@ -202,12 +202,21 @@ export class CatalogService implements OnModuleInit {
     );
     // An optional engine (AI model service) being down must not make the whole application "not ready".
     return {
-      ok: entries.some(([id]) => !optional.has(id)) && entries.every(([id, h]) => h.ok || optional.has(id)),
+      // Ready when something can speak, and every required engine is healthy.
+      ok: entries.some(([, h]) => h.ok) && entries.every(([id, h]) => h.ok || optional.has(id)),
       detail:
         entries
           .map(([id, h]) => (h.ok ? h.detail : `${id}${optional.has(id) ? ' (optional)' : ''}: ${h.detail}`))
           .join('; ') || 'no engines',
     };
+  }
+
+  /** Health of the AI model service for the administrator dashboard; null when the AI engine is not registered. */
+  async aiServiceHealth(): Promise<{ ok: boolean; detail: string } | null> {
+    const adapter = this.registry.all().find((x) => x.engineId === 'vieneu');
+    if (!adapter) return null;
+    const h = await adapter.healthCheck();
+    return { ok: h.ok, detail: h.detail };
   }
 
   /** True when the engine runs an AI model (ADR 0008). Unknown engines are treated as non-AI. */

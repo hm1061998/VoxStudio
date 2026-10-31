@@ -2,7 +2,8 @@ import { useState } from 'react';
 import { useQueryClient } from '@tanstack/react-query';
 import { SETTING_KEYS, type PartialSettings, type PresetDto, type SettingKey } from '@voxstudio/contracts';
 import { api, describeError } from '../api/client';
-import { qk, usePresets, useVoice } from '../api/hooks';
+import { qk, usePresets, useVoice, useVoices } from '../api/hooks';
+import { defaultVoiceFor } from '../studio/voicePick';
 import { Confirm, Dialog, Empty, ErrorNote, Spinner, SupportBadge } from '../components/ui';
 import { presetDesc, presetName, settingLabel, translate, useI18n, variantLabel } from '../i18n';
 
@@ -104,7 +105,10 @@ function PresetEditor({
   onSaved: () => void;
 }) {
   const { t } = useI18n();
-  const caps = useVoice('espeak:en-us').data?.capabilities;
+  // Capabilities only describe which controls exist; any installed voice of the first language will do.
+  const voices = useVoices();
+  const sample = voices.data ? defaultVoiceFor(voices.data, voices.data[0]?.locale ?? 'vi-VN') : undefined;
+  const caps = useVoice(sample?.id ?? null).data?.capabilities;
   const src = preset ?? copyFrom;
   const [name, setName] = useState(
     preset?.name ?? (copyFrom ? `${presetName(copyFrom)}${translate('presets.copySuffix')}` : ''),

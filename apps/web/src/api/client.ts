@@ -7,7 +7,12 @@ export function localizedError(
   serverMessage: string,
   details?: Record<string, unknown>,
 ): string {
-  let msg = hasKey(`error.${code}`) ? translate(`error.${code}`) : serverMessage;
+  const reasonKey = `error.${code}.${String(details?.reason ?? '')}`;
+  let msg = hasKey(reasonKey)
+    ? translate(reasonKey)
+    : hasKey(`error.${code}`)
+      ? translate(`error.${code}`)
+      : serverMessage;
   if (details?.parameter && (code === 'PARAMETER_OUT_OF_RANGE' || code === 'PARAMETER_UNSUPPORTED')) {
     const label = settingLabel(details.parameter as SettingKey);
     msg +=

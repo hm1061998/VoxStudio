@@ -64,14 +64,14 @@ services:
       migrate: { condition: service_completed_successfully }
     deploy: { resources: { limits: { cpus: '2', memory: 1500m } } }
 
-  # Optional AI voice engine (ADR 0008): docker compose --profile ai up. Internal network only; weights are baked in at build time.
+  # The AI voice engine (ADR 0008, ADR 0009): the product's default engine. Internal network only; weights are baked
+  # in at build time. Without it no voice is available and /health/ready reports 503.
   vieneu:
-    profiles: [ai]
     build: { context: ., dockerfile: services/vieneu/Dockerfile }
     image: voxstudio-vieneu:0.1.0
     environment:
       VIENEU_TOKEN: ${VIENEU_SERVICE_TOKEN:?set VIENEU_SERVICE_TOKEN in .env.docker}
-      VIENEU_VOICES: ${VIENEU_VOICES:-Ngọc Huyền,Hải Đăng,Quang Sơn,Ngọc Trân,Thùy Dung}
+      VIENEU_VOICES: ${VIENEU_VOICES:-Ngọc Huyền,Hải Đăng,Quang Sơn,Ngọc Trân,Thùy Dung,Adam}
       VIENEU_INSTANCES: ${VIENEU_INSTANCES:-1}
       VIENEU_THREADS: ${VIENEU_THREADS:-4}
     networks: [backend]
