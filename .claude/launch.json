@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "voxstudio",
+      "runtimeExecutable": "node",
+      "runtimeArgs": ["scripts/start-all.mjs"],
+      "port": 4000
+    },
+    {
+      "name": "web-dev",
+      "runtimeExecutable": "pnpm",
+      "runtimeArgs": ["--filter", "@voxstudio/web", "dev"],
+      "port": 5173
+    }
+  ]
+}

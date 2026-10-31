@@ -1,0 +1,570 @@
+{
+  "benchmark": "vi-bench-1",
+  "engine": {
+    "id": "espeak",
+    "version": "1.52.0"
+  },
+  "ffmpeg": "9.0.1-essentials_build-www.gyan.dev",
+  "generatedAt": "2026-10-31T10:22:54.796Z",
+  "sentenceCount": 131,
+  "voices": {
+    "northern": {
+      "nativeId": "vi",
+      "rendered": 131,
+      "failed": 0,
+      "deterministic": 131,
+      "silentOrClipped": 0,
+      "sentencesWithForeignSwitch": 10,
+      "medianRtf": 0.041,
+      "maxRtf": 0.102,
+      "totalAudioSec": 343.8,
+      "byCategory": {
+        "tone-coverage": {
+          "n": 10,
+          "medianAudioMs": 2609,
+          "foreign": 0
+        },
+        "initial-consonants": {
+          "n": 26,
+          "medianAudioMs": 1562,
+          "foreign": 0
+        },
+        "final-consonants": {
+          "n": 10,
+          "medianAudioMs": 1657,
+          "foreign": 0
+        },
+        "vowels-diphthongs-triphthongs": {
+          "n": 14,
+          "medianAudioMs": 1637,
+          "foreign": 0
+        },
+        "north-south-contrast": {
+          "n": 10,
+          "medianAudioMs": 2237,
+          "foreign": 0
+        },
+        "abbreviations": {
+          "n": 8,
+          "medianAudioMs": 3086,
+          "foreign": 0
+        },
+        "numbers-dates-currency-percent": {
+          "n": 16,
+          "medianAudioMs": 3395,
+          "foreign": 2
+        },
+        "english-terms": {
+          "n": 10,
+          "medianAudioMs": 2369,
+          "foreign": 8
+        },
+        "questions": {
+          "n": 5,
+          "medianAudioMs": 1445,
+          "foreign": 0
+        },
+        "statements": {
+          "n": 3,
+          "medianAudioMs": 1957,
+          "foreign": 0
+        },
+        "exclamations": {
+          "n": 5,
+          "medianAudioMs": 1175,
+          "foreign": 0
+        },
+        "pauses-phrase-boundaries": {
+          "n": 8,
+          "medianAudioMs": 3193,
+          "foreign": 0
+        },
+        "long-form-narration": {
+          "n": 6,
+          "medianAudioMs": 11331,
+          "foreign": 0
+        }
+      },
+      "failures": [],
+      "foreignSentences": [
+        "vi-bench-1-089",
+        "vi-bench-1-090",
+        "vi-bench-1-095",
+        "vi-bench-1-097",
+        "vi-bench-1-098",
+        "vi-bench-1-099",
+        "vi-bench-1-100",
+        "vi-bench-1-101",
+        "vi-bench-1-102",
+        "vi-bench-1-103"
+      ]
+    },
+    "central": {
+      "nativeId": "vi-vn-x-central",
+      "rendered": 131,
+      "failed": 0,
+      "deterministic": 131,
+      "silentOrClipped": 0,
+      "sentencesWithForeignSwitch": 10,
+      "medianRtf": 0.041,
+      "maxRtf": 0.105,
+      "totalAudioSec": 345.2,
+      "byCategory": {
+        "tone-coverage": {
+          "n": 10,
+          "medianAudioMs": 2624,
+          "foreign": 0
+        },
+        "initial-consonants": {
+          "n": 26,
+          "medianAudioMs": 1569,
+          "foreign": 0
+        },
+        "final-consonants": {
+          "n": 10,
+          "medianAudioMs": 1722,
+          "foreign": 0
+        },
+        "vowels-diphthongs-triphthongs": {
+          "n": 14,
+          "medianAudioMs": 1713,
+          "foreign": 0
+        },
+        "north-south-contrast": {
+          "n": 10,
+          "medianAudioMs": 2180,
+          "foreign": 0
+        },
+        "abbreviations": {
+          "n": 8,
+          "medianAudioMs": 3222,
+          "foreign": 0
+        },
+        "numbers-dates-currency-percent": {
+          "n": 16,
+          "medianAudioMs": 3389,
+          "foreign": 2
+        },
+        "english-terms": {
+          "n": 10,
+          "medianAudioMs": 2316,
+          "foreign": 8
+        },
+        "questions": {
+          "n": 5,
+          "medianAudioMs": 1435,
+          "foreign": 0
+        },
+        "statements": {
+          "n": 3,
+          "medianAudioMs": 1993,
+          "foreign": 0
+        },
+        "exclamations": {
+          "n": 5,
+          "medianAudioMs": 1286,
+          "foreign": 0
+        },
+        "pauses-phrase-boundaries": {
+          "n": 8,
+          "medianAudioMs": 3233,
+          "foreign": 0
+        },
+        "long-form-narration": {
+          "n": 6,
+          "medianAudioMs": 11554,
+          "foreign": 0
+        }
+      },
+      "failures": [],
+      "foreignSentences": [
+        "vi-bench-1-089",
+        "vi-bench-1-090",
+        "vi-bench-1-095",
+        "vi-bench-1-097",
+        "vi-bench-1-098",
+        "vi-bench-1-099",
+        "vi-bench-1-100",
+        "vi-bench-1-101",
+        "vi-bench-1-102",
+        "vi-bench-1-103"
+      ]
+    },
+    "southern": {
+      "nativeId": "vi-vn-x-south",
+      "rendered": 131,
+      "failed": 0,
+      "deterministic": 131,
+      "silentOrClipped": 0,
+      "sentencesWithForeignSwitch": 9,
+      "medianRtf": 0.04,
+      "maxRtf": 0.095,
+      "totalAudioSec": 352,
+      "byCategory": {
+        "tone-coverage": {
+          "n": 10,
+          "medianAudioMs": 2640,
+          "foreign": 0
+        },
+        "initial-consonants": {
+          "n": 26,
+          "medianAudioMs": 1610,
+          "foreign": 0
+        },
+        "final-consonants": {
+          "n": 10,
+          "medianAudioMs": 1724,
+          "foreign": 0
+        },
+        "vowels-diphthongs-triphthongs": {
+          "n": 14,
+          "medianAudioMs": 1702,
+          "foreign": 0
+        },
+        "north-south-contrast": {
+          "n": 10,
+          "medianAudioMs": 2288,
+          "foreign": 0
+        },
+        "abbreviations": {
+          "n": 8,
+          "medianAudioMs": 3244,
+          "foreign": 0
+        },
+        "numbers-dates-currency-percent": {
+          "n": 16,
+          "medianAudioMs": 3454,
+          "foreign": 2
+        },
+        "english-terms": {
+          "n": 10,
+          "medianAudioMs": 2446,
+          "foreign": 7
+        },
+        "questions": {
+          "n": 5,
+          "medianAudioMs": 1541,
+          "foreign": 0
+        },
+        "statements": {
+          "n": 3,
+          "medianAudioMs": 1972,
+          "foreign": 0
+        },
+        "exclamations": {
+          "n": 5,
+          "medianAudioMs": 1231,
+          "foreign": 0
+        },
+        "pauses-phrase-boundaries": {
+          "n": 8,
+          "medianAudioMs": 3273,
+          "foreign": 0
+        },
+        "long-form-narration": {
+          "n": 6,
+          "medianAudioMs": 11688,
+          "foreign": 0
+        }
+      },
+      "failures": [],
+      "foreignSentences": [
+        "vi-bench-1-089",
+        "vi-bench-1-090",
+        "vi-bench-1-095",
+        "vi-bench-1-097",
+        "vi-bench-1-098",
+        "vi-bench-1-100",
+        "vi-bench-1-101",
+        "vi-bench-1-102",
+        "vi-bench-1-103"
+      ]
+    }
+  },
+  "dialect": {
+    "northern-vs-central": {
+      "sentencesDiffering": 113,
+      "of": 131,
+      "tokenEditRate": 0.173
+    },
+    "northern-vs-southern": {
+      "sentencesDiffering": 125,
+      "of": 131,
+      "tokenEditRate": 0.262
+    },
+    "central-vs-southern": {
+      "sentencesDiffering": 112,
+      "of": 131,
+      "tokenEditRate": 0.133
+    }
+  },
+  "notMeasured": [
+    "naturalness (MOS)",
+    "intelligibility",
+    "prosody quality",
+    "pronunciation accuracy by native listeners"
+  ],
+  "tones": {
+    "northern": {
+      "summary": [
+        {
+          "tone": "ngang",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 258,
+          "points": [-0.84, -0.05, 0.01, -0.01, -0.19],
+          "slope": 0.65,
+          "dipAt": 0.16,
+          "gapsPerSyllable": 0.13,
+          "medianHz": 117
+        },
+        {
+          "tone": "huyền",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 233,
+          "points": [-0.05, 0.51, 0.15, -0.39, -1.01],
+          "slope": -0.96,
+          "dipAt": 0.5,
+          "gapsPerSyllable": 0.25,
+          "medianHz": 102
+        },
+        {
+          "tone": "sắc",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 254,
+          "points": [-1.72, -0.66, 0.03, 1.34, 3.02],
+          "slope": 4.74,
+          "dipAt": 0,
+          "gapsPerSyllable": 0.13,
+          "medianHz": 113
+        },
+        {
+          "tone": "hỏi",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 249,
+          "points": [0.59, 0.71, -0.55, -1.57, 0.15],
+          "slope": -0.44,
+          "dipAt": 0.68,
+          "gapsPerSyllable": 1.13,
+          "medianHz": 108
+        },
+        {
+          "tone": "ngã",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 257,
+          "points": [0.09, 0.16, -0.57, -0.08, 1.39],
+          "slope": 1.29,
+          "dipAt": 0.29,
+          "gapsPerSyllable": 0,
+          "medianHz": 127
+        },
+        {
+          "tone": "nặng",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 258,
+          "points": [1.47, 1.53, -0.2, -1.09, -0.21],
+          "slope": -1.68,
+          "dipAt": 0.65,
+          "gapsPerSyllable": 1.38,
+          "medianHz": 105
+        }
+      ],
+      "pairwiseContourDistanceSemitones": {
+        "ngang/huyền": 1.33,
+        "ngang/sắc": 3.64,
+        "ngang/hỏi": 2.34,
+        "ngang/ngã": 1.94,
+        "ngang/nặng": 3.01,
+        "huyền/sắc": 4.84,
+        "huyền/hỏi": 1.92,
+        "huyền/ngã": 2.55,
+        "huyền/nặng": 2.15,
+        "sắc/hỏi": 4.92,
+        "sắc/ngã": 3,
+        "sắc/nặng": 5.6,
+        "hỏi/ngã": 2.08,
+        "hỏi/nặng": 1.39,
+        "ngã/nặng": 2.74
+      }
+    },
+    "central": {
+      "summary": [
+        {
+          "tone": "ngang",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 268,
+          "points": [-1.16, -0.97, -0.05, 0.96, 1.67],
+          "slope": 2.83,
+          "dipAt": 0.08,
+          "gapsPerSyllable": 0.88,
+          "medianHz": 81
+        },
+        {
+          "tone": "huyền",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 233,
+          "points": [-0.14, 0.07, -0.03, -0.03, -0.19],
+          "slope": -0.04,
+          "dipAt": 0.43,
+          "gapsPerSyllable": 0.5,
+          "medianHz": 84
+        },
+        {
+          "tone": "sắc",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 272,
+          "points": [0.34, 0.12, -0.23, -0.18, 0.34],
+          "slope": -0.01,
+          "dipAt": 0.6,
+          "gapsPerSyllable": 0.38,
+          "medianHz": 76
+        },
+        {
+          "tone": "hỏi",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 271,
+          "points": [0.21, 0.07, -0.12, -0.1, 0],
+          "slope": -0.2,
+          "dipAt": 0.7,
+          "gapsPerSyllable": 0.13,
+          "medianHz": 76
+        },
+        {
+          "tone": "ngã",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 272,
+          "points": [0.02, 0.06, -0.12, -0.07, 0.04],
+          "slope": 0.02,
+          "dipAt": 0.31,
+          "gapsPerSyllable": 1.13,
+          "medianHz": 78
+        },
+        {
+          "tone": "nặng",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 266,
+          "points": [0.6, 0.54, -0.15, -0.32, -0.04],
+          "slope": -0.65,
+          "dipAt": 0.66,
+          "gapsPerSyllable": 0.75,
+          "medianHz": 80
+        }
+      ],
+      "pairwiseContourDistanceSemitones": {
+        "ngang/huyền": 2.56,
+        "ngang/sắc": 2.56,
+        "ngang/hỏi": 2.62,
+        "ngang/ngã": 2.49,
+        "ngang/nặng": 3.15,
+        "huyền/sắc": 0.76,
+        "huyền/hỏi": 0.41,
+        "huyền/ngã": 0.3,
+        "huyền/nặng": 0.94,
+        "sắc/hỏi": 0.39,
+        "sắc/ngã": 0.47,
+        "sắc/nặng": 0.64,
+        "hỏi/ngã": 0.2,
+        "hỏi/nặng": 0.65,
+        "ngã/nặng": 0.8
+      }
+    },
+    "southern": {
+      "summary": [
+        {
+          "tone": "ngang",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 272,
+          "points": [-0.32, -0.03, -0.03, -0.01, -0.12],
+          "slope": 0.2,
+          "dipAt": 0.3,
+          "gapsPerSyllable": 0,
+          "medianHz": 93
+        },
+        {
+          "tone": "huyền",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 241,
+          "points": [0.03, 0.21, 0.02, -0.18, -0.42],
+          "slope": -0.44,
+          "dipAt": 0.6,
+          "gapsPerSyllable": 0.13,
+          "medianHz": 80
+        },
+        {
+          "tone": "sắc",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 273,
+          "points": [-0.85, -0.42, 0.01, 0.86, 1.9],
+          "slope": 2.76,
+          "dipAt": 0,
+          "gapsPerSyllable": 0.13,
+          "medianHz": 98
+        },
+        {
+          "tone": "hỏi",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 273,
+          "points": [-0.12, 0.07, -0.07, -0.08, 0.11],
+          "slope": 0.23,
+          "dipAt": 0.17,
+          "gapsPerSyllable": 0,
+          "medianHz": 95
+        },
+        {
+          "tone": "ngã",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 250,
+          "points": [0.59, 0.11, -0.63, -0.38, 0.67],
+          "slope": 0.07,
+          "dipAt": 0.57,
+          "gapsPerSyllable": 1.13,
+          "medianHz": 92
+        },
+        {
+          "tone": "nặng",
+          "measured": 8,
+          "of": 8,
+          "voicedMs": 267,
+          "points": [-0.04, 0.15, -0.07, -0.07, -0.04],
+          "slope": 0,
+          "dipAt": 0.29,
+          "gapsPerSyllable": 0.25,
+          "medianHz": 83
+        }
+      ],
+      "pairwiseContourDistanceSemitones": {
+        "ngang/huyền": 0.55,
+        "ngang/sắc": 2.3,
+        "ngang/hỏi": 0.33,
+        "ngang/ngã": 1.4,
+        "ngang/nặng": 0.35,
+        "huyền/sắc": 2.76,
+        "huyền/hỏi": 0.58,
+        "huyền/ngã": 1.41,
+        "huyền/nặng": 0.42,
+        "sắc/hỏi": 2.21,
+        "sắc/ngã": 2.41,
+        "sắc/nặng": 2.37,
+        "hỏi/ngã": 1.11,
+        "hỏi/nặng": 0.19,
+        "ngã/nặng": 1.15
+      }
+    }
+  }
+}

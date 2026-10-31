@@ -1,0 +1,18 @@
+node_modules
+**/node_modules
+**/dist
+.data
+storage
+tmp
+.env
+.env.docker
+test-results
+playwright-report
+*.log
+.claude
+qa-output
+
+# The AI model service has its own image (services/vieneu/Dockerfile); no model code or tooling in the application image.
+services
+tools
+benchmark

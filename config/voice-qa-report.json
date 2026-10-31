@@ -1,0 +1,1599 @@
+{
+  "engineId": "espeak",
+  "engineVersion": "1.52.0",
+  "corpusVersion": "corpus-2",
+  "generatedAt": "2026-10-31T03:14:42.270Z",
+  "results": {
+    "espeak:en-us": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 5406 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "5406 ms for 82 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0802"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.701"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 3601 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Welcome to VoxStudio. This sentence checks pronunciation, rhythm, and punctuation.",
+      "durationMs": 5406,
+      "manualReview": null
+    },
+    "espeak:en-gb": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3443 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3443 ms for 58 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0978"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.804"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2286 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Good morning. The quick brown fox jumps over the lazy dog.",
+      "durationMs": 3443,
+      "manualReview": null
+    },
+    "espeak:es": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3717 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3717 ms for 62 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0779"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.675"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2646 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Buenos días. Esta frase comprueba la pronunciación y el ritmo.",
+      "durationMs": 3717,
+      "manualReview": null
+    },
+    "espeak:es-419": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3024 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3024 ms for 45 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0941"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.979"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 1956 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Hola, ¿cómo estás? Mañana vamos a la escuela.",
+      "durationMs": 3024,
+      "manualReview": null
+    },
+    "espeak:fr-fr": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3418 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3418 ms for 67 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0755"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.568"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2318 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "1 of 11 words read with other-language rules (en)"
+        }
+      ],
+      "sampleText": "Bonjour à tous. Cette phrase vérifie la prononciation et le rythme.",
+      "durationMs": 3418,
+      "manualReview": null
+    },
+    "espeak:de": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3544 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3544 ms for 64 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0827"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.788"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2337 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Guten Morgen. Dieser Satz prüft die Aussprache und den Rhythmus.",
+      "durationMs": 3544,
+      "manualReview": null
+    },
+    "espeak:it": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3872 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3872 ms for 66 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0764"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.933"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2696 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Buongiorno a tutti. Questa frase verifica la pronuncia e il ritmo.",
+      "durationMs": 3872,
+      "manualReview": null
+    },
+    "espeak:pt-br": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3248 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3248 ms for 51 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0855"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.786"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2157 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Bom dia. Esta frase verifica a pronúncia e o ritmo.",
+      "durationMs": 3248,
+      "manualReview": null
+    },
+    "espeak:pt": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3211 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3211 ms for 51 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0860"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.771"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2097 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Bom dia. Esta frase verifica a pronúncia e o ritmo.",
+      "durationMs": 3211,
+      "manualReview": null
+    },
+    "espeak:nl": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3668 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3668 ms for 60 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0891"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.752"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2408 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Goedemorgen. Deze zin controleert de uitspraak en het ritme.",
+      "durationMs": 3668,
+      "manualReview": null
+    },
+    "espeak:ru": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3367 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3367 ms for 59 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0852"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.850"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2753 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Доброе утро. Это предложение проверяет произношение и ритм.",
+      "durationMs": 3367,
+      "manualReview": null
+    },
+    "espeak:uk": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4598 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4598 ms for 51 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1098"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.997"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 3126 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Доброго ранку. Це речення перевіряє вимову та ритм.",
+      "durationMs": 4598,
+      "manualReview": null
+    },
+    "espeak:pl": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3184 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3184 ms for 46 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0879"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.852"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2088 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Dzień dobry. To zdanie sprawdza wymowę i rytm.",
+      "durationMs": 3184,
+      "manualReview": null
+    },
+    "espeak:cs": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3453 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3453 ms for 53 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0906"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.998"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2376 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Dobré ráno. Tato věta kontroluje výslovnost a rytmus.",
+      "durationMs": 3453,
+      "manualReview": null
+    },
+    "espeak:sv": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3736 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3736 ms for 57 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0912"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.945"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2509 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "God morgon. Den här meningen kontrollerar uttal och rytm.",
+      "durationMs": 3736,
+      "manualReview": null
+    },
+    "espeak:da": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2978 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2978 ms for 54 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0911"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.868"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 1988 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Godmorgen. Denne sætning kontrollerer udtale og rytme.",
+      "durationMs": 2978,
+      "manualReview": null
+    },
+    "espeak:nb": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3506 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3506 ms for 57 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0809"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.993"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2455 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "God morgen. Denne setningen kontrollerer uttale og rytme.",
+      "durationMs": 3506,
+      "manualReview": null
+    },
+    "espeak:fi": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3900 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3900 ms for 58 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0884"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.765"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2565 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Hyvää huomenta. Tämä lause tarkistaa ääntämisen ja rytmin.",
+      "durationMs": 3900,
+      "manualReview": null
+    },
+    "espeak:ro": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4328 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4328 ms for 64 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0800"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.708"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2841 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Bună dimineața. Această propoziție verifică pronunția și ritmul.",
+      "durationMs": 4328,
+      "manualReview": null
+    },
+    "espeak:hu": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3828 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3828 ms for 58 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0904"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.958"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2530 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Jó reggelt. Ez a mondat a kiejtést és a ritmust ellenőrzi.",
+      "durationMs": 3828,
+      "manualReview": null
+    },
+    "espeak:el": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3441 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3441 ms for 59 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0865"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.992"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2357 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Καλημέρα. Αυτή η πρόταση ελέγχει την προφορά και τον ρυθμό.",
+      "durationMs": 3441,
+      "manualReview": null
+    },
+    "espeak:bg": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4034 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4034 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0866"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.999"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2726 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Добро утро. Това изречение проверява произношението и ритъма.",
+      "durationMs": 4034,
+      "manualReview": null
+    },
+    "espeak:ca": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3159 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3159 ms for 56 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0873"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.993"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2149 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Bon dia. Aquesta frase comprova la pronúncia i el ritme.",
+      "durationMs": 3159,
+      "manualReview": null
+    },
+    "espeak:tr": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3668 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3668 ms for 51 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0929"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.993"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2323 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Günaydın. Bu cümle telaffuzu ve ritmi kontrol eder.",
+      "durationMs": 3668,
+      "manualReview": null
+    },
+    "espeak:id": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3750 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3750 ms for 57 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0869"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.693"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2492 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Selamat pagi. Kalimat ini memeriksa pengucapan dan ritme.",
+      "durationMs": 3750,
+      "manualReview": null
+    },
+    "espeak:vi": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2872 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2872 ms for 53 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1104"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.996"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 1890 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu.",
+      "durationMs": 2872,
+      "manualReview": null
+    },
+    "espeak:vi-vn-x-central": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2798 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2798 ms for 53 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1042"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.997"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 1809 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu.",
+      "durationMs": 2798,
+      "manualReview": null
+    },
+    "espeak:vi-vn-x-south": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2922 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2922 ms for 53 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1209"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.999"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 1895 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu.",
+      "durationMs": 2922,
+      "manualReview": null
+    },
+    "espeak:sw": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4734 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4734 ms for 60 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0937"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.701"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 3032 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "Habari za asubuhi. Sentensi hii inakagua matamshi na mdundo.",
+      "durationMs": 4734,
+      "manualReview": null
+    },
+    "espeak:hi": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3554 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3554 ms for 47 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0914"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.795"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2340 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "नमस्ते। यह वाक्य उच्चारण और लय की जाँच करता है।",
+      "durationMs": 3554,
+      "manualReview": null
+    },
+    "espeak:cmn": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4195 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4195 ms for 17 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1159"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.950"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2518 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "你好。这个句子用来检查发音和节奏。",
+      "durationMs": 4195,
+      "manualReview": null
+    },
+    "espeak:yue": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3756 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3756 ms for 17 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0988"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.917"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2353 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "早晨。呢句句子用嚟檢查發音同節奏。",
+      "durationMs": 3756,
+      "manualReview": null
+    },
+    "espeak:ja": {
+      "status": "failed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 7976 ms"
+        },
+        {
+          "name": "duration",
+          "ok": false,
+          "detail": "7976 ms for 23 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1029"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.902"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 5057 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": false,
+          "detail": "6 of 1 words read with other-language rules (en)"
+        }
+      ],
+      "sampleText": "こんにちは。この文は発音とリズムを確認します。",
+      "durationMs": 7976,
+      "manualReview": null
+    },
+    "espeak:ko": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4033 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4033 ms for 27 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0883"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.635"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2737 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "안녕하세요. 이 문장은 발음과 리듬을 확인합니다.",
+      "durationMs": 4033,
+      "manualReview": null
+    },
+    "espeak:ar": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3767 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3767 ms for 39 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0847"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.617"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2505 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "مرحبا. هذه الجملة تختبر النطق والإيقاع.",
+      "durationMs": 3767,
+      "manualReview": null
+    },
+    "espeak:he": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3303 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3303 ms for 44 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0476"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.750"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 2498 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "בוקר טוב. המשפט הזה בודק את ההגייה ואת הקצב.",
+      "durationMs": 3303,
+      "manualReview": null
+    },
+    "espeak:th": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 5634 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "5634 ms for 50 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.1046"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.697"
+        },
+        {
+          "name": "deterministic",
+          "ok": true,
+          "detail": "two identical runs"
+        },
+        {
+          "name": "rate-control",
+          "ok": true,
+          "detail": "1.5× rate → 4103 ms"
+        },
+        {
+          "name": "no-language-fallback",
+          "ok": true,
+          "detail": "stayed in voice language"
+        }
+      ],
+      "sampleText": "สวัสดีครับ ประโยคนี้ใช้ตรวจสอบการออกเสียงและจังหวะ",
+      "durationMs": 5634,
+      "manualReview": null
+    }
+  }
+}

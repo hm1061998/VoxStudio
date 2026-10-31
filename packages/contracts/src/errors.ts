@@ -1,0 +1,63 @@
+/** Stable error codes returned by the API. Clients may branch on these. */
+export const ErrorCodes = {
+  VALIDATION_FAILED: 'VALIDATION_FAILED',
+  UNAUTHENTICATED: 'UNAUTHENTICATED',
+  FORBIDDEN: 'FORBIDDEN',
+  CSRF_INVALID: 'CSRF_INVALID',
+  NOT_FOUND: 'NOT_FOUND',
+  EMAIL_TAKEN: 'EMAIL_TAKEN',
+  INVALID_CREDENTIALS: 'INVALID_CREDENTIALS',
+  REVISION_CONFLICT: 'REVISION_CONFLICT',
+  PAYLOAD_TOO_LARGE: 'PAYLOAD_TOO_LARGE',
+  TEXT_TOO_LONG: 'TEXT_TOO_LONG',
+  RATE_LIMITED: 'RATE_LIMITED',
+  QUEUE_FULL: 'QUEUE_FULL',
+  QUOTA_EXCEEDED: 'QUOTA_EXCEEDED',
+  ENGINE_BUSY: 'ENGINE_BUSY',
+  ENGINE_UNAVAILABLE: 'ENGINE_UNAVAILABLE',
+  ENGINE_DISABLED: 'ENGINE_DISABLED',
+  VOICE_NOT_AVAILABLE: 'VOICE_NOT_AVAILABLE',
+  VOICE_LOCALE_UNSUPPORTED: 'VOICE_LOCALE_UNSUPPORTED',
+  PARAMETER_UNSUPPORTED: 'PARAMETER_UNSUPPORTED',
+  PARAMETER_OUT_OF_RANGE: 'PARAMETER_OUT_OF_RANGE',
+  OUTPUT_FORMAT_UNSUPPORTED: 'OUTPUT_FORMAT_UNSUPPORTED',
+  EMPTY_TEXT: 'EMPTY_TEXT',
+  UNIT_MISSING: 'UNIT_MISSING',
+  UNRESOLVED_TOKENS: 'UNRESOLVED_TOKENS',
+  NOTHING_TO_RENDER: 'NOTHING_TO_RENDER',
+  JOB_NOT_RETRYABLE: 'JOB_NOT_RETRYABLE',
+  JOB_NOT_CANCELLABLE: 'JOB_NOT_CANCELLABLE',
+  SYNTHESIS_FAILED: 'SYNTHESIS_FAILED',
+  SYNTHESIS_TIMEOUT: 'SYNTHESIS_TIMEOUT',
+  DSP_FAILED: 'DSP_FAILED',
+  OUTPUT_VALIDATION_FAILED: 'OUTPUT_VALIDATION_FAILED',
+  JOB_CANCELLED: 'JOB_CANCELLED',
+  WORKER_LOST: 'WORKER_LOST',
+  ASSET_MISSING: 'ASSET_MISSING',
+  PRONUNCIATION_INVALID: 'PRONUNCIATION_INVALID',
+  INTERNAL_ERROR: 'INTERNAL_ERROR',
+} as const;
+
+export type ErrorCode = (typeof ErrorCodes)[keyof typeof ErrorCodes];
+
+export interface ApiErrorBody {
+  error: { code: ErrorCode; message: string; details?: Record<string, unknown> };
+  meta: { requestId: string };
+}
+
+export interface ApiSuccess<T> {
+  data: T;
+  meta: { requestId: string };
+}
+
+/** Error carrying a stable code; safe to surface to clients (messages must not contain paths or user text). */
+export class VoxError extends Error {
+  constructor(
+    public readonly code: ErrorCode,
+    message: string,
+    public readonly details?: Record<string, unknown>,
+  ) {
+    super(message);
+    this.name = 'VoxError';
+  }
+}

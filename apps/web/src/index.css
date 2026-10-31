@@ -1,0 +1,90 @@
+@import 'tailwindcss';
+
+/* Dark audio-workstation palette. Contrast: text-primary on bg ≈ 14:1, text-muted ≈ 7:1. */
+@theme {
+  --color-bg: #0d1117;
+  --color-panel: #141a22;
+  --color-panel-2: #1a222c;
+  --color-line: #263040;
+  --color-line-strong: #34425a;
+  --color-fg: #e6edf3;
+  --color-muted: #9aa7b6;
+  --color-dim: #6b7787;
+  --color-accent: #3ecfb2;
+  --color-accent-strong: #5fe3c8;
+  --color-accent-ink: #062520;
+  --color-native: #7aa7ff;
+  --color-dsp: #f0b75a;
+  --color-danger: #ff7b72;
+  --color-ok: #56d364;
+  --color-warn: #e3b341;
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: ui-monospace, 'Cascadia Code', 'SF Mono', Menlo, Consolas, monospace;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+body {
+  background: var(--color-bg);
+  color: var(--color-fg);
+  font-family: var(--font-sans);
+  font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+
+:focus-visible {
+  outline: 2px solid var(--color-accent-strong);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+input[type='range'] {
+  accent-color: var(--color-accent);
+}
+
+.scroll-thin {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-line-strong) transparent;
+}
+
+@layer components {
+  .btn {
+    @apply inline-flex items-center justify-center gap-1.5 rounded-md border border-line bg-panel-2 px-3 py-1.5 text-sm font-medium text-fg hover:border-line-strong hover:bg-line disabled:cursor-not-allowed disabled:opacity-50;
+  }
+  .btn-primary {
+    @apply border-accent bg-accent text-accent-ink hover:border-accent-strong hover:bg-accent-strong;
+  }
+  .btn-danger {
+    @apply border-danger/50 text-danger hover:bg-danger/10;
+  }
+  .btn-ghost {
+    @apply border-transparent bg-transparent hover:bg-panel-2;
+  }
+  .btn-sm {
+    @apply px-2 py-1 text-xs;
+  }
+  .input {
+    @apply w-full rounded-md border border-line bg-bg px-2.5 py-1.5 text-sm text-fg placeholder:text-dim focus:border-accent focus:outline-none;
+  }
+  .label {
+    @apply mb-1 block text-xs font-medium text-muted;
+  }
+  .card {
+    @apply rounded-lg border border-line bg-panel;
+  }
+  .badge {
+    @apply inline-flex items-center gap-1 rounded px-1.5 py-0.5 text-[11px] font-medium leading-none;
+  }
+}

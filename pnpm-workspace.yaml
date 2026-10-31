@@ -1,0 +1,11 @@
+packages:
+  - apps/*
+  - packages/*
+allowBuilds:
+  prisma: true
+  '@prisma/client': true
+  '@prisma/engines': true
+  esbuild: true
+overrides:
+  # GHSA-q7qp-rjg7-q26m (transitive via @nestjs/platform-express; uploads are not used).
+  multer: 2.5.0

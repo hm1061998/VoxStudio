@@ -1,0 +1,20 @@
+# TLS-terminating reverse proxy. Set VOXSTUDIO_DOMAIN to your hostname for automatic HTTPS
+# (Let's Encrypt); "localhost" uses Caddy's internal CA.
+{$VOXSTUDIO_DOMAIN:localhost} {
+	encode zstd gzip
+	request_body {
+		max_size 4MB
+	}
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		-Server
+	}
+	reverse_proxy api:4000 {
+		# Server-sent events must not be buffered.
+		flush_interval -1
+	}
+	log {
+		output stdout
+		format json
+	}
+}

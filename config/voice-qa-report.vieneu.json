@@ -1,0 +1,206 @@
+{
+  "engineId": "vieneu",
+  "engineVersion": "3.8.3",
+  "corpusVersion": "corpus-2",
+  "generatedAt": "2026-10-31T16:25:33.150Z",
+  "results": {
+    "vieneu:ngoc-huyen": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3760 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3760 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0949"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.507"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 3760,
+      "manualReview": null
+    },
+    "vieneu:hai-dang": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2960 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2960 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0938"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.703"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 2960,
+      "manualReview": null
+    },
+    "vieneu:quang-son": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4240 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4240 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0961"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.691"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 4240,
+      "manualReview": null
+    },
+    "vieneu:ngoc-tran": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 4240 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "4240 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0950"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.463"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 4240,
+      "manualReview": null
+    },
+    "vieneu:thuy-dung": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 2960 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "2960 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0933"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.570"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 2960,
+      "manualReview": null
+    },
+    "vieneu:adam": {
+      "status": "passed",
+      "checks": [
+        {
+          "name": "synthesis",
+          "ok": true,
+          "detail": "22050 Hz, 1 ch, 3360 ms"
+        },
+        {
+          "name": "duration",
+          "ok": true,
+          "detail": "3360 ms for 61 characters"
+        },
+        {
+          "name": "signal",
+          "ok": true,
+          "detail": "RMS 0.0959"
+        },
+        {
+          "name": "no-clipping",
+          "ok": true,
+          "detail": "0 full-scale samples, peak 0.717"
+        },
+        {
+          "name": "controls",
+          "ok": true,
+          "detail": "speed and pitch are audio-processing controls"
+        }
+      ],
+      "sampleText": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!",
+      "durationMs": 3360,
+      "manualReview": null
+    }
+  }
+}

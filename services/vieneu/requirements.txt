@@ -1,0 +1,5 @@
+# Pinned for reproducible builds of the model service (ADR 0008). Upgrading vieneu changes the engine version,
+# so the stored QA report must be regenerated (node scripts/qa-vieneu.mjs).
+vieneu==3.8.3
+soundfile
+soxr

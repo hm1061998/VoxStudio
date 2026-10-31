@@ -1,0 +1,366 @@
+// VoxStudio database schema. Migrations live in ./migrations and are applied with `prisma migrate deploy`.
+generator client {
+  provider = "prisma-client-js"
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String   @id @default(uuid()) @db.Uuid
+  /// Stored lower-cased; uniqueness is case-insensitive by construction.
+  email        String   @unique
+  passwordHash String   @map("password_hash")
+  displayName  String   @map("display_name")
+  role         String   @default("user")
+  status       String   @default("active")
+  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  sessions   Session[]
+  resetTokens PasswordResetToken[]
+  workspaces Workspace[]
+  memberships WorkspaceMember[]
+  renderJobs RenderJob[]
+  versions   ProjectVersion[]
+
+  @@map("users")
+}
+
+model Session {
+  id          String   @id @default(uuid()) @db.Uuid
+  userId      String   @map("user_id") @db.Uuid
+  /// SHA-256 of the opaque session token; the raw token only lives in the client cookie.
+  tokenHash   String   @unique @map("token_hash")
+  csrfToken   String   @map("csrf_token")
+  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt  DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model PasswordResetToken {
+  id        String    @id @default(uuid()) @db.Uuid
+  userId    String    @map("user_id") @db.Uuid
+  tokenHash String    @unique @map("token_hash")
+  expiresAt DateTime  @map("expires_at") @db.Timestamptz(3)
+  usedAt    DateTime? @map("used_at") @db.Timestamptz(3)
+  createdAt DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("password_reset_tokens")
+}
+
+model Workspace {
+  id          String   @id @default(uuid()) @db.Uuid
+  ownerUserId String   @map("owner_user_id") @db.Uuid
+  name        String
+  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  /// Service plan: 'free' | 'pro' | 'business'. Set by an administrator (no payment integration).
+  plan        String   @default("free")
+  owner       User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  aiUsage     AiUsage[]
+
+  members        WorkspaceMember[]
+  projects       Project[]
+  presets        VoicePreset[]
+  pronunciations PronunciationEntry[]
+  assets         AudioAsset[]
+  jobs           RenderJob[]
+  auditEvents    AuditEvent[]
+
+  @@index([ownerUserId])
+  @@map("workspaces")
+}
+
+model WorkspaceMember {
+  workspaceId String    @map("workspace_id") @db.Uuid
+  userId      String    @map("user_id") @db.Uuid
+  role        String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@id([workspaceId, userId])
+  @@map("workspace_members")
+}
+
+model Project {
+  id            String    @id @default(uuid()) @db.Uuid
+  workspaceId   String    @map("workspace_id") @db.Uuid
+  name          String
+  description   String?
+  defaultLocale String    @map("default_locale")
+  status        String    @default("draft")
+  revision      Int       @default(0)
+  settingsJson  Json      @map("settings_json")
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  archivedAt    DateTime? @map("archived_at") @db.Timestamptz(3)
+  /// Soft delete marker; storage cleanup runs before hard delete.
+  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
+  latestExportAssetId String? @map("latest_export_asset_id") @db.Uuid
+
+  workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  segments  ProjectSegment[]
+  jobs      RenderJob[]
+  assets    AudioAsset[]
+  versions  ProjectVersion[]
+
+  @@index([workspaceId, updatedAt(sort: Desc)])
+  @@map("projects")
+}
+
+model ProjectSegment {
+  id                 String   @id @db.Uuid
+  projectId          String   @map("project_id") @db.Uuid
+  position           Int
+  sourceText         String   @map("source_text")
+  locale             String
+  engineId           String   @map("engine_id")
+  voiceId            String   @map("voice_id")
+  settingsJson       Json     @map("settings_json")
+  revision           Int      @default(0)
+  latestAudioAssetId String?  @map("latest_audio_asset_id") @db.Uuid
+  lastErrorCode      String?  @map("last_error_code")
+  lastErrorMessage   String?  @map("last_error_message")
+  createdAt          DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt          DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  project Project @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, position])
+  @@index([projectId, position])
+  @@map("project_segments")
+}
+
+model TtsEngine {
+  id               String    @id
+  displayName      String    @map("display_name")
+  version          String
+  synthesisMethod  String    @map("synthesis_method")
+  complianceStatus String    @map("compliance_status")
+  enabled          Boolean   @default(true)
+  metadataJson     Json      @map("metadata_json")
+  licenseId        String    @map("license_id")
+  verifiedAt       DateTime? @map("verified_at") @db.Timestamptz(3)
+  voices           TtsVoice[]
+
+  @@map("tts_engines")
+}
+
+model TtsVoice {
+  id                  String    @id
+  engineId            String    @map("engine_id")
+  displayName         String    @map("display_name")
+  locale              String
+  accent              String?
+  voicePackageVersion String    @map("voice_package_version")
+  licenseId           String    @map("license_id")
+  enabled             Boolean   @default(true)
+  installed           Boolean   @default(true)
+  capabilitiesJson    Json      @map("capabilities_json")
+  qaStatus            String    @map("qa_status")
+  qaReportJson        Json      @map("qa_report_json")
+  engine              TtsEngine @relation(fields: [engineId], references: [id], onDelete: Cascade)
+
+  datasets            TtsVoiceDataset[]
+
+  @@index([locale])
+  @@map("tts_voices")
+}
+
+/// Append-only audit trail of recorded-unit datasets: one row per distinct manifest checksum a voice has had.
+model TtsVoiceDataset {
+  id             String   @id @default(uuid()) @db.Uuid
+  voiceId        String   @map("voice_id")
+  datasetVersion String   @map("dataset_version")
+  manifestSha256 String   @map("manifest_sha256")
+  unitsSha256    String   @map("units_sha256")
+  licenseId      String   @map("license_id")
+  attribution    String
+  reportJson     Json     @map("report_json")
+  recordedAt     DateTime @default(now()) @map("recorded_at") @db.Timestamptz(3)
+  voice          TtsVoice @relation(fields: [voiceId], references: [id], onDelete: Cascade)
+
+  @@unique([voiceId, manifestSha256])
+  @@index([voiceId, recordedAt(sort: Desc)])
+  @@map("tts_voice_datasets")
+}
+
+model VoicePreset {
+  id             String     @id @default(uuid()) @db.Uuid
+  workspaceId    String?    @map("workspace_id") @db.Uuid
+  name           String
+  description    String     @default("")
+  localeScope    String?    @map("locale_scope")
+  parametersJson Json       @map("parameters_json")
+  isBuiltin      Boolean    @default(false) @map("is_builtin")
+  createdAt      DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt      DateTime   @updatedAt @map("updated_at") @db.Timestamptz(3)
+  workspace      Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId])
+  @@map("voice_presets")
+}
+
+model PronunciationEntry {
+  id              String    @id @default(uuid()) @db.Uuid
+  workspaceId     String    @map("workspace_id") @db.Uuid
+  locale          String
+  matchText       String    @map("match_text")
+  replacementText String    @map("replacement_text")
+  phonemeFormat   String?   @map("phoneme_format")
+  engineScope     String?   @map("engine_scope")
+  caseSensitive   Boolean   @default(false) @map("case_sensitive")
+  wholeWord       Boolean   @default(true) @map("whole_word")
+  priority        Int       @default(0)
+  enabled         Boolean   @default(true)
+  createdAt       DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt       DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  workspace       Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, locale, enabled])
+  @@map("pronunciation_entries")
+}
+
+model RenderJob {
+  id                String    @id @default(uuid()) @db.Uuid
+  /// null for standalone previews (voice library / pronunciation preview)
+  projectId         String?   @map("project_id") @db.Uuid
+  workspaceId       String    @map("workspace_id") @db.Uuid
+  segmentId         String?   @map("segment_id") @db.Uuid
+  requestedByUserId String    @map("requested_by_user_id") @db.Uuid
+  /// 'segment' (one segment synthesis) | 'project' (all segments + assembly + encode)
+  kind              String
+  /// 'preview' | 'render' | 'export'
+  purpose           String
+  status            String    @default("queued")
+  /// Scheduling priority fixed at enqueue time from the workspace plan (higher runs first, with aging).
+  priority          Int       @default(0)
+  progressUnits     Int       @default(0) @map("progress_units")
+  totalUnits        Int       @default(1) @map("total_units")
+  renderPlanJson    Json      @map("render_plan_json")
+  cacheKey          String?   @map("cache_key")
+  errorCode         String?   @map("error_code")
+  errorMessageSafe  String?   @map("error_message_safe")
+  warningsJson      Json      @default("[]") @map("warnings_json")
+  attempts          Int       @default(0)
+  maxAttempts       Int       @default(3) @map("max_attempts")
+  cancelRequested   Boolean   @default(false) @map("cancel_requested")
+  lockedBy          String?   @map("locked_by")
+  lockedUntil       DateTime? @map("locked_until") @db.Timestamptz(3)
+  resultAssetId     String?   @map("result_asset_id") @db.Uuid
+  startedAt         DateTime? @map("started_at") @db.Timestamptz(3)
+  completedAt       DateTime? @map("completed_at") @db.Timestamptz(3)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+
+  project     Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  requestedBy User      @relation(fields: [requestedByUserId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([projectId, createdAt(sort: Desc)])
+  @@index([workspaceId, status])
+  @@index([status, createdAt])
+  @@index([status, priority, createdAt])
+  @@map("render_jobs")
+}
+
+model AudioAsset {
+  id               String    @id @default(uuid()) @db.Uuid
+  workspaceId      String    @map("workspace_id") @db.Uuid
+  /// null for standalone previews
+  projectId        String?   @map("project_id") @db.Uuid
+  segmentId        String?   @map("segment_id") @db.Uuid
+  renderJobId      String?   @map("render_job_id") @db.Uuid
+  /// 'segment' | 'preview' | 'export'
+  kind             String
+  storageKey       String    @unique @map("storage_key")
+  format           String
+  codec            String
+  sampleRate       Int       @map("sample_rate")
+  channels         Int
+  bitDepth         Int?      @map("bit_depth")
+  bitrate          Int?
+  durationMs       Int       @map("duration_ms")
+  fileSizeBytes    Int       @map("file_size_bytes")
+  checksumSha256   String    @map("checksum_sha256")
+  cacheKey         String?   @map("cache_key")
+  engineSnapshotJson Json    @map("engine_snapshot_json")
+  dspSnapshotJson  Json      @map("dsp_snapshot_json")
+  timelineJson     Json?     @map("timeline_json")
+  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt        DateTime? @map("expires_at") @db.Timestamptz(3)
+
+  workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([workspaceId, cacheKey])
+  @@index([expiresAt])
+  @@map("audio_assets")
+}
+
+model ProjectVersion {
+  id              String   @id @default(uuid()) @db.Uuid
+  projectId       String   @map("project_id") @db.Uuid
+  revision        Int
+  label           String?
+  snapshotJson    Json     @map("snapshot_json")
+  createdByUserId String   @map("created_by_user_id") @db.Uuid
+  createdAt       DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  project         Project  @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  createdBy       User     @relation(fields: [createdByUserId], references: [id], onDelete: Cascade)
+
+  @@unique([projectId, revision])
+  @@map("project_versions")
+}
+
+model AuditEvent {
+  id           String    @id @default(uuid()) @db.Uuid
+  workspaceId  String    @map("workspace_id") @db.Uuid
+  actorUserId  String?   @map("actor_user_id") @db.Uuid
+  eventType    String    @map("event_type")
+  resourceType String    @map("resource_type")
+  resourceId   String    @map("resource_id")
+  metadataJson Json      @map("metadata_json")
+  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  workspace    Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@map("audit_events")
+}
+
+model WorkerHeartbeat {
+  workerId      String   @id @map("worker_id")
+  startedAt     DateTime @map("started_at") @db.Timestamptz(3)
+  lastSeenAt    DateTime @map("last_seen_at") @db.Timestamptz(3)
+  infoJson      Json     @map("info_json")
+
+  @@map("worker_heartbeats")
+}
+
+/// Characters synthesized by AI engines per workspace and calendar month (UTC), for plan quotas.
+model AiUsage {
+  id          String    @id @default(uuid()) @db.Uuid
+  workspaceId String    @map("workspace_id") @db.Uuid
+  /// 'YYYY-MM' (UTC)
+  month       String
+  engineId    String    @map("engine_id")
+  chars       Int       @default(0)
+  audioMs     Int       @default(0) @map("audio_ms")
+  segments    Int       @default(0)
+  updatedAt   DateTime  @default(now()) @updatedAt @map("updated_at") @db.Timestamptz(3)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, month, engineId])
+  @@map("ai_usage")
+}

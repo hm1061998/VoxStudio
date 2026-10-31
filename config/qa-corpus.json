@@ -1,0 +1,177 @@
+{
+  "version": "corpus-2",
+  "entries": [
+    {
+      "voiceId": "espeak:en-us",
+      "text": "Welcome to VoxStudio. This sentence checks pronunciation, rhythm, and punctuation."
+    },
+    {
+      "voiceId": "espeak:en-gb",
+      "text": "Good morning. The quick brown fox jumps over the lazy dog."
+    },
+    {
+      "voiceId": "espeak:es",
+      "text": "Buenos días. Esta frase comprueba la pronunciación y el ritmo."
+    },
+    {
+      "voiceId": "espeak:es-419",
+      "text": "Hola, ¿cómo estás? Mañana vamos a la escuela."
+    },
+    {
+      "voiceId": "espeak:fr-fr",
+      "text": "Bonjour à tous. Cette phrase vérifie la prononciation et le rythme."
+    },
+    {
+      "voiceId": "espeak:de",
+      "text": "Guten Morgen. Dieser Satz prüft die Aussprache und den Rhythmus."
+    },
+    {
+      "voiceId": "espeak:it",
+      "text": "Buongiorno a tutti. Questa frase verifica la pronuncia e il ritmo."
+    },
+    {
+      "voiceId": "espeak:pt-br",
+      "text": "Bom dia. Esta frase verifica a pronúncia e o ritmo."
+    },
+    {
+      "voiceId": "espeak:pt",
+      "text": "Bom dia. Esta frase verifica a pronúncia e o ritmo."
+    },
+    {
+      "voiceId": "espeak:nl",
+      "text": "Goedemorgen. Deze zin controleert de uitspraak en het ritme."
+    },
+    {
+      "voiceId": "espeak:ru",
+      "text": "Доброе утро. Это предложение проверяет произношение и ритм."
+    },
+    {
+      "voiceId": "espeak:uk",
+      "text": "Доброго ранку. Це речення перевіряє вимову та ритм."
+    },
+    {
+      "voiceId": "espeak:pl",
+      "text": "Dzień dobry. To zdanie sprawdza wymowę i rytm."
+    },
+    {
+      "voiceId": "espeak:cs",
+      "text": "Dobré ráno. Tato věta kontroluje výslovnost a rytmus."
+    },
+    {
+      "voiceId": "espeak:sv",
+      "text": "God morgon. Den här meningen kontrollerar uttal och rytm."
+    },
+    {
+      "voiceId": "espeak:da",
+      "text": "Godmorgen. Denne sætning kontrollerer udtale og rytme."
+    },
+    {
+      "voiceId": "espeak:nb",
+      "text": "God morgen. Denne setningen kontrollerer uttale og rytme."
+    },
+    {
+      "voiceId": "espeak:fi",
+      "text": "Hyvää huomenta. Tämä lause tarkistaa ääntämisen ja rytmin."
+    },
+    {
+      "voiceId": "espeak:ro",
+      "text": "Bună dimineața. Această propoziție verifică pronunția și ritmul."
+    },
+    {
+      "voiceId": "espeak:hu",
+      "text": "Jó reggelt. Ez a mondat a kiejtést és a ritmust ellenőrzi."
+    },
+    {
+      "voiceId": "espeak:el",
+      "text": "Καλημέρα. Αυτή η πρόταση ελέγχει την προφορά και τον ρυθμό."
+    },
+    {
+      "voiceId": "espeak:bg",
+      "text": "Добро утро. Това изречение проверява произношението и ритъма."
+    },
+    {
+      "voiceId": "espeak:ca",
+      "text": "Bon dia. Aquesta frase comprova la pronúncia i el ritme."
+    },
+    {
+      "voiceId": "espeak:tr",
+      "text": "Günaydın. Bu cümle telaffuzu ve ritmi kontrol eder."
+    },
+    {
+      "voiceId": "espeak:id",
+      "text": "Selamat pagi. Kalimat ini memeriksa pengucapan dan ritme."
+    },
+    {
+      "voiceId": "espeak:vi",
+      "text": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu."
+    },
+    {
+      "voiceId": "espeak:sw",
+      "text": "Habari za asubuhi. Sentensi hii inakagua matamshi na mdundo."
+    },
+    {
+      "voiceId": "espeak:hi",
+      "text": "नमस्ते। यह वाक्य उच्चारण और लय की जाँच करता है।"
+    },
+    {
+      "voiceId": "espeak:cmn",
+      "text": "你好。这个句子用来检查发音和节奏。"
+    },
+    {
+      "voiceId": "espeak:yue",
+      "text": "早晨。呢句句子用嚟檢查發音同節奏。"
+    },
+    {
+      "voiceId": "espeak:ja",
+      "text": "こんにちは。この文は発音とリズムを確認します。"
+    },
+    {
+      "voiceId": "espeak:ko",
+      "text": "안녕하세요. 이 문장은 발음과 리듬을 확인합니다."
+    },
+    {
+      "voiceId": "espeak:ar",
+      "text": "مرحبا. هذه الجملة تختبر النطق والإيقاع."
+    },
+    {
+      "voiceId": "espeak:he",
+      "text": "בוקר טוב. המשפט הזה בודק את ההגייה ואת הקצב."
+    },
+    {
+      "voiceId": "espeak:th",
+      "text": "สวัสดีครับ ประโยคนี้ใช้ตรวจสอบการออกเสียงและจังหวะ"
+    },
+    {
+      "voiceId": "espeak:vi-vn-x-central",
+      "text": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu."
+    },
+    {
+      "voiceId": "espeak:vi-vn-x-south",
+      "text": "Xin chào. Câu này kiểm tra cách phát âm và nhịp điệu."
+    },
+    {
+      "voiceId": "vieneu:ngoc-huyen",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    },
+    {
+      "voiceId": "vieneu:hai-dang",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    },
+    {
+      "voiceId": "vieneu:quang-son",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    },
+    {
+      "voiceId": "vieneu:ngoc-tran",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    },
+    {
+      "voiceId": "vieneu:thuy-dung",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    },
+    {
+      "voiceId": "vieneu:adam",
+      "text": "Xin chào các bạn. Hôm nay trời đẹp, chúng ta cùng đi dạo nhé!"
+    }
+  ]
+}

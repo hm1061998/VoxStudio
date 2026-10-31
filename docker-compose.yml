@@ -1,0 +1,106 @@
+# VoxStudio single-node production baseline. See docs/10-DEPLOYMENT.md.
+name: voxstudio
+
+x-server: &server
+  image: voxstudio-server:0.1.0
+  build: { context: ., dockerfile: infra/docker/Dockerfile }
+  env_file: .env.docker
+  environment:
+    DATABASE_URL: postgresql://voxstudio:${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.docker}@postgres:5432/voxstudio
+  volumes:
+    - storage:/data/storage
+  read_only: true
+  tmpfs: [/tmp/voxstudio:size=1g, uid=1000, gid=1000]
+  security_opt: [no-new-privileges:true]
+  cap_drop: [ALL]
+  restart: unless-stopped
+
+services:
+  postgres:
+    image: postgres:17.6-alpine
+    environment:
+      POSTGRES_USER: voxstudio
+      POSTGRES_DB: voxstudio
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.docker}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    networks: [backend]
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U voxstudio']
+      interval: 5s
+      retries: 20
+    restart: unless-stopped
+
+  migrate:
+    <<: *server
+    command: ['sh', '-c', 'cd packages/db && node node_modules/prisma/build/index.js migrate deploy']
+    restart: 'no'
+    networks: [backend]
+    depends_on: { postgres: { condition: service_healthy } }
+
+  api:
+    <<: *server
+    command: ['node', '--enable-source-maps', 'apps/api/dist/main.js']
+    networks: [backend, frontend]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'node',
+          '-e',
+          "fetch('http://127.0.0.1:4000/api/v1/health/live').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))",
+        ]
+      interval: 15s
+      retries: 5
+    deploy: { resources: { limits: { cpus: '2', memory: 1g } } }
+
+  worker:
+    <<: *server
+    command: ['node', '--enable-source-maps', 'apps/worker/dist/main.js']
+    # Internal-only network: the worker has no route to the internet.
+    networks: [backend]
+    depends_on:
+      migrate: { condition: service_completed_successfully }
+    deploy: { resources: { limits: { cpus: '2', memory: 1500m } } }
+
+  # Optional AI voice engine (ADR 0008): docker compose --profile ai up. Internal network only; weights are baked in at build time.
+  vieneu:
+    profiles: [ai]
+    build: { context: ., dockerfile: services/vieneu/Dockerfile }
+    image: voxstudio-vieneu:0.1.0
+    environment:
+      VIENEU_TOKEN: ${VIENEU_SERVICE_TOKEN:?set VIENEU_SERVICE_TOKEN in .env.docker}
+      VIENEU_VOICES: ${VIENEU_VOICES:-Ngọc Huyền,Hải Đăng,Quang Sơn,Ngọc Trân,Thùy Dung}
+      VIENEU_INSTANCES: ${VIENEU_INSTANCES:-1}
+      VIENEU_THREADS: ${VIENEU_THREADS:-4}
+    networks: [backend]
+    read_only: true
+    tmpfs: [/tmp]
+    security_opt: [no-new-privileges:true]
+    cap_drop: [ALL]
+    restart: unless-stopped
+    deploy: { resources: { limits: { cpus: '4', memory: 4g } } }
+
+  caddy:
+    image: caddy:2.10.2-alpine
+    ports: ['80:80', '443:443']
+    environment:
+      VOXSTUDIO_DOMAIN: ${VOXSTUDIO_DOMAIN:-localhost}
+    volumes:
+      - ./infra/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    networks: [frontend]
+    depends_on: [api]
+    restart: unless-stopped
+
+networks:
+  backend: { internal: true }
+  frontend: {}
+
+volumes:
+  pgdata: {}
+  storage: {}
+  caddy_data: {}
+  caddy_config: {}

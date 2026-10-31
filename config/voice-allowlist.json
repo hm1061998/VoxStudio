@@ -1,0 +1,346 @@
+[
+  {
+    "id": "espeak:en-us",
+    "engineId": "espeak",
+    "nativeId": "en-us",
+    "locale": "en-US",
+    "displayName": "English (US)",
+    "accent": "General American"
+  },
+  {
+    "id": "espeak:en-gb",
+    "engineId": "espeak",
+    "nativeId": "en-gb",
+    "locale": "en-GB",
+    "displayName": "English (UK)",
+    "accent": "Received Pronunciation"
+  },
+  {
+    "id": "espeak:es",
+    "engineId": "espeak",
+    "nativeId": "es",
+    "locale": "es-ES",
+    "displayName": "Spanish (Spain)",
+    "accent": "Castilian"
+  },
+  {
+    "id": "espeak:es-419",
+    "engineId": "espeak",
+    "nativeId": "es-419",
+    "locale": "es-419",
+    "displayName": "Spanish (Latin America)",
+    "accent": null
+  },
+  {
+    "id": "espeak:fr-fr",
+    "engineId": "espeak",
+    "nativeId": "fr-fr",
+    "locale": "fr-FR",
+    "displayName": "French (France)",
+    "accent": null
+  },
+  {
+    "id": "espeak:de",
+    "engineId": "espeak",
+    "nativeId": "de",
+    "locale": "de-DE",
+    "displayName": "German",
+    "accent": null
+  },
+  {
+    "id": "espeak:it",
+    "engineId": "espeak",
+    "nativeId": "it",
+    "locale": "it-IT",
+    "displayName": "Italian",
+    "accent": null
+  },
+  {
+    "id": "espeak:pt-br",
+    "engineId": "espeak",
+    "nativeId": "pt-br",
+    "locale": "pt-BR",
+    "displayName": "Portuguese (Brazil)",
+    "accent": null
+  },
+  {
+    "id": "espeak:pt",
+    "engineId": "espeak",
+    "nativeId": "pt",
+    "locale": "pt-PT",
+    "displayName": "Portuguese (Portugal)",
+    "accent": null
+  },
+  {
+    "id": "espeak:nl",
+    "engineId": "espeak",
+    "nativeId": "nl",
+    "locale": "nl-NL",
+    "displayName": "Dutch",
+    "accent": null
+  },
+  {
+    "id": "espeak:ru",
+    "engineId": "espeak",
+    "nativeId": "ru",
+    "locale": "ru-RU",
+    "displayName": "Russian",
+    "accent": null
+  },
+  {
+    "id": "espeak:uk",
+    "engineId": "espeak",
+    "nativeId": "uk",
+    "locale": "uk-UA",
+    "displayName": "Ukrainian",
+    "accent": null
+  },
+  {
+    "id": "espeak:pl",
+    "engineId": "espeak",
+    "nativeId": "pl",
+    "locale": "pl-PL",
+    "displayName": "Polish",
+    "accent": null
+  },
+  {
+    "id": "espeak:cs",
+    "engineId": "espeak",
+    "nativeId": "cs",
+    "locale": "cs-CZ",
+    "displayName": "Czech",
+    "accent": null
+  },
+  {
+    "id": "espeak:sv",
+    "engineId": "espeak",
+    "nativeId": "sv",
+    "locale": "sv-SE",
+    "displayName": "Swedish",
+    "accent": null
+  },
+  {
+    "id": "espeak:da",
+    "engineId": "espeak",
+    "nativeId": "da",
+    "locale": "da-DK",
+    "displayName": "Danish",
+    "accent": null
+  },
+  {
+    "id": "espeak:nb",
+    "engineId": "espeak",
+    "nativeId": "nb",
+    "locale": "nb-NO",
+    "displayName": "Norwegian Bokmål",
+    "accent": null
+  },
+  {
+    "id": "espeak:fi",
+    "engineId": "espeak",
+    "nativeId": "fi",
+    "locale": "fi-FI",
+    "displayName": "Finnish",
+    "accent": null
+  },
+  {
+    "id": "espeak:ro",
+    "engineId": "espeak",
+    "nativeId": "ro",
+    "locale": "ro-RO",
+    "displayName": "Romanian",
+    "accent": null
+  },
+  {
+    "id": "espeak:hu",
+    "engineId": "espeak",
+    "nativeId": "hu",
+    "locale": "hu-HU",
+    "displayName": "Hungarian",
+    "accent": null
+  },
+  {
+    "id": "espeak:el",
+    "engineId": "espeak",
+    "nativeId": "el",
+    "locale": "el-GR",
+    "displayName": "Greek",
+    "accent": null
+  },
+  {
+    "id": "espeak:bg",
+    "engineId": "espeak",
+    "nativeId": "bg",
+    "locale": "bg-BG",
+    "displayName": "Bulgarian",
+    "accent": null
+  },
+  {
+    "id": "espeak:ca",
+    "engineId": "espeak",
+    "nativeId": "ca",
+    "locale": "ca-ES",
+    "displayName": "Catalan",
+    "accent": null
+  },
+  {
+    "id": "espeak:tr",
+    "engineId": "espeak",
+    "nativeId": "tr",
+    "locale": "tr-TR",
+    "displayName": "Turkish",
+    "accent": null
+  },
+  {
+    "id": "espeak:id",
+    "engineId": "espeak",
+    "nativeId": "id",
+    "locale": "id-ID",
+    "displayName": "Indonesian",
+    "accent": null
+  },
+  {
+    "id": "espeak:vi",
+    "engineId": "espeak",
+    "nativeId": "vi",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Northern)",
+    "accent": "northern"
+  },
+  {
+    "id": "espeak:vi-vn-x-central",
+    "engineId": "espeak",
+    "nativeId": "vi-vn-x-central",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Central)",
+    "accent": "central"
+  },
+  {
+    "id": "espeak:vi-vn-x-south",
+    "engineId": "espeak",
+    "nativeId": "vi-vn-x-south",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Southern)",
+    "accent": "southern"
+  },
+  {
+    "id": "espeak:sw",
+    "engineId": "espeak",
+    "nativeId": "sw",
+    "locale": "sw",
+    "displayName": "Swahili",
+    "accent": null
+  },
+  {
+    "id": "espeak:hi",
+    "engineId": "espeak",
+    "nativeId": "hi",
+    "locale": "hi-IN",
+    "displayName": "Hindi",
+    "accent": null
+  },
+  {
+    "id": "espeak:cmn",
+    "engineId": "espeak",
+    "nativeId": "cmn",
+    "locale": "zh-CN",
+    "displayName": "Chinese (Mandarin)",
+    "accent": null
+  },
+  {
+    "id": "espeak:yue",
+    "engineId": "espeak",
+    "nativeId": "yue",
+    "locale": "yue-HK",
+    "displayName": "Chinese (Cantonese)",
+    "accent": null
+  },
+  {
+    "id": "espeak:ja",
+    "engineId": "espeak",
+    "nativeId": "ja",
+    "locale": "ja-JP",
+    "displayName": "Japanese",
+    "accent": null
+  },
+  {
+    "id": "espeak:ko",
+    "engineId": "espeak",
+    "nativeId": "ko",
+    "locale": "ko-KR",
+    "displayName": "Korean",
+    "accent": null
+  },
+  {
+    "id": "espeak:ar",
+    "engineId": "espeak",
+    "nativeId": "ar",
+    "locale": "ar",
+    "displayName": "Arabic",
+    "accent": null
+  },
+  {
+    "id": "espeak:he",
+    "engineId": "espeak",
+    "nativeId": "he",
+    "locale": "he-IL",
+    "displayName": "Hebrew",
+    "accent": null
+  },
+  {
+    "id": "espeak:th",
+    "engineId": "espeak",
+    "nativeId": "th",
+    "locale": "th-TH",
+    "displayName": "Thai",
+    "accent": null
+  },
+  {
+    "id": "vieneu:ngoc-huyen",
+    "engineId": "vieneu",
+    "nativeId": "ngoc-huyen",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Northern, AI) — Ngọc Huyền",
+    "accent": "northern"
+  },
+  {
+    "id": "vieneu:hai-dang",
+    "engineId": "vieneu",
+    "nativeId": "hai-dang",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Northern, AI) — Hải Đăng",
+    "accent": "northern"
+  },
+  {
+    "id": "vieneu:quang-son",
+    "engineId": "vieneu",
+    "nativeId": "quang-son",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Central, AI) — Quang Sơn",
+    "accent": "central"
+  },
+  {
+    "id": "vieneu:ngoc-tran",
+    "engineId": "vieneu",
+    "nativeId": "ngoc-tran",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Central, AI) — Ngọc Trân",
+    "accent": "central"
+  },
+  {
+    "id": "vieneu:thuy-dung",
+    "engineId": "vieneu",
+    "nativeId": "thuy-dung",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Southern, AI) — Thùy Dung",
+    "accent": "southern"
+  },
+  {
+    "id": "vieneu:adam",
+    "engineId": "vieneu",
+    "nativeId": "adam",
+    "locale": "vi-VN",
+    "displayName": "Vietnamese (Southern, AI) — Adam",
+    "accent": "southern"
+  }
+]

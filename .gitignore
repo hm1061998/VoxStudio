@@ -1,0 +1,15 @@
+node_modules/
+dist/
+*.tsbuildinfo
+.env
+.data/
+storage/
+tmp/
+test-results/
+playwright-report/
+coverage/
+apps/web/dist/
+.env.docker
+tmp-*
+backups/
+qa-output/

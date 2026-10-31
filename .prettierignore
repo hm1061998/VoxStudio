@@ -1,0 +1,8 @@
+node_modules
+dist
+.data
+storage
+pnpm-lock.yaml
+packages/db/prisma/migrations
+playwright-report
+test-results
