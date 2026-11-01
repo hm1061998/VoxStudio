@@ -32,3 +32,7 @@ Card gateway with hosted checkout (needs a business account and does not match h
 ## Security/license/performance impact
 
 The webhook is an unauthenticated entry point protected by a shared secret, rate limiting and strict payload validation; the secret is read from the environment and never logged. No new dependency.
+
+## Addendum: failures and repeats (2026-11-01)
+
+A notification is stored as `received` and leaves that state only in the same transaction that applies the plan (the order row is locked first, then the notification row), so a crash cannot drop a payment or apply it twice. A repeated delivery of an unfinished notification resumes it; a timer on the API reprocesses stale ones. Creating an order returns the existing unpaid order for the same plan and period, under a per-workspace advisory lock. Administrators can apply, extend or dismiss a transfer that did not resolve itself.

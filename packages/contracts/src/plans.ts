@@ -20,6 +20,11 @@ export const orderCreateSchema = z.strictObject({
   months: z.union([z.literal(1), z.literal(3), z.literal(6), z.literal(12)]),
 });
 export const orderDecisionSchema = z.strictObject({ note: z.string().trim().max(300).optional() });
+export const paymentEventResolveSchema = z.strictObject({
+  action: z.enum(['attach', 'extend', 'dismiss']),
+  orderId: z.string().uuid().optional(),
+  note: z.string().trim().max(300).optional(),
+});
 
 export interface BillingInfoDto {
   /** false when no prices are configured: administrators assign plans and nothing can be bought. */

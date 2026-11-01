@@ -10,6 +10,14 @@ Quyết định: [ADR 0010](../decisions/0010-optional-billing-by-bank-transfer.
 - **Xác nhận.** Hoặc quản trị viên bấm "Xác nhận thanh toán" sau khi đối chiếu sao kê, hoặc một nhà cung cấp gọi webhook. Cả hai dùng chung một hàm, an toàn khi chạy lặp.
 - **Quy tắc an toàn.** Thiếu tiền, đang có gói trả phí khác còn hạn, hoặc đơn đã bị hủy: đơn sang trạng thái "đang kiểm tra" và không đổi gói, chờ quản trị viên. Chuyển thừa: nhận và ghi lại. Khoản không khớp đơn nào: lưu để quản trị viên xem, không đổi gói. Cùng gói còn hạn: cộng thêm thời gian vào ngày hết hạn hiện tại. Gói do quản trị viên gán không có ngày hết hạn: giữ nguyên không hết hạn.
 
+## Lỗi mạng, trừ tiền nhưng chưa cập nhật, bấm hai lần
+
+- **Webhook xử lý tiếp được.** Thông báo được lưu với kết quả `received`, và chỉ rời trạng thái này trong cùng giao dịch cơ sở dữ liệu cấp gói cho đơn. Nếu máy chủ sập giữa chừng, nhà cung cấp gửi lại cùng `eventId` sẽ được xử lý tiếp (không bị coi là trùng). Lỗi giữa chừng trả mã 5xx để nhà cung cấp gửi lại. Nhiều lần gửi cùng lúc chỉ cấp gói một lần.
+- **Quét tự động.** Mỗi phút máy chủ API xử lý lại các thông báo còn `received` quá 60 giây, kể cả khi nhà cung cấp không gửi lại.
+- **Tạo đơn không bị nhân đôi.** Nếu workspace đã có đơn chưa thanh toán cùng gói và cùng số tháng, hệ thống trả lại đơn đó thay vì tạo mới (có khóa theo workspace nên hai yêu cầu song song cũng chỉ ra một đơn). Khi mạng lỗi lúc tạo đơn, giao diện tải lại danh sách đơn để khách thấy đơn đã được tạo.
+- **Chuyển khoản hai lần, hoặc ghi sai mã.** Trong tab Đơn hàng, mỗi khoản cần kiểm tra có ba thao tác: "Áp dụng" cho một đơn chưa thanh toán, "Cộng thêm thời gian" (khoản trả lần hai cho đơn đã thanh toán, tạo thêm một đơn cùng gói và số tháng), hoặc "Bỏ qua khoản này" (ví dụ đã hoàn tiền). Mỗi khoản chỉ xử lý được một lần và đều có nhật ký.
+- **Chưa làm được:** hỏi ngược nhà cung cấp về trạng thái giao dịch (chưa có adapter thật), và hoàn tiền thật (admin hoàn ở ngân hàng rồi bấm "Bỏ qua khoản này").
+
 ## Cấu hình
 
 | Biến                                                               | Ý nghĩa                                                                                                                                      |

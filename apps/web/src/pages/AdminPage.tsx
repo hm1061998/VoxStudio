@@ -575,6 +575,26 @@ function Orders() {
       setErr(describeError(e));
     }
   };
+  const everyOrder = useQuery({
+    queryKey: ['admin', 'orders', ''],
+    queryFn: () => api<AdminOrderDto[]>('/admin/orders'),
+  });
+  const unpaid = (everyOrder.data ?? []).filter((o) => o.status !== 'paid' && o.status !== 'cancelled');
+  const [pick, setPick] = useState<Record<string, string>>({});
+  const [dismissing, setDismissing] = useState<AdminPaymentEventDto | null>(null);
+  const resolve = async (
+    e: AdminPaymentEventDto,
+    action: 'attach' | 'extend' | 'dismiss',
+    orderId?: string,
+  ) => {
+    setErr(null);
+    try {
+      await api(`/admin/payment-events/${e.id}/resolve`, { method: 'POST', body: { action, orderId } });
+      await qc.invalidateQueries({ queryKey: ['admin'] });
+    } catch (error) {
+      setErr(describeError(error));
+    }
+  };
   if (orders.isLoading) return <Spinner />;
   if (orders.error || !orders.data) return <ErrorNote error={orders.error ?? '—'} />;
   return (
@@ -682,20 +702,69 @@ function Orders() {
                 <th scope="col">{t('upgrade.amount')}</th>
                 <th scope="col">{t('adm.events.note')}</th>
                 <th scope="col">{t('upgrade.col.status')}</th>
+                <th scope="col">
+                  <span className="sr-only">{t('dash.col.actions')}</span>
+                </th>
               </tr>
             </thead>
             <tbody>
               {(events.data ?? []).map((e) => (
-                <tr key={e.id} className="border-t border-line">
+                <tr key={e.id} className="border-t border-line align-top">
                   <td className="py-1.5">{fmtDate(e.createdAt, lang)}</td>
                   <td className="font-mono text-xs">{vnd(e.amountVnd)}</td>
                   <td className="max-w-xs truncate">{e.note}</td>
                   <td>{t(`adm.events.${e.result}` as MessageKey)}</td>
+                  <td>
+                    <div className="flex flex-wrap gap-1">
+                      {unpaid.length > 0 && (
+                        <>
+                          <select
+                            className="input w-44 py-1 text-xs"
+                            aria-label={t('adm.events.pick')}
+                            value={pick[e.id] ?? ''}
+                            onChange={(ev) => setPick({ ...pick, [e.id]: ev.target.value })}
+                          >
+                            <option value="">{t('adm.events.pick')}</option>
+                            {unpaid.map((o) => (
+                              <option key={o.id} value={o.id}>
+                                {o.paymentCode} · {o.ownerEmail}
+                              </option>
+                            ))}
+                          </select>
+                          <button
+                            className="btn btn-sm btn-primary"
+                            disabled={!pick[e.id]}
+                            onClick={() => void resolve(e, 'attach', pick[e.id])}
+                          >
+                            {t('adm.events.attach')}
+                          </button>
+                        </>
+                      )}
+                      {e.orderId && e.result === 'review' && (
+                        <button className="btn btn-sm" onClick={() => void resolve(e, 'extend')}>
+                          {t('adm.events.extend')}
+                        </button>
+                      )}
+                      <button className="btn btn-sm" onClick={() => setDismissing(e)}>
+                        {t('adm.events.dismiss')}
+                      </button>
+                    </div>
+                  </td>
                 </tr>
               ))}
             </tbody>
           </table>
         </section>
+      )}
+      {dismissing && (
+        <Confirm
+          danger
+          title={t('adm.events.dismissTitle')}
+          message={t('adm.events.dismissMsg', { amount: vnd(dismissing.amountVnd) })}
+          confirmLabel={t('adm.events.dismiss')}
+          onClose={() => setDismissing(null)}
+          onConfirm={() => void resolve(dismissing, 'dismiss')}
+        />
       )}
       {asking && (
         <Confirm

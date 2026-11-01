@@ -5,6 +5,7 @@ import {
   adminUserUpdateSchema,
   engineToggleSchema,
   orderDecisionSchema,
+  paymentEventResolveSchema,
   voiceToggleSchema,
   workspacePlanSchema,
   ErrorCodes,
@@ -462,6 +463,17 @@ export class AdminController {
   @Get('payment-events')
   paymentEvents() {
     return this.billing.adminPaymentEvents();
+  }
+
+  /** Settle a transfer that did not resolve itself: apply it to an order, add time, or dismiss it. */
+  @Post('payment-events/:id/resolve')
+  @HttpCode(200)
+  resolvePaymentEvent(
+    @CurrentUser() admin: SessionUser,
+    @Param('id', UuidPipe) id: string,
+    @Body(new ZodPipe(paymentEventResolveSchema)) body: z.infer<typeof paymentEventResolveSchema>,
+  ) {
+    return this.billing.resolveEvent(admin.id, id, body);
   }
 
   /** Re-read installed voices and QA report (e.g. after running `pnpm qa:voices`). */

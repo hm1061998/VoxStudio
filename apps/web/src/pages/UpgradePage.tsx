@@ -49,7 +49,11 @@ export function UpgradeSection() {
       setError(null);
       void refresh();
     },
-    onError: (e) => setError(describeError(e)),
+    onError: (e) => {
+      setError(describeError(e));
+      // The order may have been created even though the answer never arrived: show what the server has.
+      void refresh();
+    },
   });
   const cancel = useMutation({
     mutationFn: (id: string) => api<OrderDto>(`/billing/orders/${id}/cancel`, { method: 'POST' }),

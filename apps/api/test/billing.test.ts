@@ -1,5 +1,9 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest';
+import { createRequire } from 'node:module';
 import { as, createHarness, register, type Harness, type TestUser } from './harness';
+
+// The harness loads the built API natively, so the provider class must come from that same module instance.
+const BILLING_SERVICE = createRequire(import.meta.url)('../dist/billing/billing.service').BillingService;
 
 const SECRET = 'test-webhook-secret-123456';
 let h: Harness;
@@ -81,12 +85,27 @@ describe('orders', () => {
     expect((await as(h, u).post('/billing/orders', { plan: 'pro', months: 1, amountVnd: 1 })).status).toBe(
       400,
     );
-    await order(u);
-    await order(u);
-    await order(u);
-    const fourth = await as(h, u).post('/billing/orders', { plan: 'pro', months: 1 });
+    await order(u, 'pro', 1);
+    await order(u, 'pro', 3);
+    await order(u, 'pro', 6);
+    const fourth = await as(h, u).post('/billing/orders', { plan: 'business', months: 1 });
     expect(fourth.status).toBe(409);
     expect(fourth.body.error.code).toBe('ORDER_STATE');
+  });
+
+  it('returns the same unpaid order for a double click, a retry or parallel requests', async () => {
+    const u = await user();
+    const first = await order(u, 'pro', 1);
+    expect((await order(u, 'pro', 1)).id).toBe(first.id);
+    const parallel = await Promise.all(
+      Array.from({ length: 6 }, () => as(h, u).post('/billing/orders', { plan: 'business', months: 3 })),
+    );
+    expect(parallel.every((r) => r.status === 201)).toBe(true);
+    expect(new Set(parallel.map((r) => r.body.data.id)).size).toBe(1);
+    expect((await as(h, u).get('/billing/orders')).body.data).toHaveLength(2);
+    // Once that order is paid, buying the same thing again makes a new one.
+    await hook(event(first.paymentCode, 100_000));
+    expect((await order(u, 'pro', 1)).id).not.toBe(first.id);
   });
 
   it('keeps orders private and lets the owner cancel only an unpaid one', async () => {
@@ -195,6 +214,122 @@ describe('payment webhook', () => {
     const results = rs.map((r) => r.body.result).sort();
     expect(results.filter((x) => x === 'applied')).toHaveLength(1);
     expect(daysFromNow((await plan(u)).planExpiresAt)).toBeLessThan(32);
+  });
+});
+
+describe('crashes and retries', () => {
+  const stored = (provider: string, eventId: string, note: string, amountVnd: number, ageMs = 0) =>
+    h.prisma.paymentEvent.create({
+      data: {
+        provider,
+        eventId,
+        direction: 'in',
+        amountVnd,
+        note,
+        result: 'received',
+        createdAt: new Date(Date.now() - ageMs),
+      },
+    });
+
+  it('finishes a notification whose first attempt died after it was stored', async () => {
+    const u = await user();
+    const o = await order(u, 'pro', 1);
+    // The state a crash leaves behind: stored, nothing applied.
+    await stored('generic', 'crash-1', o.paymentCode, 100_000);
+    expect((await plan(u)).plan).toBe('free');
+    const retry = await hook(event(o.paymentCode, 100_000, 'crash-1'));
+    expect(retry.body).toEqual({ success: true, result: 'applied' });
+    expect((await plan(u)).plan).toBe('pro');
+    expect((await hook(event(o.paymentCode, 100_000, 'crash-1'))).body.result).toBe('duplicate');
+  });
+
+  it('finishes stuck notifications on its own when the provider never retries', async () => {
+    const u = await user();
+    const o = await order(u, 'pro', 1);
+    await stored('generic', 'crash-2', o.paymentCode, 100_000, 5 * 60_000);
+    await stored('generic', 'crash-young', 'no code here', 1_000);
+    const billing = h.app.get(BILLING_SERVICE, { strict: false }) as {
+      reprocessStuckEvents(): Promise<number>;
+    };
+    expect(await billing.reprocessStuckEvents()).toBeGreaterThanOrEqual(1);
+    expect((await plan(u)).plan).toBe('pro');
+    // A notification only just stored may still be in flight, so it is left alone.
+    const young = await h.prisma.paymentEvent.findFirst({ where: { eventId: 'crash-young' } });
+    expect(young?.result).toBe('received');
+    expect(await billing.reprocessStuckEvents()).toBe(0);
+  });
+
+  it('applies the plan once when the same delivery is replayed many times at once', async () => {
+    const u = await user();
+    const o = await order(u, 'pro', 1);
+    const e = event(o.paymentCode, 100_000, 'replay-1');
+    const rs = await Promise.all(Array.from({ length: 5 }, () => hook(e)));
+    expect(rs.every((r) => r.status === 200)).toBe(true);
+    expect(rs.filter((r) => r.body.result === 'applied')).toHaveLength(1);
+    expect(daysFromNow((await plan(u)).planExpiresAt)).toBeLessThan(32);
+  });
+});
+
+describe('resolving transfers by hand', () => {
+  const pending = async (id: string) =>
+    (await as(h, admin).get('/admin/payment-events')).body.data.find((x: { id: string }) => x.id === id);
+  const eventIdOf = async (eventId: string) =>
+    (await h.prisma.paymentEvent.findFirstOrThrow({ where: { eventId } })).id;
+
+  it('applies a transfer with a wrong code to the order the customer meant', async () => {
+    const u = await user();
+    const o = await order(u, 'pro', 1);
+    await hook(event('chuyen khoan VOXWRONGCODE', 100_000, 'typo-1'));
+    const id = await eventIdOf('typo-1');
+    expect((await pending(id)).result).toBe('unmatched');
+    const bad = await as(h, admin).post(`/admin/payment-events/${id}/resolve`, { action: 'attach' });
+    expect(bad.status).toBe(400);
+    const ok = await as(h, admin).post(`/admin/payment-events/${id}/resolve`, {
+      action: 'attach',
+      orderId: o.id,
+    });
+    expect(ok.status).toBe(200);
+    expect((await plan(u)).plan).toBe('pro');
+    expect(await pending(id)).toBeUndefined();
+    // Handled once only.
+    expect(
+      (await as(h, admin).post(`/admin/payment-events/${id}/resolve`, { action: 'attach', orderId: o.id }))
+        .status,
+    ).toBe(409);
+  });
+
+  it('adds the period again for a second payment, or dismisses it', async () => {
+    const u = await user();
+    const o = await order(u, 'pro', 1);
+    await hook(event(o.paymentCode, 100_000, 'twice-1'));
+    expect((await hook(event(o.paymentCode, 100_000, 'twice-2'))).body.result).toBe('review');
+    const t1 = (await plan(u)).planExpiresAt;
+    const id = await eventIdOf('twice-2');
+    expect(
+      (await as(h, admin).post(`/admin/payment-events/${id}/resolve`, { action: 'extend' })).status,
+    ).toBe(200);
+    const t2 = (await plan(u)).planExpiresAt;
+    expect(daysFromNow(t2) - daysFromNow(t1)).toBeGreaterThan(27);
+    expect(daysFromNow(t2) - daysFromNow(t1)).toBeLessThan(32);
+    expect((await as(h, u).get('/billing/orders')).body.data).toHaveLength(2);
+
+    await hook(event(o.paymentCode, 100_000, 'twice-3'));
+    const id3 = await eventIdOf('twice-3');
+    const dismissed = await as(h, admin).post(`/admin/payment-events/${id3}/resolve`, {
+      action: 'dismiss',
+      note: 'Refunded',
+    });
+    expect(dismissed.body.data.result).toBe('dismissed');
+    expect((await plan(u)).planExpiresAt).toBe(t2);
+    expect(await pending(id3)).toBeUndefined();
+  });
+
+  it('is for administrators only', async () => {
+    const u = await user();
+    const r = await as(h, u).post('/admin/payment-events/00000000-0000-4000-8000-000000000000/resolve', {
+      action: 'dismiss',
+    });
+    expect(r.status).toBe(403);
   });
 });
 
