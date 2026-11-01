@@ -13,3 +13,4 @@ apps/web/dist/
 tmp-*
 backups/
 qa-output/
+.history/*
