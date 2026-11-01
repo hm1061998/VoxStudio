@@ -47,3 +47,9 @@ Operator CLI (needs database access): `node scripts/user-admin.mjs` to list user
 ## Not done
 
 No 2FA, email verification or mailed password reset; no CAPTCHA; no WAF/volumetric DDoS protection (use the reverse proxy or a CDN); no TLS in the application itself (Caddy terminates it in the compose stack, never built here); no independent penetration test; the Docker images have not been built.
+
+## Stored audio (disk) limits
+
+- Each plan has a `storageBytes` allowance (free 300 MB, pro 5 GB, business 50 GB; override with `PLAN_LIMITS_JSON`). New render and preview jobs are refused with `STORAGE_QUOTA_EXCEEDED` (402) once a workspace has used it; results already stored still play. Usage is shown in Settings and returned by `GET /me/plan`.
+- Standalone previews expire after 24 hours. Superseded project audio (the old take of a re-rendered segment) and replaced exports are deleted by the worker 24 hours after they stop being referenced (`ORPHAN_GRACE_MS`, checked every 10 minutes). Earlier builds never deleted them.
+- Audio is 22.05 kHz mono 16-bit WAV, about 2.6 MB per minute. No per-file or per-day creation limit beyond the above and the character and pending-job limits.

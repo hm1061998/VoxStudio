@@ -15,18 +15,24 @@ export interface PlanLimits {
   maxPendingJobs: number;
   /** Characters per calendar month (UTC) the workspace may synthesize with AI engines; null = unlimited. */
   aiMonthlyChars: number | null;
+  /** Bytes of stored audio (segments, exports, previews) a workspace may hold. */
+  storageBytes: number;
 }
 
+const MB = 1024 * 1024;
+const GB = 1024 * MB;
+
 export const DEFAULT_PLAN_LIMITS: Record<PlanId, PlanLimits> = {
-  free: { priority: 0, maxPendingJobs: 5, aiMonthlyChars: 20_000 },
-  pro: { priority: 10, maxPendingJobs: 15, aiMonthlyChars: 500_000 },
-  business: { priority: 20, maxPendingJobs: 20, aiMonthlyChars: null },
+  free: { priority: 0, maxPendingJobs: 5, aiMonthlyChars: 20_000, storageBytes: 300 * MB },
+  pro: { priority: 10, maxPendingJobs: 15, aiMonthlyChars: 500_000, storageBytes: 5 * GB },
+  business: { priority: 20, maxPendingJobs: 20, aiMonthlyChars: null, storageBytes: 50 * GB },
 };
 
 const limitsSchema = z.strictObject({
   priority: z.number().int().min(0).max(100),
   maxPendingJobs: z.number().int().min(1).max(1000),
   aiMonthlyChars: z.number().int().min(0).nullable(),
+  storageBytes: z.number().int().min(0),
 });
 
 /** Parse PLAN_LIMITS_JSON (partial overrides per plan). Throws on invalid input so a typo never goes unnoticed. */

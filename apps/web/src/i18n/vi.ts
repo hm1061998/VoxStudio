@@ -738,6 +738,10 @@ export const vi: Record<MessageKey, string> = {
   'plan.name.business': 'Doanh nghiệp',
   'plan.priority':
     'Độ ưu tiên trong hàng đợi: {n}. Gói cao hơn được phục vụ trước khi máy chủ bận; việc chờ lâu sẽ được đẩy lên dần nên không ai chờ mãi.',
+  'plan.storage': 'Dung lượng âm thanh đã lưu: {used}/{limit}',
+  'plan.storageMeter': 'Dung lượng âm thanh đã dùng',
+  'error.STORAGE_QUOTA_EXCEEDED':
+    'Dung lượng âm thanh đã lưu đã chạm mức của gói. Hãy xóa dự án hoặc bản xuất cũ, hoặc nhờ quản trị viên nâng gói.',
   'plan.pending': 'Việc đang chờ hoặc chạy: {n}/{max}',
   'plan.ai': 'Giọng AI trong tháng này: {used}/{limit} ký tự',
   'plan.aiUnlimited': 'Giọng AI trong tháng này: {used} ký tự (không giới hạn)',

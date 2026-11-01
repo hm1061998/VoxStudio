@@ -739,6 +739,10 @@ export const en = {
   'plan.name.business': 'Business',
   'plan.priority':
     'Queue priority: {n}. Higher plans are served first when the server is busy; waiting jobs move up over time so none wait forever.',
+  'plan.storage': 'Stored audio: {used} of {limit}',
+  'plan.storageMeter': 'Stored audio used',
+  'error.STORAGE_QUOTA_EXCEEDED':
+    'Your stored audio has reached the limit of your plan. Delete old projects or exports, or ask an administrator for a larger plan.',
   'plan.pending': 'Jobs waiting or running: {n} of {max}',
   'plan.ai': 'AI voices this month: {used} of {limit} characters',
   'plan.aiUnlimited': 'AI voices this month: {used} characters (no limit)',

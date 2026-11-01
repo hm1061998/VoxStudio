@@ -1,26 +1,53 @@
 import type { StorageDriver } from '@voxstudio/core';
 import type { PrismaClient } from '@voxstudio/db';
 
+/** Superseded segment audio and old exports are kept this long (undo, comparing, a render still running). */
+export const ORPHAN_GRACE_MS = 24 * 3600_000;
+const PAGE = 500;
+
 /**
- * Delete expired assets (standalone previews) that nothing references. Assets referenced as a
- * segment's latest audio or a project's latest export are never deleted.
+ * Delete assets that nothing references: expired standalone previews, and project audio/exports that are no
+ * longer a segment's latest audio or a project's latest export once the grace period has passed (the old take
+ * of a re-rendered segment, a replaced export). Referenced assets are never deleted.
  */
 export async function cleanupExpiredAssets(prisma: PrismaClient, storage: StorageDriver): Promise<number> {
-  const expired = await prisma.audioAsset.findMany({ where: { expiresAt: { lt: new Date() } }, take: 500 });
+  const now = Date.now();
+  const where = {
+    OR: [
+      { expiresAt: { lt: new Date(now) } },
+      {
+        expiresAt: null,
+        kind: { in: ['segment', 'export'] },
+        createdAt: { lt: new Date(now - ORPHAN_GRACE_MS) },
+      },
+    ],
+  };
   let removed = 0;
-  for (const a of expired) {
-    const [seg, proj] = await Promise.all([
-      prisma.projectSegment.count({ where: { latestAudioAssetId: a.id } }),
-      prisma.project.count({ where: { latestExportAssetId: a.id } }),
-    ]);
-    if (seg || proj) {
-      await prisma.audioAsset.update({ where: { id: a.id }, data: { expiresAt: null } });
-      continue;
+  let cursor: string | undefined;
+  // Page through every candidate: referenced old assets match too and must not starve the ones behind them.
+  for (;;) {
+    const page = await prisma.audioAsset.findMany({
+      where: cursor ? { AND: [where, { id: { gt: cursor } }] } : where,
+      orderBy: { id: 'asc' },
+      take: PAGE,
+    });
+    if (!page.length) break;
+    cursor = page[page.length - 1]!.id;
+    for (const a of page) {
+      const [seg, proj] = await Promise.all([
+        prisma.projectSegment.count({ where: { latestAudioAssetId: a.id } }),
+        prisma.project.count({ where: { latestExportAssetId: a.id } }),
+      ]);
+      if (seg || proj) {
+        if (a.expiresAt) await prisma.audioAsset.update({ where: { id: a.id }, data: { expiresAt: null } });
+        continue;
+      }
+      await storage.delete(a.storageKey);
+      await prisma.renderJob.updateMany({ where: { resultAssetId: a.id }, data: { resultAssetId: null } });
+      await prisma.audioAsset.delete({ where: { id: a.id } });
+      removed++;
     }
-    await storage.delete(a.storageKey);
-    await prisma.renderJob.updateMany({ where: { resultAssetId: a.id }, data: { resultAssetId: null } });
-    await prisma.audioAsset.delete({ where: { id: a.id } });
-    removed++;
+    if (page.length < PAGE) break;
   }
   return removed;
 }

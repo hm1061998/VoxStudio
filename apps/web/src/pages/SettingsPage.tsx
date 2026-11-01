@@ -157,6 +157,11 @@ export function SettingsPage() {
   );
 }
 
+function formatBytes(n: number): string {
+  if (n >= 1024 ** 3) return `${(n / 1024 ** 3).toFixed(1)} GB`;
+  return `${Math.max(0, Math.round(n / 1024 ** 2))} MB`;
+}
+
 function PlanSection() {
   const { t, lang } = useI18n();
   const plan = useQuery({ queryKey: ['plan'], queryFn: () => api<PlanDto>('/me/plan') });
@@ -172,6 +177,9 @@ function PlanSection() {
         <li>{t('plan.priority', { n: p.priority })}</li>
         <li>{t('plan.pending', { n: p.pendingJobs, max: p.maxPendingJobs })}</li>
         <li>
+          {t('plan.storage', { used: formatBytes(p.storageUsedBytes), limit: formatBytes(p.storageBytes) })}
+        </li>
+        <li>
           {p.aiMonthlyChars === null
             ? t('plan.aiUnlimited', { used: p.aiUsedChars.toLocaleString(lang) })
             : t('plan.ai', {
@@ -180,6 +188,13 @@ function PlanSection() {
               })}
         </li>
       </ul>
+      <meter
+        className="mt-2 h-2 w-full"
+        min={0}
+        max={p.storageBytes}
+        value={Math.min(p.storageUsedBytes, p.storageBytes)}
+        aria-label={t('plan.storageMeter')}
+      />
       {p.aiMonthlyChars !== null && (
         <meter
           className="mt-2 h-2 w-full"

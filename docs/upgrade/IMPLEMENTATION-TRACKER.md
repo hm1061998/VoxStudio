@@ -196,3 +196,7 @@ Owner feedback after listening: the AI voice is good and smooth; users must be a
 | UP-052 | Lockout, password policy, session limits, Origin/CSRF, headers, first-admin bootstrap, operator CLI    | COMPLETED   | `qa-security.mjs` 31/31; `password-policy.test.ts`                    |
 | UP-053 | Accessibility pass (axe-core) on login, studio, admin                                                  | COMPLETED   | Playwright axe test                                                   |
 | UP-054 | 2FA, email verification, mailed reset, penetration test, Docker build                                  | NOT_STARTED | out of scope or needs infrastructure; see `10-SECURITY-AND-ACCESS.md` |
+
+| ID     | Task                                                                                      | Status    | Evidence                                                               |
+| ------ | ----------------------------------------------------------------------------------------- | --------- | ---------------------------------------------------------------------- |
+| UP-055 | Per-plan stored-audio allowance, orphaned segment/export cleanup, usage meter in Settings | COMPLETED | `storage.test.ts` (2 tests); not measured on a long-running deployment |

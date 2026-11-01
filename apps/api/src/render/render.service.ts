@@ -47,9 +47,10 @@ export class RenderService {
     const workspaceId = this.access.defaultWorkspace(user);
     const { plan, limits } = await this.planLimits(workspaceId);
     const month = usageMonth();
-    const [agg, pending] = await Promise.all([
+    const [agg, pending, stored] = await Promise.all([
       this.prisma.aiUsage.aggregate({ where: { workspaceId, month }, _sum: { chars: true } }),
       this.prisma.renderJob.count({ where: { workspaceId, status: { in: ['queued', 'running'] } } }),
+      this.prisma.audioAsset.aggregate({ where: { workspaceId }, _sum: { fileSizeBytes: true } }),
     ]);
     return {
       workspaceId,
@@ -59,6 +60,8 @@ export class RenderService {
       pendingJobs: pending,
       aiMonthlyChars: limits.aiMonthlyChars,
       aiUsedChars: agg._sum.chars ?? 0,
+      storageBytes: limits.storageBytes,
+      storageUsedBytes: stored._sum.fileSizeBytes ?? 0,
       month,
     };
   }
@@ -92,6 +95,21 @@ export class RenderService {
         ErrorCodes.QUOTA_EXCEEDED,
         'This would exceed the monthly allowance for AI voices on your plan. Use a non-AI voice or upgrade.',
         { month, used, needed, limit: limits.aiMonthlyChars },
+      );
+  }
+
+  /** New audio is refused once the workspace has used its stored-audio allowance (cached results still play). */
+  private async enforceStorageQuota(workspaceId: string, limits: PlanLimits): Promise<void> {
+    const agg = await this.prisma.audioAsset.aggregate({
+      where: { workspaceId },
+      _sum: { fileSizeBytes: true },
+    });
+    const used = agg._sum.fileSizeBytes ?? 0;
+    if (used >= limits.storageBytes)
+      throw new VoxError(
+        ErrorCodes.STORAGE_QUOTA_EXCEEDED,
+        'Your stored audio has reached the limit of your plan. Delete old projects or exports, or ask an administrator for a larger plan.',
+        { used, limit: limits.storageBytes },
       );
   }
 
@@ -174,6 +192,7 @@ export class RenderService {
     }
     const { limits } = await this.planLimits(workspaceId);
     await this.enforceQueueLimit(workspaceId, limits);
+    await this.enforceStorageQuota(workspaceId, limits);
     await this.enforceAiQuota(workspaceId, data.plan, limits);
     const job = await this.prisma.$transaction(async (tx) => {
       const j = await tx.renderJob.create({

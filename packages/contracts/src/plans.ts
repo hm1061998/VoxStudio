@@ -16,6 +16,9 @@ export interface PlanDto {
   /** null = unlimited */
   aiMonthlyChars: number | null;
   aiUsedChars: number;
+  /** Bytes of stored audio allowed / currently stored for the workspace. */
+  storageBytes: number;
+  storageUsedBytes: number;
   /** 'YYYY-MM' (UTC) the usage refers to */
   month: string;
 }
