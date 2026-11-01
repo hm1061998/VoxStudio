@@ -2,7 +2,7 @@ import { useMemo, useRef, useState } from 'react';
 import { SETTING_KEYS, type RenderJobDto } from '@voxstudio/contracts';
 import { api, assetUrl, describeError } from '../api/client';
 import { useVoice, useVoices, waitForJob } from '../api/hooks';
-import { Empty, ErrorNote, Spinner, SupportBadge, TierBadge } from '../components/ui';
+import { Empty, ErrorNote, Spinner, SupportBadge, TierBadge, Waiting } from '../components/ui';
 import {
   AiBadge,
   DatasetPanel,
@@ -200,6 +200,7 @@ function VoiceDetail({ id }: { id: string }) {
           >
             {state === 'busy' ? t('voices.speaking') : t('voices.speak')}
           </button>
+          {state === 'busy' && <Waiting label={t('voices.speaking')} />}
           {audioId && (
             <audio
               ref={audio}

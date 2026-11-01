@@ -287,6 +287,8 @@ export const en = {
   'player.prev': 'Previous paragraph',
   'player.next': 'Next paragraph',
   'player.empty': 'No audio yet — press “Listen” on a paragraph or create the full audio.',
+  'wait.long':
+    'Still working: the queue may be busy or the AI voice is slow. You can keep editing; finished files are also listed under Exported files.',
   'player.synthesizing': 'Creating audio',
   'player.loadingAudio': 'Loading audio',
   'player.stale': '◐ This paragraph changed since you listened',

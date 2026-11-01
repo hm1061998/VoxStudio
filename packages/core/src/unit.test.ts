@@ -113,6 +113,22 @@ describe('capabilities and settings', () => {
     expect(r.settings.rate).toBe(1.2);
     expect(r.settings.variant).toBe('default');
   });
+  it('carries speed and pitch of a style over to the audio processing for a voice without those controls', () => {
+    const ai = {
+      ...caps,
+      rate: { ...caps.rate, support: 'unsupported' as const },
+      pitch: { ...caps.pitch, support: 'unsupported' as const },
+      pitchRange: { ...caps.pitchRange, support: 'unsupported' as const },
+      wordGapMs: { ...caps.wordGapMs, support: 'unsupported' as const },
+    };
+    const r = applyPreset(defaults, { rate: 0.75, pitch: 35, pitchRange: 40, wordGapMs: 40 }, ai);
+    expect(r.settings.tempo).toBe(0.75);
+    expect(r.settings.pitchShiftSemitones).toBe(-3);
+    expect(r.changes.map((c) => c.key).sort()).toEqual(['pitchShiftSemitones', 'tempo']);
+    expect(r.skipped.sort()).toEqual(['pitchRange', 'wordGapMs']);
+    // A style that sets the audio-processing value itself keeps it.
+    expect(applyPreset(defaults, { rate: 0.75, tempo: 1.1 }, ai).settings.tempo).toBe(1.1);
+  });
   it('validates output profiles', () => {
     expect(
       outputProfileSchema.safeParse({ format: 'mp3', sampleRate: 44100, channels: 2, bitrateKbps: 192 })

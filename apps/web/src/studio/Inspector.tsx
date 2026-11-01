@@ -78,8 +78,24 @@ export function presetDiff(settings: SynthesisSettings, preset: PresetDto, caps:
   const next = { ...settings } as Record<string, unknown>;
   const changes: { key: SettingKey; label: string; from: unknown; to: unknown }[] = [];
   const skipped: string[] = [];
+  // Same translation as the server (presetForVoice): a voice without speed/pitch controls gets the audio-processing equivalent.
+  const params: Record<string, unknown> = { ...preset.parameters };
+  const p = preset.parameters;
+  if (caps.rate.support === 'unsupported' && caps.tempo.support !== 'unsupported' && p.rate !== undefined) {
+    if (p.tempo === undefined) params.tempo = p.rate;
+    delete params.rate;
+  }
+  if (
+    caps.pitch.support === 'unsupported' &&
+    caps.pitchShiftSemitones.support !== 'unsupported' &&
+    p.pitch !== undefined
+  ) {
+    if (p.pitchShiftSemitones === undefined)
+      params.pitchShiftSemitones = Math.round(((p.pitch - 50) / 5) * 2) / 2;
+    delete params.pitch;
+  }
   for (const key of SETTING_KEYS) {
-    const to = preset.parameters[key];
+    const to = params[key];
     if (to === undefined) continue;
     const cap = caps[key];
     const ok =

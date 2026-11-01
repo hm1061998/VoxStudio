@@ -66,7 +66,7 @@ export async function createHarness(overrides: Record<string, string> = {}): Pro
   if (!/_test(\?|$)/.test(new URL(url).pathname + (new URL(url).search ? '?' : '')))
     throw new Error('Refusing to truncate a non-test database');
   await prisma.$executeRawUnsafe(
-    'TRUNCATE users, sessions, password_reset_tokens, workspaces, workspace_members, projects, project_segments, voice_presets, pronunciation_entries, render_jobs, audio_assets, project_versions, audit_events, orders, payment_events, worker_heartbeats, tts_voices, tts_engines CASCADE',
+    'TRUNCATE users, sessions, password_reset_tokens, workspaces, workspace_members, projects, project_segments, voice_presets, pronunciation_entries, render_jobs, audio_assets, project_versions, audit_events, orders, payment_events, auth_throttles, worker_heartbeats, tts_voices, tts_engines CASCADE',
   );
   const app = await createApp(config);
   const worker = new RenderWorker({ config, prisma, pollMs: 200, logger: () => undefined });

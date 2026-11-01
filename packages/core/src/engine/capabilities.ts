@@ -264,14 +264,43 @@ export interface PresetChange {
 }
 
 /**
+ * A style written for engine controls (rate, base pitch) means nothing to a voice that has none, such as the AI
+ * voices. For those, speed becomes the time-stretch and pitch (0–100, 50 = neutral) becomes a pitch shift of
+ * 1 semitone per 5 points, unless the style sets the audio-processing value itself. Range and word gap have no
+ * equivalent and stay skipped.
+ */
+export function presetForVoice(preset: PartialSettings, caps: VoiceCapabilities): PartialSettings {
+  const out: PartialSettings = { ...preset };
+  if (
+    caps.rate.support === 'unsupported' &&
+    caps.tempo.support !== 'unsupported' &&
+    preset.rate !== undefined
+  ) {
+    if (preset.tempo === undefined) out.tempo = preset.rate;
+    delete out.rate;
+  }
+  if (
+    caps.pitch.support === 'unsupported' &&
+    caps.pitchShiftSemitones.support !== 'unsupported' &&
+    preset.pitch !== undefined
+  ) {
+    if (preset.pitchShiftSemitones === undefined)
+      out.pitchShiftSemitones = Math.round(((preset.pitch - 50) / 5) * 2) / 2;
+    delete out.pitch;
+  }
+  return out;
+}
+
+/**
  * Apply a preset (partial settings) to settings. Returns the result plus the list of values that
  * change, so the UI can show it before applying. Parameters the voice cannot honour are reported, not applied.
  */
 export function applyPreset(
   settings: SynthesisSettings,
-  preset: PartialSettings,
+  presetIn: PartialSettings,
   caps: VoiceCapabilities,
 ): { settings: SynthesisSettings; changes: PresetChange[]; skipped: (keyof SynthesisSettings)[] } {
+  const preset = presetForVoice(presetIn, caps);
   const next: SynthesisSettings = { ...settings };
   const changes: PresetChange[] = [];
   const skipped: (keyof SynthesisSettings)[] = [];

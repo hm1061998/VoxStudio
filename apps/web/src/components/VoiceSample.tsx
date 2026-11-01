@@ -3,7 +3,7 @@ import type { RenderJobDto } from '@voxstudio/contracts';
 import { api, assetUrl, describeError } from '../api/client';
 import { waitForJob } from '../api/hooks';
 import { useI18n } from '../i18n';
-import { ErrorNote } from './ui';
+import { ErrorNote, Waiting } from './ui';
 
 /**
  * Plays a real sample of a voice: the server synthesizes the sample text with that voice and engine
@@ -61,6 +61,7 @@ export function VoiceSample({
           />
         )}
       </div>
+      {state === 'busy' && <Waiting label={t('insp.sampling')} />}
       {error && <ErrorNote error={error} />}
     </div>
   );

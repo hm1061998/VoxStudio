@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
 import { assetUrl } from '../api/client';
-import { ErrorNote, Spinner, fmtDate, fmtMs } from '../components/ui';
+import { ErrorNote, Spinner, Waiting, fmtDate, fmtMs } from '../components/ui';
 import { translateWarning, useI18n } from '../i18n';
 import { fingerprint, useStudio } from './store';
 
@@ -148,7 +148,7 @@ export function Player() {
         </span>
         <span className="truncate text-xs text-muted">{label}</span>
         <span role="status" className="text-xs">
-          {player.status === 'loading' && <Spinner label={t('player.synthesizing')} />}
+          {player.status === 'loading' && <Waiting label={t('player.synthesizing')} />}
           {state === 'loading' && player.status !== 'loading' && <Spinner label={t('player.loadingAudio')} />}
           {stale && <span className="badge bg-warn/15 text-warn">{t('player.stale')}</span>}
         </span>

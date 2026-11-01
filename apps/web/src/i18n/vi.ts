@@ -289,6 +289,8 @@ export const vi: Record<MessageKey, string> = {
   'player.prev': 'Đoạn trước',
   'player.next': 'Đoạn sau',
   'player.empty': 'Chưa có âm thanh — bấm “Nghe thử” ở một đoạn hoặc tạo âm thanh đầy đủ.',
+  'wait.long':
+    'Vẫn đang xử lý: hàng đợi có thể đang bận hoặc giọng AI chạy chậm. Bạn cứ tiếp tục chỉnh sửa; tệp xong cũng nằm trong mục Tệp đã xuất.',
   'player.synthesizing': 'Đang tạo âm thanh',
   'player.loadingAudio': 'Đang tải âm thanh',
   'player.stale': '◐ Đoạn này đã sửa sau khi bạn nghe',

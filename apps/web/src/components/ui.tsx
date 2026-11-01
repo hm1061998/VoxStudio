@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ReactNode } from 'react';
+import { useEffect, useRef, useState, type ReactNode } from 'react';
 import type { JobStatus, SegmentAudioState, SupportTier } from '@voxstudio/contracts';
 import { useI18n } from '../i18n';
 
@@ -14,6 +14,33 @@ export function Spinner({ label }: { label?: string }) {
       />
       <span className="text-xs">{label ?? t('common.loading')}…</span>
     </span>
+  );
+}
+
+/**
+ * Shown while a job is being made: moving bars, the seconds so far, and after a few seconds an honest note that the
+ * wait is the queue or the AI model, with a way to leave and come back (the file lands in the exported-files list).
+ */
+export function Waiting({ label, className = '' }: { label: string; className?: string }) {
+  const { t } = useI18n();
+  const [secs, setSecs] = useState(0);
+  useEffect(() => {
+    const started = Date.now();
+    const id = setInterval(() => setSecs(Math.floor((Date.now() - started) / 1000)), 1000);
+    return () => clearInterval(id);
+  }, []);
+  return (
+    <div role="status" className={`flex flex-wrap items-center gap-x-3 gap-y-1 text-muted ${className}`}>
+      <span aria-hidden className="wave">
+        {[0, 1, 2, 3, 4].map((i) => (
+          <i key={i} style={{ animationDelay: `${i * 0.12}s` }} />
+        ))}
+      </span>
+      <span className="text-xs">
+        {label.replace(/…$/, '')}… {secs > 0 && <span className="font-mono">{secs}s</span>}
+      </span>
+      {secs >= 8 && <span className="text-xs text-dim">{t('wait.long')}</span>}
+    </div>
   );
 }
 
