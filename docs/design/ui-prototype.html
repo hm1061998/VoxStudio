@@ -1,0 +1,488 @@
+<title>VoxStudio Prototype</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<style>
+/* Layout concept: a calm studio. Left rail for places, one working surface, one right panel for the choice that matters (voice).
+   Teal is the only brand hue; amber and red are reserved for warnings. Numbers use the mono face. */
+:root {
+  --bg: #f4f7f8;
+  --surface: #ffffff;
+  --surface-2: #eaf0f2;
+  --line: #d5dfe3;
+  --fg: #12262d;
+  --muted: #4d6670;
+  --dim: #6b838d;
+  --accent: #0b7a83;
+  --accent-strong: #075c64;
+  --accent-soft: #d7eef0;
+  --on-accent: #ffffff;
+  --ok: #1d7a46;
+  --ok-soft: #dcf1e5;
+  --warn: #8a5a00;
+  --warn-soft: #fbefcf;
+  --bad: #b3261e;
+  --bad-soft: #fadedb;
+  --shadow: 0 1px 2px rgba(18, 38, 45, .06), 0 4px 14px rgba(18, 38, 45, .05);
+  --font: 'Be Vietnam Pro', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --mono: 'JetBrains Mono', ui-monospace, 'Cascadia Mono', Consolas, monospace;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0e1a1f; --surface: #15252c; --surface-2: #1c313a; --line: #2b434d; --fg: #e6f0f2; --muted: #a9bfc6; --dim: #8aa2ab;
+    --accent: #4fc3cc; --accent-strong: #7fd8df; --accent-soft: #17383d; --on-accent: #06242a;
+    --ok: #6fd39a; --ok-soft: #173a29; --warn: #f0c566; --warn-soft: #3b2f10; --bad: #ff9a92; --bad-soft: #451d1a;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0e1a1f; --surface: #15252c; --surface-2: #1c313a; --line: #2b434d; --fg: #e6f0f2; --muted: #a9bfc6; --dim: #8aa2ab;
+  --accent: #4fc3cc; --accent-strong: #7fd8df; --accent-soft: #17383d; --on-accent: #06242a;
+  --ok: #6fd39a; --ok-soft: #173a29; --warn: #f0c566; --warn-soft: #3b2f10; --bad: #ff9a92; --bad-soft: #451d1a;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .3), 0 4px 14px rgba(0, 0, 0, .25);
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--fg); font-family: var(--font); font-size: 15px; line-height: 1.5; padding-left: max(0px, env(safe-area-inset-left, 0px)); padding-right: max(0px, env(safe-area-inset-right, 0px)); }
+h1, h2, h3 { margin: 0; font-weight: 600; text-wrap: balance; line-height: 1.25; }
+h1 { font-size: 1.6rem; } h2 { font-size: 1.15rem; } h3 { font-size: 1rem; }
+p { margin: 0; }
+button, input, select, textarea { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; border-radius: 6px; }
+.mono { font-family: var(--mono); font-variant-numeric: tabular-nums; }
+.muted { color: var(--muted); } .dim { color: var(--dim); }
+.sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* shell */
+.app { display: grid; grid-template-columns: 236px minmax(0, 1fr); min-height: 100vh; }
+.rail { background: var(--surface); border-right: 1px solid var(--line); padding: 20px 14px; display: flex; flex-direction: column; gap: 22px; position: sticky; top: 0; height: 100vh; }
+.brand { display: flex; align-items: center; gap: 10px; font-weight: 700; font-size: 1.1rem; padding: 0 8px; }
+.brand-mark { width: 30px; height: 30px; border-radius: 9px; background: var(--accent); display: grid; place-items: center; }
+.brand-mark svg { width: 18px; height: 18px; }
+.nav { display: flex; flex-direction: column; gap: 4px; }
+.nav button { display: flex; align-items: center; gap: 12px; width: 100%; text-align: left; background: none; border: 0; padding: 10px 12px; border-radius: 10px; color: var(--muted); cursor: pointer; font-weight: 500; }
+.nav button svg { width: 20px; height: 20px; flex: none; }
+.nav button:hover { background: var(--surface-2); color: var(--fg); }
+.nav button[aria-current="page"] { background: var(--accent-soft); color: var(--accent-strong); font-weight: 600; }
+.nav .sep { height: 1px; background: var(--line); margin: 8px 6px; }
+.nav .admin-only { display: none; }
+body[data-role="admin"] .nav .admin-only { display: flex; }
+.rail-foot { margin-top: auto; display: flex; flex-direction: column; gap: 12px; }
+.meter { height: 8px; border-radius: 99px; background: var(--surface-2); overflow: hidden; }
+.meter > i { display: block; height: 100%; background: var(--accent); border-radius: 99px; }
+.meter.warn > i { background: var(--warn); } .meter.bad > i { background: var(--bad); }
+.who { display: flex; align-items: center; gap: 10px; padding: 8px; border-radius: 10px; background: var(--surface-2); }
+.avatar { width: 34px; height: 34px; border-radius: 50%; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; font-weight: 700; flex: none; }
+main { padding: 28px clamp(16px, 3vw, 40px) 60px; min-width: 0; max-width: 1280px; width: 100%; margin: 0 auto; }
+.screen { display: none; flex-direction: column; gap: 22px; }
+.screen.on { display: flex; }
+.page-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+.page-head p { color: var(--muted); margin-top: 4px; }
+
+/* parts */
+.card { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 18px; box-shadow: var(--shadow); min-width: 0; }
+.grid { display: grid; gap: 14px; }
+.cols-3 { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); }
+.cols-4 { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+.row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 8px; min-height: 42px; padding: 0 16px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; }
+.btn:hover { border-color: var(--accent); }
+.btn.primary { background: var(--accent); border-color: var(--accent); color: var(--on-accent); }
+.btn.primary:hover { background: var(--accent-strong); }
+.btn.sm { min-height: 34px; padding: 0 12px; font-size: .9rem; }
+.btn.ghost { background: none; border-color: transparent; color: var(--muted); }
+.btn svg { width: 18px; height: 18px; }
+.chip { display: inline-flex; align-items: center; gap: 6px; padding: 5px 11px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font-size: .88rem; cursor: pointer; }
+.chip[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong); font-weight: 600; }
+.badge { display: inline-flex; align-items: center; gap: 5px; padding: 2px 9px; border-radius: 99px; font-size: .78rem; font-weight: 600; background: var(--surface-2); color: var(--muted); }
+.badge.ai { background: var(--accent-soft); color: var(--accent-strong); }
+.badge.ok { background: var(--ok-soft); color: var(--ok); }
+.badge.warn { background: var(--warn-soft); color: var(--warn); }
+.badge.bad { background: var(--bad-soft); color: var(--bad); }
+label.field { display: flex; flex-direction: column; gap: 6px; font-weight: 600; font-size: .9rem; }
+input[type=text], input[type=email], input[type=password], select, textarea { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; min-height: 42px; width: 100%; font-weight: 400; }
+textarea { resize: vertical; min-height: 96px; line-height: 1.6; }
+input[type=range] { width: 100%; accent-color: var(--accent); }
+.note { padding: 11px 14px; border-radius: 10px; background: var(--warn-soft); color: var(--warn); font-size: .92rem; }
+.note.info { background: var(--accent-soft); color: var(--accent-strong); }
+.note.bad { background: var(--bad-soft); color: var(--bad); }
+table { width: 100%; border-collapse: collapse; font-size: .92rem; }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: .8rem; text-transform: uppercase; letter-spacing: .05em; }
+th, td { padding: 10px 12px; border-bottom: 1px solid var(--line); vertical-align: middle; }
+.tablewrap { overflow-x: auto; }
+
+/* login */
+#login { align-items: center; padding-top: 6vh; }
+.login-card { width: min(440px, 100%); display: flex; flex-direction: column; gap: 16px; padding: 28px; }
+.tabs { display: flex; gap: 4px; background: var(--surface-2); padding: 4px; border-radius: 11px; }
+.tabs button { flex: 1; min-height: 38px; border: 0; background: none; border-radius: 8px; font-weight: 600; color: var(--muted); cursor: pointer; }
+.tabs button[aria-selected="true"] { background: var(--surface); color: var(--fg); box-shadow: var(--shadow); }
+
+/* home */
+.quick { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 18px; }
+.region-pick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.region-pick button { padding: 10px 6px; border-radius: 10px; border: 1px solid var(--line); background: var(--surface); cursor: pointer; font-weight: 600; }
+.region-pick button[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--accent-strong); }
+.project { display: flex; flex-direction: column; gap: 10px; cursor: pointer; text-align: left; }
+.project:hover { border-color: var(--accent); }
+.wave { display: flex; align-items: center; gap: 2px; height: 34px; }
+.wave i { flex: 1; min-width: 2px; background: var(--accent); opacity: .55; border-radius: 2px; }
+
+/* studio */
+.studio { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 18px; align-items: start; }
+.seg { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 12px; align-items: start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--surface); }
+.seg[aria-current="true"] { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); }
+.seg .num { font-family: var(--mono); color: var(--dim); font-size: .85rem; padding-top: 3px; min-width: 22px; }
+.seg textarea { min-height: 64px; border-color: transparent; padding: 4px 6px; background: transparent; }
+.seg textarea:focus { background: var(--surface-2); }
+.play { width: 38px; height: 38px; border-radius: 50%; border: 0; background: var(--accent); color: var(--on-accent); display: grid; place-items: center; cursor: pointer; flex: none; }
+.play svg { width: 16px; height: 16px; }
+.voice-opt { display: grid; grid-template-columns: auto 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; background: var(--surface); }
+.voice-opt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+.voice-opt input { accent-color: var(--accent); width: 18px; height: 18px; }
+.player { position: sticky; bottom: 0; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 12px 16px; border-radius: 14px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); }
+.player .wave { height: 40px; }
+
+/* voices */
+.voice-card { display: flex; flex-direction: column; gap: 12px; }
+.voice-card .top { display: flex; justify-content: space-between; gap: 10px; align-items: flex-start; }
+
+/* admin */
+.stat { display: flex; flex-direction: column; gap: 4px; }
+.stat b { font-size: 1.7rem; font-family: var(--mono); font-weight: 500; font-variant-numeric: tabular-nums; }
+.stat span { color: var(--muted); font-size: .88rem; }
+.admin-tabs { display: flex; gap: 4px; overflow-x: auto; border-bottom: 1px solid var(--line); }
+.admin-tabs button { background: none; border: 0; padding: 10px 14px; cursor: pointer; font-weight: 600; color: var(--muted); border-bottom: 3px solid transparent; white-space: nowrap; }
+.admin-tabs button[aria-selected="true"] { color: var(--accent-strong); border-bottom-color: var(--accent); }
+.panel { display: none; flex-direction: column; gap: 16px; } .panel.on { display: flex; }
+
+/* toast + proto bar */
+.toast { position: fixed; left: 50%; bottom: calc(24px + env(safe-area-inset-bottom, 0px)); transform: translateX(-50%); background: var(--fg); color: var(--bg); padding: 11px 18px; border-radius: 10px; font-weight: 600; opacity: 0; pointer-events: none; transition: opacity .2s; z-index: 50; max-width: calc(100% - 32px); }
+.toast.on { opacity: 1; }
+.proto { position: fixed; right: 14px; top: calc(10px + env(safe-area-inset-top, 0px)); z-index: 40; display: flex; gap: 6px; background: var(--surface); border: 1px solid var(--line); border-radius: 12px; padding: 5px; box-shadow: var(--shadow); }
+.proto button { border: 0; background: none; padding: 6px 10px; border-radius: 8px; cursor: pointer; font-size: .82rem; font-weight: 600; color: var(--muted); }
+.proto button[aria-pressed="true"] { background: var(--accent-soft); color: var(--accent-strong); }
+dialog { border: 1px solid var(--line); border-radius: 16px; background: var(--surface); color: var(--fg); padding: 24px; width: min(520px, calc(100% - 32px)); box-shadow: 0 20px 60px rgba(0,0,0,.3); }
+dialog::backdrop { background: rgba(8, 20, 24, .55); }
+.fmt { display: grid; grid-template-columns: auto 1fr; gap: 12px; padding: 12px; border: 1px solid var(--line); border-radius: 10px; cursor: pointer; }
+.fmt:has(input:checked) { border-color: var(--accent); background: var(--accent-soft); }
+
+@media (max-width: 980px) {
+  .studio, .quick { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 760px) {
+  .app { grid-template-columns: minmax(0, 1fr); }
+  .rail { position: fixed; bottom: 0; left: 0; right: 0; top: auto; height: auto; flex-direction: row; padding: 6px 8px calc(6px + env(safe-area-inset-bottom, 0px)); z-index: 30; border-right: 0; border-top: 1px solid var(--line); }
+  .rail .brand, .rail .rail-foot { display: none; }
+  .nav { flex-direction: row; width: 100%; justify-content: space-around; }
+  .nav .sep { display: none; }
+  .nav button { flex-direction: column; gap: 2px; font-size: .72rem; padding: 6px 4px; text-align: center; justify-content: center; }
+  body[data-role="admin"] .nav .admin-only { display: flex; }
+  main { padding-bottom: 110px; padding-top: 56px; }
+  .proto { right: 8px; }
+  .player { bottom: 70px; }
+}
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+
+<div class="proto" role="group" aria-label="Điều khiển bản mẫu">
+  <button id="roleUser" aria-pressed="true">Người dùng</button>
+  <button id="roleAdmin" aria-pressed="false">Quản trị viên</button>
+  <button id="themeBtn" aria-label="Đổi sáng/tối">Sáng/Tối</button>
+</div>
+
+<div class="app">
+  <aside class="rail" id="rail" aria-label="Điều hướng chính">
+    <div class="brand"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></span>VoxStudio</div>
+    <nav class="nav" aria-label="Các mục">
+      <button data-go="home" aria-current="page"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg>Trang chủ</button>
+      <button data-go="studio"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>Soạn giọng đọc</button>
+      <button data-go="voices"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="2" width="6" height="12" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v4"/></svg>Thư viện giọng</button>
+      <button data-go="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg>Tài khoản &amp; gói</button>
+      <div class="sep admin-only" role="separator"></div>
+      <button data-go="admin" class="admin-only"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6z"/></svg>Quản trị</button>
+    </nav>
+    <div class="rail-foot">
+      <div>
+        <div class="row" style="justify-content:space-between;font-size:.85rem"><span class="muted">Dung lượng đã lưu</span><span class="mono">96 / 300 MB</span></div>
+        <div class="meter" style="margin-top:6px" role="img" aria-label="Đã dùng 32% dung lượng"><i style="width:32%"></i></div>
+      </div>
+      <div class="who"><span class="avatar">M</span><div style="min-width:0"><div style="font-weight:600">Minh</div><div class="dim" style="font-size:.8rem" id="whoRole">Gói Miễn phí</div></div></div>
+      <button class="btn sm" data-go="login">Đăng xuất</button>
+    </div>
+  </aside>
+
+  <main>
+    <!-- LOGIN -->
+    <section class="screen" id="login" aria-labelledby="loginH">
+      <div class="login-card card">
+        <div class="brand" style="padding:0"><span class="brand-mark"><svg viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.4" stroke-linecap="round"><path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4"/></svg></span>VoxStudio</div>
+        <div><h1 id="loginH">Biến văn bản thành giọng đọc tiếng Việt</h1><p class="muted" style="margin-top:6px">Giọng AI chạy ngay trên máy chủ của bạn. Văn bản không gửi ra dịch vụ bên ngoài.</p></div>
+        <div class="tabs" role="tablist" aria-label="Đăng nhập hoặc đăng ký">
+          <button role="tab" aria-selected="true" id="tabIn">Đăng nhập</button>
+          <button role="tab" aria-selected="false" id="tabUp">Tạo tài khoản</button>
+        </div>
+        <label class="field" id="nameField" hidden>Tên hiển thị<input type="text" id="nameIn" autocomplete="name" value=""></label>
+        <label class="field">Email<input type="email" id="emailIn" autocomplete="email" placeholder="ban@vi-du.vn"></label>
+        <label class="field">Mật khẩu<input type="password" id="pwIn" autocomplete="current-password" placeholder="Ít nhất 10 ký tự"></label>
+        <p class="dim" style="font-size:.85rem" id="pwHint" hidden>Dùng cụm từ dài, dễ nhớ. Tránh mật khẩu phổ biến hoặc chứa email của bạn.</p>
+        <button class="btn primary" id="loginGo">Đăng nhập</button>
+      </div>
+    </section>
+
+    <!-- HOME -->
+    <section class="screen on" id="home" aria-labelledby="homeH">
+      <div class="page-head"><div><h1 id="homeH">Chào Minh, hôm nay đọc gì?</h1><p>Dán văn bản, chọn giọng, nghe thử ngay. Hài lòng thì lưu thành dự án.</p></div></div>
+      <div class="quick">
+        <div class="card" style="display:flex;flex-direction:column;gap:14px">
+          <label class="field" for="quickText">Văn bản cần đọc<textarea id="quickText">Xin chào các bạn, đây là bản nghe thử giọng đọc tiếng Việt chạy trên máy chủ riêng của chúng tôi.</textarea></label>
+          <div class="row" style="justify-content:space-between"><span class="dim mono" style="font-size:.85rem" id="quickCount">96 / 1.000 ký tự</span>
+            <div class="row"><button class="btn" id="quickPlay"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Nghe thử</button><button class="btn primary" data-go="studio">Lưu thành dự án</button></div></div>
+        </div>
+        <div class="card" style="display:flex;flex-direction:column;gap:14px">
+          <h2>Chọn giọng</h2>
+          <div><div class="muted" style="font-size:.85rem;margin-bottom:6px;font-weight:600">Vùng miền</div>
+            <div class="region-pick" role="group" aria-label="Vùng miền"><button aria-pressed="true">Miền Bắc</button><button aria-pressed="false">Miền Trung</button><button aria-pressed="false">Miền Nam</button></div></div>
+          <div><div class="muted" style="font-size:.85rem;margin-bottom:6px;font-weight:600">Giới tính</div>
+            <div class="row" role="group" aria-label="Giới tính"><button class="chip" aria-pressed="true">Nữ</button><button class="chip" aria-pressed="false">Nam</button></div></div>
+          <div class="note info" style="font-size:.88rem">Giọng đang chọn: <b>Ngọc Huyền</b> · <span class="badge ai">AI</span></div>
+        </div>
+      </div>
+      <div class="page-head"><h2>Dự án gần đây</h2><button class="btn sm" data-go="studio">+ Dự án mới</button></div>
+      <div class="grid cols-3" id="projects"></div>
+      <p class="dim" style="font-size:.82rem">Dữ liệu trên màn hình này là ví dụ minh họa của bản mẫu, không phải dữ liệu thật.</p>
+    </section>
+
+    <!-- STUDIO -->
+    <section class="screen" id="studio" aria-labelledby="studioH">
+      <div class="page-head">
+        <div><h1 id="studioH">Bản tin buổi sáng</h1><p><span class="badge ok">Đã lưu</span> · 4 đoạn · khoảng 1 phút 20 giây</p></div>
+        <div class="row"><button class="btn" id="playAll"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>Nghe cả bài</button><button class="btn primary" id="openExport">Xuất file</button></div>
+      </div>
+      <div class="studio">
+        <div style="display:flex;flex-direction:column;gap:10px" id="segs"></div>
+        <aside class="card" style="display:flex;flex-direction:column;gap:16px" aria-label="Thiết lập giọng đọc">
+          <h2>Giọng đọc của đoạn 2</h2>
+          <div class="row" role="group" aria-label="Lọc giọng"><button class="chip" aria-pressed="true">Tất cả</button><button class="chip" aria-pressed="false">Bắc</button><button class="chip" aria-pressed="false">Trung</button><button class="chip" aria-pressed="false">Nam</button></div>
+          <div style="display:flex;flex-direction:column;gap:8px" id="voiceOpts"></div>
+          <label class="field">Tốc độ <span class="mono dim" id="spd">1,00×</span><input type="range" min="0.6" max="1.6" step="0.05" value="1" id="spdIn"></label>
+          <label class="field">Cao độ <span class="mono dim" id="pit">0</span><input type="range" min="-6" max="6" step="1" value="0" id="pitIn"></label>
+          <label class="field">Nghỉ sau đoạn <span class="mono dim" id="pau">400 ms</span><input type="range" min="0" max="2000" step="100" value="400" id="pauIn"></label>
+          <details><summary class="muted" style="cursor:pointer;font-weight:600">Chế độ nâng cao</summary><p class="dim" style="margin-top:8px;font-size:.88rem">Âm lượng, lọc tiếng, nén, bảng phát âm. Chỉ hiện khi bạn cần.</p></details>
+        </aside>
+      </div>
+      <div class="player" role="region" aria-label="Trình phát">
+        <button class="play" id="mainPlay" aria-label="Phát"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button>
+        <div class="wave" id="mainWave" aria-hidden="true"></div>
+        <span class="mono muted" id="mainTime">0:00 / 1:20</span>
+      </div>
+    </section>
+
+    <!-- VOICES -->
+    <section class="screen" id="voices" aria-labelledby="voicesH">
+      <div class="page-head"><div><h1 id="voicesH">Thư viện giọng</h1><p>Sáu giọng AI có sẵn, nghe thử trước khi dùng.</p></div></div>
+      <div class="row" role="group" aria-label="Lọc"><button class="chip" aria-pressed="true">Mọi vùng</button><button class="chip" aria-pressed="false">Bắc</button><button class="chip" aria-pressed="false">Trung</button><button class="chip" aria-pressed="false">Nam</button><span style="width:12px"></span><button class="chip" aria-pressed="true">Cả hai</button><button class="chip" aria-pressed="false">Nữ</button><button class="chip" aria-pressed="false">Nam</button></div>
+      <div class="grid cols-3" id="voiceGrid"></div>
+      <p class="dim" style="font-size:.82rem">Vùng miền và giới tính trong bản mẫu là minh họa; bản thật lấy từ dữ liệu của từng giọng trên máy chủ. Nút nghe thử trong bản mẫu không phát âm thanh.</p>
+    </section>
+
+    <!-- SETTINGS -->
+    <section class="screen" id="settings" aria-labelledby="setH">
+      <div class="page-head"><div><h1 id="setH">Tài khoản &amp; gói</h1><p>Mức bạn đã dùng và những gì gói của bạn bao gồm.</p></div></div>
+      <div class="grid cols-3">
+        <div class="card"><div class="row" style="justify-content:space-between"><h2>Gói Miễn phí</h2><span class="badge">Ưu tiên thường</span></div>
+          <div style="display:flex;flex-direction:column;gap:14px;margin-top:14px">
+            <div><div class="row" style="justify-content:space-between;font-size:.9rem"><span>Ký tự giọng AI tháng này</span><span class="mono">13.200 / 20.000</span></div><div class="meter" style="margin-top:6px"><i style="width:66%"></i></div></div>
+            <div><div class="row" style="justify-content:space-between;font-size:.9rem"><span>Dung lượng âm thanh đã lưu</span><span class="mono">96 / 300 MB</span></div><div class="meter" style="margin-top:6px"><i style="width:32%"></i></div></div>
+            <div><div class="row" style="justify-content:space-between;font-size:.9rem"><span>Việc đang chờ hoặc chạy</span><span class="mono">1 / 5</span></div><div class="meter" style="margin-top:6px"><i style="width:20%"></i></div></div>
+            <p class="dim" style="font-size:.85rem">Xuất WAV chất lượng cao (48 kHz, stereo, 24 bit) có ở gói Pro. MP3 và WAV tiêu chuẩn luôn dùng được. Quản trị viên đổi gói cho bạn.</p></div></div>
+        <div class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Hồ sơ</h2>
+          <label class="field">Tên hiển thị<input type="text" value="Minh"></label>
+          <label class="field">Email<input type="email" value="minh@vi-du.vn" disabled></label><button class="btn sm" style="align-self:flex-start">Lưu</button></div>
+        <div class="card" style="display:flex;flex-direction:column;gap:12px"><h2>Bảo mật</h2>
+          <label class="field">Mật khẩu hiện tại<input type="password"></label>
+          <label class="field">Mật khẩu mới<input type="password"></label>
+          <button class="btn sm" style="align-self:flex-start">Đổi mật khẩu</button>
+          <p class="dim" style="font-size:.85rem">Đổi mật khẩu sẽ đăng xuất mọi thiết bị khác. Đang có 2 phiên đăng nhập.</p></div>
+      </div>
+    </section>
+
+    <!-- ADMIN -->
+    <section class="screen" id="admin" aria-labelledby="adminH">
+      <div class="page-head"><div><h1 id="adminH">Quản trị</h1><p>Sức khỏe hệ thống, người dùng và nhật ký. Chỉ quản trị viên thấy trang này.</p></div></div>
+      <div class="note" role="alert"><b>Ổ đĩa đang đầy dần:</b> còn 17,4 GB trên 100 GB. Bản nháp cũ đang được dọn sớm hơn. Hãy giải phóng chỗ hoặc thêm ổ lớn hơn.</div>
+      <div class="admin-tabs" role="tablist" aria-label="Mục quản trị" id="adminTabs">
+        <button role="tab" aria-selected="true" data-p="pOv">Tổng quan</button><button role="tab" aria-selected="false" data-p="pUsers">Người dùng</button><button role="tab" aria-selected="false" data-p="pEng">Giọng &amp; dịch vụ</button><button role="tab" aria-selected="false" data-p="pJobs">Việc đang chạy</button><button role="tab" aria-selected="false" data-p="pAudit">Nhật ký</button>
+      </div>
+      <div class="panel on" id="pOv">
+        <div class="grid cols-4">
+          <div class="card stat"><b>1.284</b><span>Người dùng · 1.271 đang hoạt động</span></div>
+          <div class="card stat"><b style="color:var(--warn)">17,4 GB</b><span>Ổ đĩa còn trống / 100 GB</span><div class="meter warn"><i style="width:83%"></i></div></div>
+          <div class="card stat"><b>3</b><span>Việc đang chờ · 2 đang chạy</span></div>
+          <div class="card stat"><b style="color:var(--ok)">Bình thường</b><span>Dịch vụ giọng AI · 1 instance</span></div>
+        </div>
+        <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(300px,1fr))">
+          <div class="card"><h2 style="margin-bottom:10px">Dùng nhiều dung lượng nhất</h2>
+            <div class="tablewrap"><table><tbody><tr><td>Studio Hoa Sen <span class="badge">Business</span></td><td class="mono" style="text-align:right">8,2 GB</td></tr><tr><td>Nguyễn Văn An <span class="badge">Pro</span></td><td class="mono" style="text-align:right">3,6 GB</td></tr><tr><td>Podcast Sáng Sớm <span class="badge">Pro</span></td><td class="mono" style="text-align:right">2,9 GB</td></tr></tbody></table></div></div>
+          <div class="card"><h2 style="margin-bottom:10px">Bảo mật 24 giờ qua</h2>
+            <div class="tablewrap"><table><tbody><tr><td>Đăng nhập sai</td><td class="mono" style="text-align:right">37</td></tr><tr><td>Tài khoản đang bị khóa tạm</td><td class="mono" style="text-align:right">2</td></tr><tr><td>Phiên đang hoạt động</td><td class="mono" style="text-align:right">412</td></tr></tbody></table></div></div>
+        </div>
+      </div>
+      <div class="panel" id="pUsers"><div class="row"><input type="text" placeholder="Tìm theo tên hoặc email" aria-label="Tìm người dùng" style="max-width:320px"><select aria-label="Lọc vai trò" style="max-width:180px"><option>Mọi vai trò</option><option>Quản trị viên</option><option>Người dùng</option></select></div>
+        <div class="card tablewrap" style="padding:0"><table><thead><tr><th>Người dùng</th><th>Vai trò</th><th>Gói</th><th>Dung lượng</th><th>Trạng thái</th><th></th></tr></thead><tbody id="userRows"></tbody></table></div></div>
+      <div class="panel" id="pEng"><div class="card tablewrap" style="padding:0"><table><thead><tr><th>Dịch vụ</th><th>Loại</th><th>Trạng thái</th><th>Bật</th></tr></thead><tbody><tr><td>VieNeu-TTS v3 Turbo</td><td><span class="badge ai">AI</span></td><td><span class="badge ok">Đang chạy</span></td><td><input type="checkbox" checked aria-label="Bật VieNeu"></td></tr><tr><td>eSpeak NG</td><td><span class="badge">Quy tắc</span></td><td><span class="badge">Không bật trong cấu hình</span></td><td><input type="checkbox" disabled aria-label="eSpeak không bật"></td></tr></tbody></table></div></div>
+      <div class="panel" id="pJobs"><div class="card tablewrap" style="padding:0"><table><thead><tr><th>Việc</th><th>Gói</th><th>Trạng thái</th><th>Chờ</th></tr></thead><tbody><tr><td>Xuất “Bản tin buổi sáng”</td><td>Pro</td><td><span class="badge ai">Đang chạy</span></td><td class="mono">0 s</td></tr><tr><td>Nghe thử 3 câu</td><td>Free</td><td><span class="badge">Đang chờ</span></td><td class="mono">14 s</td></tr></tbody></table></div></div>
+      <div class="panel" id="pAudit"><div class="card tablewrap" style="padding:0"><table><thead><tr><th>Thời điểm</th><th>Sự kiện</th><th>Chi tiết</th></tr></thead><tbody><tr><td class="mono">09:12</td><td>disk.state</td><td>ok → warn (còn 17,4%)</td></tr><tr><td class="mono">08:47</td><td>user.role</td><td>admin nâng quyền cho một tài khoản</td></tr><tr><td class="mono">08:03</td><td>auth.locked</td><td>5 lần sai liên tiếp, khóa 1 phút</td></tr></tbody></table></div></div>
+      <p class="dim" style="font-size:.82rem">Số liệu trong bản mẫu là ví dụ minh họa.</p>
+    </section>
+  </main>
+</div>
+
+<dialog id="exportDlg" aria-labelledby="exH">
+  <div style="display:flex;flex-direction:column;gap:14px">
+    <h2 id="exH">Xuất file âm thanh</h2>
+    <label class="fmt"><input type="radio" name="fmt" checked><span><b>MP3</b> <span class="badge ok">Khuyên dùng</span><br><span class="muted" style="font-size:.88rem">Nhẹ, nghe được ở mọi nơi. Khoảng 1,3 MB cho bài này.</span></span></label>
+    <label class="fmt"><input type="radio" name="fmt"><span><b>WAV tiêu chuẩn</b><br><span class="muted" style="font-size:.88rem">Không nén, chất lượng gốc. Khoảng 3,5 MB.</span></span></label>
+    <label class="fmt" style="opacity:.6"><input type="radio" name="fmt" disabled><span><b>WAV chất lượng cao</b> <span class="badge warn">Gói Pro</span><br><span class="muted" style="font-size:.88rem">48 kHz, stereo, 24 bit. Gói của bạn chưa có tùy chọn này.</span></span></label>
+    <div class="row" style="justify-content:flex-end"><button class="btn" id="exCancel">Hủy</button><button class="btn primary" id="exGo">Xuất file</button></div>
+  </div>
+</dialog>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+(function () {
+  var $ = function (s, r) { return (r || document).querySelector(s); };
+  var $$ = function (s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); };
+  var VOICES = [
+    { n: 'Ngọc Huyền', r: 'Bắc', g: 'Nữ' }, { n: 'Hải Đăng', r: 'Bắc', g: 'Nam' },
+    { n: 'Thùy Dung', r: 'Trung', g: 'Nữ' }, { n: 'Quang Sơn', r: 'Trung', g: 'Nam' },
+    { n: 'Ngọc Trân', r: 'Nam', g: 'Nữ' }, { n: 'Adam', r: 'Nam', g: 'Nam' }
+  ];
+  var PROJECTS = [
+    ['Bản tin buổi sáng', 'Ngọc Huyền · Bắc', '1:20', 'Đã xuất MP3'], ['Giới thiệu sản phẩm', 'Adam · Nam', '2:05', 'Bản nháp'],
+    ['Sách nói chương 1', 'Thùy Dung · Trung', '14:32', 'Đang xuất'], ['Lời chào tổng đài', 'Ngọc Trân · Nam', '0:18', 'Đã xuất WAV']
+  ];
+  var SEGS = [
+    'Chào buổi sáng, đây là bản tin tổng hợp những sự kiện đáng chú ý trong ngày.',
+    'Thời tiết hôm nay nhiều mây, nhiệt độ từ 24 đến 31 độ, khả năng mưa rào vào buổi chiều.',
+    'Giá xăng được điều chỉnh giảm 320 đồng một lít kể từ 15 giờ chiều nay.',
+    'Cảm ơn quý vị đã theo dõi. Hẹn gặp lại trong bản tin tiếp theo.'
+  ];
+  var USERS = [
+    ['Minh', 'minh@vi-du.vn', 'Người dùng', 'Free', '96 MB', 'Hoạt động'], ['Lan Anh', 'lananh@vi-du.vn', 'Người dùng', 'Pro', '3,6 GB', 'Hoạt động'],
+    ['Quản trị', 'admin@vi-du.vn', 'Quản trị viên', 'Business', '1,1 GB', 'Hoạt động'], ['Tuấn', 'tuan@vi-du.vn', 'Người dùng', 'Free', '12 MB', 'Đã khóa']
+  ];
+  function wave(el, n, seed) {
+    var h = '', s = seed || 7;
+    for (var i = 0; i < n; i++) { s = (s * 9301 + 49297) % 233280; var v = 20 + Math.round((s / 233280) * 80); h += '<i style="height:' + v + '%"></i>'; }
+    el.innerHTML = h;
+  }
+  var toastT;
+  function toast(m) { var t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(toastT); toastT = setTimeout(function () { t.classList.remove('on'); }, 2200); }
+
+  /* navigation */
+  var role = 'user';
+  function go(id) {
+    if (id === 'admin' && role !== 'admin') { toast('Chỉ quản trị viên được vào trang này.'); id = 'home'; }
+    $$('.screen').forEach(function (s) { s.classList.toggle('on', s.id === id); });
+    $$('.nav button[data-go]').forEach(function (b) { if (b.dataset.go === id) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current'); });
+    $('#rail').style.display = id === 'login' ? 'none' : '';
+    $('.app').style.gridTemplateColumns = id === 'login' ? 'minmax(0,1fr)' : '';
+    window.scrollTo(0, 0);
+    try { history.replaceState(null, '', '#' + id); } catch (e) {}
+  }
+  document.addEventListener('click', function (e) { var b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+  function setRole(r) {
+    role = r; document.body.dataset.role = r;
+    $('#roleUser').setAttribute('aria-pressed', r === 'user'); $('#roleAdmin').setAttribute('aria-pressed', r === 'admin');
+    $('#whoRole').textContent = r === 'admin' ? 'Quản trị viên' : 'Gói Miễn phí';
+    if (r !== 'admin' && $('#admin').classList.contains('on')) go('home');
+  }
+  $('#roleUser').onclick = function () { setRole('user'); }; $('#roleAdmin').onclick = function () { setRole('admin'); };
+  $('#themeBtn').onclick = function () {
+    var r = document.documentElement, dark = r.dataset.theme === 'dark' || (!r.dataset.theme && matchMedia('(prefers-color-scheme: dark)').matches);
+    r.dataset.theme = dark ? 'light' : 'dark';
+  };
+
+  /* login */
+  function authTab(up) {
+    $('#tabIn').setAttribute('aria-selected', !up); $('#tabUp').setAttribute('aria-selected', up);
+    $('#nameField').hidden = !up; $('#pwHint').hidden = !up; $('#loginGo').textContent = up ? 'Tạo tài khoản' : 'Đăng nhập';
+  }
+  $('#tabIn').onclick = function () { authTab(false); }; $('#tabUp').onclick = function () { authTab(true); };
+  $('#loginGo').onclick = function () { go('home'); };
+
+  /* home */
+  $('#projects').innerHTML = PROJECTS.map(function (p, i) {
+    return '<button class="card project" data-go="studio"><div class="wave" aria-hidden="true" id="pw' + i + '"></div><div><h3>' + p[0] + '</h3><div class="muted" style="font-size:.88rem">' + p[1] + '</div></div><div class="row" style="justify-content:space-between"><span class="mono dim">' + p[2] + '</span><span class="badge ' + (p[3] === 'Bản nháp' ? '' : p[3] === 'Đang xuất' ? 'ai' : 'ok') + '">' + p[3] + '</span></div></button>';
+  }).join('');
+  PROJECTS.forEach(function (_, i) { wave($('#pw' + i), 36, i + 3); });
+  $('#quickText').addEventListener('input', function () { $('#quickCount').textContent = this.value.length.toLocaleString('vi-VN') + ' / 1.000 ký tự'; });
+  $('#quickPlay').onclick = function () { toast('Bản mẫu: bản thật sẽ phát giọng AI ở đây.'); };
+  $$('.region-pick').concat($$('[role=group][aria-label="Giới tính"]'), $$('[aria-label="Lọc giọng"]'), $$('#voices .row[role=group]')).forEach(function (g) {
+    var group = g.classList.contains('region-pick') ? $$('button', g) : $$('button.chip', g);
+    group.forEach(function (b) { b.addEventListener('click', function () {
+      var set = (g.id === 'x') ? group : group;
+      // single-select within logical group (voices page has two groups separated by a spacer)
+      var sibs = set; if (g.parentElement.id === 'voices') { var idx = set.indexOf(b); sibs = idx < 4 ? set.slice(0, 4) : set.slice(4); }
+      sibs.forEach(function (x) { x.setAttribute('aria-pressed', x === b); });
+      if (g.parentElement.id === 'voices') filterVoices();
+    }); });
+  });
+
+  /* studio */
+  $('#segs').innerHTML = SEGS.map(function (t, i) {
+    return '<div class="seg" ' + (i === 1 ? 'aria-current="true"' : '') + ' data-i="' + i + '"><span class="num">' + (i + 1) + '</span><textarea aria-label="Đoạn ' + (i + 1) + '">' + t + '</textarea><div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end"><button class="play" aria-label="Nghe đoạn ' + (i + 1) + '"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></button><span class="badge ai">' + (i === 1 ? 'Thùy Dung' : 'Ngọc Huyền') + '</span></div></div>';
+  }).join('');
+  $$('.seg').forEach(function (s) { s.addEventListener('click', function () { $$('.seg').forEach(function (x) { x.removeAttribute('aria-current'); }); s.setAttribute('aria-current', 'true'); $('#studio aside h2').textContent = 'Giọng đọc của đoạn ' + (+s.dataset.i + 1); }); });
+  $$('.seg .play').forEach(function (b) { b.onclick = function (e) { e.stopPropagation(); toast('Bản mẫu: bản thật phát đoạn này bằng giọng đã chọn.'); }; });
+  $('#voiceOpts').innerHTML = VOICES.map(function (v, i) {
+    return '<label class="voice-opt"><input type="radio" name="voice" ' + (i === 2 ? 'checked' : '') + '><span><b>' + v.n + '</b><br><span class="dim" style="font-size:.82rem">' + v.r + ' · ' + v.g + '</span></span><span class="badge ai">AI</span></label>';
+  }).join('');
+  [['spdIn', 'spd', function (v) { return (+v).toFixed(2).replace('.', ',') + '×'; }], ['pitIn', 'pit', function (v) { return (v > 0 ? '+' : '') + v; }], ['pauIn', 'pau', function (v) { return v + ' ms'; }]].forEach(function (a) {
+    $('#' + a[0]).addEventListener('input', function () { $('#' + a[1]).textContent = a[2](this.value); });
+  });
+  wave($('#mainWave'), 90, 11);
+  var playing = false, tick;
+  function togglePlay() {
+    playing = !playing; var btn = $('#mainPlay');
+    btn.innerHTML = playing ? '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></svg>' : '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+    btn.setAttribute('aria-label', playing ? 'Tạm dừng' : 'Phát');
+    clearInterval(tick);
+    if (playing) { var t = 0; tick = setInterval(function () { t = (t + 1) % 81; $('#mainTime').textContent = Math.floor(t / 60) + ':' + String(t % 60).padStart(2, '0') + ' / 1:20'; }, 250); toast('Bản mẫu: đồng hồ chạy, không có âm thanh.'); }
+  }
+  $('#mainPlay').onclick = togglePlay; $('#playAll').onclick = function () { if (!playing) togglePlay(); };
+  var dlg = $('#exportDlg');
+  $('#openExport').onclick = function () { dlg.showModal(); };
+  $('#exCancel').onclick = function () { dlg.close(); };
+  $('#exGo').onclick = function () { dlg.close(); toast('Đang xuất file. Bạn sẽ thấy nút tải khi xong.'); };
+
+  /* voices */
+  function renderVoices(list) {
+    $('#voiceGrid').innerHTML = list.map(function (v) {
+      return '<article class="card voice-card"><div class="top"><div><h3>' + v.n + '</h3><div class="muted" style="font-size:.88rem">Miền ' + v.r + ' · ' + v.g + '</div></div><span class="badge ai">AI</span></div><div class="wave" aria-hidden="true" data-seed="' + v.n.length + '"></div><div class="row"><button class="btn sm" data-sample>Nghe thử</button><button class="btn sm primary" data-go="studio">Dùng giọng này</button></div></article>';
+    }).join('');
+    $$('#voiceGrid .wave').forEach(function (w) { wave(w, 40, +w.dataset.seed + 5); });
+    $$('[data-sample]').forEach(function (b) { b.onclick = function () { toast('Bản mẫu: bản thật phát câu mẫu bằng giọng này.'); }; });
+  }
+  function filterVoices() {
+    var ch = $$('#voices .row[role=group] button.chip'), r = ch.filter(function (b, i) { return i < 4 && b.getAttribute('aria-pressed') === 'true'; })[0].textContent;
+    var g = ch.filter(function (b, i) { return i >= 4 && b.getAttribute('aria-pressed') === 'true'; })[0].textContent;
+    renderVoices(VOICES.filter(function (v) { return (r === 'Mọi vùng' || r === v.r) && (g === 'Cả hai' || g === v.g); }));
+  }
+  renderVoices(VOICES);
+
+  /* admin */
+  $('#userRows').innerHTML = USERS.map(function (u) {
+    return '<tr><td><b>' + u[0] + '</b><br><span class="dim" style="font-size:.82rem">' + u[1] + '</span></td><td>' + u[2] + '</td><td><select aria-label="Gói của ' + u[0] + '"><option' + (u[3] === 'Free' ? ' selected' : '') + '>Free</option><option' + (u[3] === 'Pro' ? ' selected' : '') + '>Pro</option><option' + (u[3] === 'Business' ? ' selected' : '') + '>Business</option></select></td><td class="mono">' + u[4] + '</td><td><span class="badge ' + (u[5] === 'Hoạt động' ? 'ok' : 'bad') + '">' + u[5] + '</span></td><td><button class="btn sm">' + (u[5] === 'Hoạt động' ? 'Khóa' : 'Mở khóa') + '</button></td></tr>';
+  }).join('');
+  $$('#adminTabs button').forEach(function (b) { b.onclick = function () {
+    $$('#adminTabs button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+    $$('#admin .panel').forEach(function (p) { p.classList.toggle('on', p.id === b.dataset.p); });
+  }; });
+
+  var h = (location.hash || '').slice(1);
+  if (['home', 'studio', 'voices', 'settings', 'admin', 'login'].indexOf(h) >= 0) { if (h === 'admin') setRole('admin'); go(h); }
+})();
+</script>
