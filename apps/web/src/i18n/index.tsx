@@ -45,7 +45,6 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   const [lang, setLangState] = useState<Lang>(current);
   useEffect(() => {
     document.documentElement.lang = lang;
-    document.title = 'VoxStudio';
   }, [lang]);
   const setLang = useCallback((l: Lang) => {
     current = l;

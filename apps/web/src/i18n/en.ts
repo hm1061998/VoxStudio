@@ -788,6 +788,9 @@ export const en = {
   'quick.save': 'Save as a project',
   'quick.listenVoice': 'Voice: {name}',
   'auth.privacyNote': 'Voices run on this server. Your text is not sent to outside services.',
+  'seo.title': 'VoxStudio: natural Vietnamese speech on your own server',
+  'seo.description':
+    'VoxStudio turns text into Vietnamese speech with a choice of region and gender. AI voices run on your own server, so your text is not sent to outside services. Export MP3 or WAV.',
   'plan.pending': 'Jobs waiting or running: {n} of {max}',
   'plan.ai': 'AI voices this month: {used} of {limit} characters',
   'plan.aiUnlimited': 'AI voices this month: {used} characters (no limit)',

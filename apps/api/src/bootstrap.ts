@@ -5,7 +5,7 @@ import type { AppConfig } from '@voxstudio/core';
 import cookieParser from 'cookie-parser';
 import express, { type NextFunction, type Request, type Response } from 'express';
 import helmet from 'helmet';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import path from 'node:path';
 import { AppModule } from './app.module';
 import { requestContext, type VoxRequest } from './common/http';
@@ -46,6 +46,7 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
   // API answers are private and never cached by browsers or proxies (individual routes may override).
   app.use('/api', (_req: Request, res: Response, next: NextFunction) => {
     res.setHeader('Cache-Control', 'no-store');
+    res.setHeader('X-Robots-Tag', 'noindex, nofollow');
     next();
   });
   // Defence in depth against cross-site requests: a state-changing call that names a foreign Origin is refused
@@ -97,6 +98,45 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
   // Serve the built web client (single-origin deployment) with SPA fallback.
   const webDist = path.join(config.repoRoot, 'apps', 'web', 'dist');
   if (existsSync(path.join(webDist, 'index.html'))) {
+    // Search-engine files are generated from PUBLIC_BASE_URL so canonical and sitemap addresses are absolute.
+    const base = config.publicBaseUrl.replace(/\/+$/, '');
+    const indexHtml = readFileSync(path.join(webDist, 'index.html'), 'utf8').replaceAll(
+      '__PUBLIC_BASE_URL__',
+      base,
+    );
+    const robots = [
+      'User-agent: *',
+      'Allow: /$',
+      'Allow: /login',
+      ...(config.allowRegistration ? ['Allow: /register'] : []),
+      'Disallow: /api/',
+      'Disallow: /admin',
+      'Disallow: /projects',
+      'Disallow: /voices',
+      'Disallow: /presets',
+      'Disallow: /pronunciation',
+      'Disallow: /renders',
+      'Disallow: /settings',
+      '',
+      `Sitemap: ${base}/sitemap.xml`,
+      '',
+    ].join('\n');
+    const sitemap = [
+      '<?xml version="1.0" encoding="UTF-8"?>',
+      '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">',
+      ...['/login', ...(config.allowRegistration ? ['/register'] : [])].map(
+        (p) => `  <url><loc>${base}${p}</loc></url>`,
+      ),
+      '</urlset>',
+      '',
+    ].join('\n');
+    app.use((req: Request, res: Response, next: NextFunction) => {
+      if (req.method !== 'GET') return next();
+      if (req.path === '/robots.txt') return void res.type('text/plain').send(robots);
+      if (req.path === '/sitemap.xml') return void res.type('application/xml').send(sitemap);
+      if (req.path === '/' || req.path === '/index.html') return void res.type('html').send(indexHtml);
+      return next();
+    });
     app.use(
       express.static(webDist, {
         index: false,
@@ -108,7 +148,7 @@ export async function createApp(config: AppConfig): Promise<NestExpressApplicati
     );
     app.use((req: Request, res: Response, next: NextFunction) => {
       if (req.method !== 'GET' || req.path.startsWith('/api/')) return next();
-      res.sendFile(path.join(webDist, 'index.html'));
+      res.type('html').send(indexHtml);
     });
   }
   await app.init();

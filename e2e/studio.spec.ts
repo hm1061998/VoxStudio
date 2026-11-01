@@ -639,3 +639,22 @@ test('account sections are separate pages, and the theme can be chosen', async (
   await page.getByRole('radio', { name: 'Auto' }).first().click();
   await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
 });
+
+test('page titles follow the screen; sign-in pages are indexable, the signed-in app is not', async ({
+  page,
+  request,
+  context,
+}) => {
+  await page.goto('/login');
+  await expect(page).toHaveTitle(/Sign in · VoxStudio/);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'index, follow');
+  await expect(page.locator('meta[name="description"]')).toHaveAttribute('content', /Vietnamese speech/);
+  const u = await apiRegister(request, 'Seo Tester');
+  await context.clearCookies();
+  await signIn(page, u.email, u.password);
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  await page.goto('/voices');
+  await expect(page).toHaveTitle(/Voices · VoxStudio/);
+  await page.goto('/settings/plan');
+  await expect(page).toHaveTitle(/Account · VoxStudio/);
+});

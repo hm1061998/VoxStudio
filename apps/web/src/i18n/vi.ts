@@ -786,6 +786,9 @@ export const vi: Record<MessageKey, string> = {
   'quick.save': 'Lưu thành dự án',
   'quick.listenVoice': 'Giọng: {name}',
   'auth.privacyNote': 'Giọng đọc chạy ngay trên máy chủ này. Văn bản của bạn không gửi ra dịch vụ bên ngoài.',
+  'seo.title': 'VoxStudio: giọng đọc tiếng Việt tự nhiên, chạy trên máy chủ của bạn',
+  'seo.description':
+    'VoxStudio chuyển văn bản thành giọng đọc tiếng Việt với nhiều vùng miền và giới tính. Giọng AI chạy trên máy chủ riêng, văn bản không gửi ra dịch vụ bên ngoài. Xuất MP3 hoặc WAV.',
   'plan.pending': 'Việc đang chờ hoặc chạy: {n}/{max}',
   'plan.ai': 'Giọng AI trong tháng này: {used}/{limit} ký tự',
   'plan.aiUnlimited': 'Giọng AI trong tháng này: {used} ký tự (không giới hạn)',

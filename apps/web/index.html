@@ -1,14 +1,59 @@
 <!doctype html>
-<html lang="en" class="dark">
+<html lang="vi">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta name="color-scheme" content="dark" />
+    <meta name="color-scheme" content="light dark" />
+    <meta name="theme-color" content="#f4f7f8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#0e1a1f" media="(prefers-color-scheme: dark)" />
+    <title>VoxStudio: giọng đọc tiếng Việt tự nhiên, chạy trên máy chủ của bạn</title>
+    <meta
+      name="description"
+      content="VoxStudio chuyển văn bản thành giọng đọc tiếng Việt với nhiều vùng miền và giới tính. Giọng AI chạy trên máy chủ riêng, văn bản không gửi ra dịch vụ bên ngoài. Xuất MP3 hoặc WAV."
+    />
+    <meta name="robots" content="index, follow" />
+    <meta name="application-name" content="VoxStudio" />
+    <link rel="canonical" href="__PUBLIC_BASE_URL__/" />
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-    <title>VoxStudio</title>
+
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="VoxStudio" />
+    <meta property="og:locale" content="vi_VN" />
+    <meta property="og:locale:alternate" content="en_US" />
+    <meta property="og:title" content="VoxStudio: giọng đọc tiếng Việt chạy trên máy chủ của bạn" />
+    <meta
+      property="og:description"
+      content="Dán văn bản, chọn vùng miền và giới tính, nghe thử rồi xuất MP3 hoặc WAV. Văn bản của bạn không rời khỏi máy chủ."
+    />
+    <meta property="og:url" content="__PUBLIC_BASE_URL__/" />
+    <meta property="og:image" content="__PUBLIC_BASE_URL__/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="630" />
+    <meta property="og:image:alt" content="VoxStudio: chuyển văn bản thành giọng đọc tiếng Việt" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="VoxStudio: giọng đọc tiếng Việt chạy trên máy chủ của bạn" />
+    <meta
+      name="twitter:description"
+      content="Dán văn bản, chọn vùng miền và giới tính, nghe thử rồi xuất MP3 hoặc WAV."
+    />
+    <meta name="twitter:image" content="__PUBLIC_BASE_URL__/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "VoxStudio",
+        "applicationCategory": "MultimediaApplication",
+        "operatingSystem": "Web",
+        "inLanguage": ["vi", "en"],
+        "url": "__PUBLIC_BASE_URL__/",
+        "description": "Web studio chuyển văn bản thành giọng đọc tiếng Việt, tự lưu trữ trên máy chủ của bạn."
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>
+    <noscript>VoxStudio cần JavaScript để chạy. Vui lòng bật JavaScript trong trình duyệt.</noscript>
     <script type="module" src="/src/main.tsx"></script>
   </body>
 </html>
