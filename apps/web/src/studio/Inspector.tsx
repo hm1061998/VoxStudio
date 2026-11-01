@@ -112,6 +112,12 @@ export function presetDiff(settings: SynthesisSettings, preset: PresetDto, caps:
   return { settings: next as SynthesisSettings, changes, skipped };
 }
 
+/** A style is offered for a voice only if at least one of its values can be applied to that voice. */
+export function presetUsable(preset: PresetDto, caps: VoiceCapabilities): boolean {
+  const asked = Object.keys(preset.parameters).length;
+  return asked > 0 && presetDiff(defaultsFrom(caps), preset, caps).skipped.length < asked;
+}
+
 /** Voices grouped by language, labelled in the UI language. */
 export function VoiceOptions({ voices, current }: { voices: VoiceDto[]; current?: string }) {
   const { lang, t } = useI18n();
@@ -153,6 +159,7 @@ export function Inspector() {
   const voice = useVoice(seg?.voiceId ?? null);
   const [group, setGroup] = useState<ParameterGroup>('voice');
   const [presetDialog, setPresetDialog] = useState(false);
+  const presetList = usePresets();
   const [notice, setNotice] = useState<string | null>(null);
   const [details, setDetails] = useState(false);
   const [gallery, setGallery] = useState(false);
@@ -381,9 +388,11 @@ export function Inspector() {
           <p className="text-[11px] leading-snug text-warn">{t('insp.datasetIncomplete')}</p>
         )}
         <div className="flex gap-2">
-          <button className="btn btn-sm flex-1" onClick={() => setPresetDialog(true)} disabled={!caps}>
-            {t('insp.applyPreset')}
-          </button>
+          {(!caps || !presetList.data || presetList.data.some((p) => presetUsable(p, caps))) && (
+            <button className="btn btn-sm flex-1" onClick={() => setPresetDialog(true)} disabled={!caps}>
+              {t('insp.applyPreset')}
+            </button>
+          )}
           <button
             className="btn btn-sm flex-1"
             disabled={!caps}
@@ -688,11 +697,13 @@ function PresetDialog({
         onChange={(e) => setPresetId(e.target.value)}
       >
         <option value="">{t('preset.choose')}</option>
-        {presets.data?.map((p) => (
-          <option key={p.id} value={p.id}>
-            {presetName(p)} {p.isBuiltin ? t('preset.builtin') : ''}
-          </option>
-        ))}
+        {presets.data
+          ?.filter((p) => presetUsable(p, caps))
+          .map((p) => (
+            <option key={p.id} value={p.id}>
+              {presetName(p)} {p.isBuiltin ? t('preset.builtin') : ''}
+            </option>
+          ))}
       </select>
       {preset && (
         <div className="space-y-3 text-sm">
