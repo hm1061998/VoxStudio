@@ -3,6 +3,8 @@ import { APP_FILTER, APP_GUARD, APP_INTERCEPTOR } from '@nestjs/core';
 import { ThrottlerGuard, ThrottlerModule } from '@nestjs/throttler';
 import type { AppConfig } from '@voxstudio/core';
 import { AdminController } from './admin/admin.controller';
+import { BillingController, PaymentsController } from './billing/billing.controller';
+import { BillingService } from './billing/billing.service';
 import { AssetsController } from './assets/assets.controller';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
@@ -45,12 +47,15 @@ export class AppModule {
         PronunciationController,
         AssetsController,
         AdminController,
+        BillingController,
+        PaymentsController,
       ],
       providers: [
         AuthService,
         AccessService,
         AuditService,
         DiskService,
+        BillingService,
         CatalogService,
         PlannerService,
         ProjectsService,

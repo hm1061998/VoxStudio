@@ -15,6 +15,7 @@ VoxStudio là web studio giọng đọc tự lưu trữ. Ở cấu hình mặc �
 - **Giao diện:** tiếng Việt và tiếng Anh; chủ đề sáng và tối (Tự động theo hệ thống); thanh điều hướng bên trái trên máy tính, thanh dưới cùng trên điện thoại; hỗ trợ bàn phím và trình đọc màn hình (có kiểm tra axe-core ở cả hai chủ đề).
 - **Tài khoản và vai trò:** `user` và `admin`. Mọi dự án, tệp âm thanh và việc đều thuộc về chủ sở hữu (tài nguyên của người khác trả về 404). Khu vực tài khoản gồm các trang riêng: Hồ sơ, Gói và mức dùng, Mật khẩu, Thiết bị đăng nhập, Dữ liệu của tôi.
 - **Trang quản trị (`/admin`, chỉ dành cho quản trị viên):** tổng quan (người dùng, hàng đợi, dịch vụ AI, dung lượng ổ đĩa, workspace dùng nhiều nhất, số liệu bảo mật), người dùng (vai trò, trạng thái, gói), bộ máy và giọng đọc, các việc, nhật ký kiểm toán. Người dùng thường nhận 403 ở mọi đường dẫn quản trị.
+- **Thanh toán (tùy chọn, tắt mặc định):** nếu đặt giá, người dùng tạo đơn nâng cấp, chuyển khoản kèm mã đơn, và gói có thời hạn được kích hoạt khi quản trị viên xác nhận hoặc khi một nhà cung cấp gọi webhook. Chưa có adapter cho nhà cung cấp thật và chưa thử với tiền thật. Xem [docs/upgrade/11-BILLING.md](docs/upgrade/11-BILLING.md).
 - **Gói dịch vụ:** free, pro, business. Gói quy định độ ưu tiên hàng đợi, số việc chờ tối đa, số ký tự AI mỗi tháng, dung lượng âm thanh được lưu và quyền xuất WAV dung lượng lớn. Quản trị viên gán gói; chưa có thanh toán.
 - **Bảo mật:** mật khẩu băm bằng scrypt kèm chính sách mật khẩu, khóa theo tài khoản và theo địa chỉ, giới hạn phiên và hết hạn khi không hoạt động, token CSRF kèm kiểm tra Origin, cookie nghiêm ngặt, các header bảo mật, nhật ký kiểm toán. Xem [docs/upgrade/10-SECURITY-AND-ACCESS.md](docs/upgrade/10-SECURITY-AND-ACCESS.md).
 - **Bảo vệ ổ đĩa:** worker đo ổ chứa dữ liệu mỗi phút. Khi dung lượng trống thấp, hệ thống rút ngắn thời gian lưu và cảnh báo quản trị viên; khi cực thấp, hệ thống từ chối việc tạo âm thanh mới (`DISK_FULL`) nhưng âm thanh đã lưu vẫn nghe được. Bản nháp cũ, âm thanh không còn được tham chiếu, việc đã xong và nhật ký kiểm toán cũ được dọn tự động.
@@ -71,20 +72,21 @@ Khi phát triển giao diện cần tải lại nóng, chạy `pnpm dev:web` (c�
 
 Đặt trong `.env` (chạy cục bộ) hoặc `.env.docker` (Compose). Danh sách đầy đủ nằm trong `.env.example`.
 
-| Biến                                                                    | Mặc định                | Ý nghĩa                                                                            |
-| ----------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------- |
-| `ENABLED_ENGINES`                                                       | `vieneu`                | Các bộ máy cung cấp cho người dùng: `vieneu`, `espeak`, `vnunit`                   |
-| `VIENEU_SERVICE_URLS`, `VIENEU_SERVICE_TOKEN`, `VIENEU_APPROVED`        | trống                   | Địa chỉ dịch vụ mô hình AI, token dùng chung, cờ quản trị viên phê duyệt           |
-| `PUBLIC_BASE_URL`                                                       | `http://localhost:4000` | Địa chỉ công khai; dùng cho thẻ canonical, sitemap và nguồn gốc (origin) được phép |
-| `ADMIN_EMAILS`                                                          | trống                   | Chỉ dùng để tạo quản trị viên **đầu tiên**                                         |
-| `ALLOW_REGISTRATION`                                                    | `true`                  | `false` để đóng đăng ký tự do                                                      |
-| `SESSION_IDLE_HOURS`                                                    | `24`                    | Số giờ không hoạt động thì phiên hết hạn                                           |
-| `TRUST_PROXY`                                                           | `loopback`              | Proxy nào được đặt `X-Forwarded-For` (cần đặt đúng khi chạy sau Caddy hoặc CDN)    |
-| `PLAN_LIMITS_JSON`                                                      | trống                   | Ghi đè hạn mức của gói, ví dụ `{"pro":{"aiMonthlyChars":1000000}}`                 |
-| `QUEUE_AGING_SECONDS`                                                   | `30`                    | Số giây chờ để việc trong hàng đợi được cộng thêm một điểm ưu tiên                 |
-| `DISK_WARN_FREE_PERCENT`, `DISK_BLOCK_FREE_PERCENT`, `DISK_MIN_FREE_MB` | `20`, `8`, `1024`       | Ngưỡng dung lượng trống để cảnh báo và để chặn                                     |
-| `JOB_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`                            | `30`, `180`             | Số ngày sau đó việc đã xong và nhật ký kiểm toán bị xóa                            |
-| `STORAGE_LOCAL_ROOT`                                                    | `./storage`             | Nơi lưu tệp âm thanh (nên đặt trên ổ bạn có theo dõi)                              |
+| Biến                                                                    | Mặc định                | Ý nghĩa                                                                               |
+| ----------------------------------------------------------------------- | ----------------------- | ------------------------------------------------------------------------------------- |
+| `ENABLED_ENGINES`                                                       | `vieneu`                | Các bộ máy cung cấp cho người dùng: `vieneu`, `espeak`, `vnunit`                      |
+| `VIENEU_SERVICE_URLS`, `VIENEU_SERVICE_TOKEN`, `VIENEU_APPROVED`        | trống                   | Địa chỉ dịch vụ mô hình AI, token dùng chung, cờ quản trị viên phê duyệt              |
+| `PUBLIC_BASE_URL`                                                       | `http://localhost:4000` | Địa chỉ công khai; dùng cho thẻ canonical, sitemap và nguồn gốc (origin) được phép    |
+| `ADMIN_EMAILS`                                                          | trống                   | Chỉ dùng để tạo quản trị viên **đầu tiên**                                            |
+| `ALLOW_REGISTRATION`                                                    | `true`                  | `false` để đóng đăng ký tự do                                                         |
+| `SESSION_IDLE_HOURS`                                                    | `24`                    | Số giờ không hoạt động thì phiên hết hạn                                              |
+| `TRUST_PROXY`                                                           | `loopback`              | Proxy nào được đặt `X-Forwarded-For` (cần đặt đúng khi chạy sau Caddy hoặc CDN)       |
+| `PLAN_LIMITS_JSON`                                                      | trống                   | Ghi đè hạn mức của gói, ví dụ `{"pro":{"aiMonthlyChars":1000000}}`                    |
+| `PLAN_PRICES_VND_JSON`, `PAYMENT_BANK_*`, `PAYMENT_WEBHOOK_SECRET`      | trống                   | Giá gói theo tháng (VND), tài khoản nhận tiền, bí mật webhook. Trống = tắt thanh toán |
+| `QUEUE_AGING_SECONDS`                                                   | `30`                    | Số giây chờ để việc trong hàng đợi được cộng thêm một điểm ưu tiên                    |
+| `DISK_WARN_FREE_PERCENT`, `DISK_BLOCK_FREE_PERCENT`, `DISK_MIN_FREE_MB` | `20`, `8`, `1024`       | Ngưỡng dung lượng trống để cảnh báo và để chặn                                        |
+| `JOB_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`                            | `30`, `180`             | Số ngày sau đó việc đã xong và nhật ký kiểm toán bị xóa                               |
+| `STORAGE_LOCAL_ROOT`                                                    | `./storage`             | Nơi lưu tệp âm thanh (nên đặt trên ổ bạn có theo dõi)                                 |
 
 Hãy đặt `PUBLIC_BASE_URL` thành địa chỉ thật trước khi đưa ra công khai; công cụ tìm kiếm và bản xem trước liên kết dùng địa chỉ này.
 
@@ -144,5 +146,5 @@ docs/             Đặc tả sản phẩm và kỹ thuật, ADR, ghi chú nâng
 
 - Bản mặc định chỉ đọc tiếng Việt; các ngôn ngữ khác cần bật bộ máy `espeak` (tùy chọn).
 - Nếu dịch vụ mô hình AI ngừng chạy thì không giọng nào đọc được (chủ ý: không có phương án thay thế ngầm).
-- Chưa có đánh giá bằng tai nghe cho giọng AI; chưa đo trên VPS thật; chưa có thanh toán; chưa có xác thực hai lớp, xác minh email hay kiểm thử xâm nhập; chưa có chức năng xóa tài khoản; chưa từng build image Docker.
+- Chưa có đánh giá bằng tai nghe cho giọng AI; chưa đo trên VPS thật; chưa thử thanh toán với tiền thật hay nhà cung cấp thật; chưa có xác thực hai lớp, xác minh email hay kiểm thử xâm nhập; chưa có chức năng xóa tài khoản; chưa từng build image Docker.
 - Mã nguồn VoxStudio theo giấy phép MIT ([LICENSE](LICENSE)). Giấy phép này không bao trùm các thành phần bên thứ ba: eSpeak NG (GPL-3.0, chạy như một chương trình riêng, không liên kết vào mã), mô hình VieNeu cùng các giọng, FFmpeg và các thư viện npm vẫn giữ giấy phép riêng (xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Hãy kiểm tra giấy phép của mô hình và giọng trước khi phân phối lại trọng số hoặc âm thanh.

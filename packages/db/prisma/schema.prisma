@@ -1,6 +1,6 @@
 // VoxStudio database schema. Migrations live in ./migrations and are applied with `prisma migrate deploy`.
 generator client {
-  provider = "prisma-client-js"
+  provider      = "prisma-client-js"
   binaryTargets = ["native", "debian-openssl-3.0.x"]
 }
 
@@ -10,40 +10,40 @@ datasource db {
 }
 
 model User {
-  id           String   @id @default(uuid()) @db.Uuid
+  id                String    @id @default(uuid()) @db.Uuid
   /// Stored lower-cased; uniqueness is case-insensitive by construction.
-  email        String   @unique
-  passwordHash String   @map("password_hash")
-  displayName  String   @map("display_name")
+  email             String    @unique
+  passwordHash      String    @map("password_hash")
+  displayName       String    @map("display_name")
   /// 'user' | 'admin'
-  role         String   @default("user")
+  role              String    @default("user")
   /// 'active' | 'suspended' (suspended accounts cannot sign in and lose every session)
-  status       String   @default("active")
-  lastLoginAt         DateTime? @map("last_login_at") @db.Timestamptz(3)
-  passwordChangedAt   DateTime? @map("password_changed_at") @db.Timestamptz(3)
-  createdAt    DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt    DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  status            String    @default("active")
+  lastLoginAt       DateTime? @map("last_login_at") @db.Timestamptz(3)
+  passwordChangedAt DateTime? @map("password_changed_at") @db.Timestamptz(3)
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt         DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
 
-  sessions   Session[]
+  sessions    Session[]
   resetTokens PasswordResetToken[]
-  workspaces Workspace[]
+  workspaces  Workspace[]
   memberships WorkspaceMember[]
-  renderJobs RenderJob[]
-  versions   ProjectVersion[]
+  renderJobs  RenderJob[]
+  versions    ProjectVersion[]
 
   @@map("users")
 }
 
 model Session {
-  id          String   @id @default(uuid()) @db.Uuid
-  userId      String   @map("user_id") @db.Uuid
+  id         String   @id @default(uuid()) @db.Uuid
+  userId     String   @map("user_id") @db.Uuid
   /// SHA-256 of the opaque session token; the raw token only lives in the client cookie.
-  tokenHash   String   @unique @map("token_hash")
-  csrfToken   String   @map("csrf_token")
-  expiresAt   DateTime @map("expires_at") @db.Timestamptz(3)
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  lastSeenAt  DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
-  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tokenHash  String   @unique @map("token_hash")
+  csrfToken  String   @map("csrf_token")
+  expiresAt  DateTime @map("expires_at") @db.Timestamptz(3)
+  createdAt  DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @default(now()) @map("last_seen_at") @db.Timestamptz(3)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@index([userId])
   @@map("sessions")
@@ -63,15 +63,18 @@ model PasswordResetToken {
 }
 
 model Workspace {
-  id          String   @id @default(uuid()) @db.Uuid
-  ownerUserId String   @map("owner_user_id") @db.Uuid
-  name        String
-  createdAt   DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt   DateTime @updatedAt @map("updated_at") @db.Timestamptz(3)
+  id            String    @id @default(uuid()) @db.Uuid
+  ownerUserId   String    @map("owner_user_id") @db.Uuid
+  name          String
+  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
   /// Service plan: 'free' | 'pro' | 'business'. Set by an administrator (no payment integration).
-  plan        String   @default("free")
-  owner       User     @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
-  aiUsage     AiUsage[]
+  plan          String    @default("free")
+  /// When a paid plan stops applying (then the workspace counts as free). null = no expiry.
+  planExpiresAt DateTime? @map("plan_expires_at") @db.Timestamptz(3)
+  owner         User      @relation(fields: [ownerUserId], references: [id], onDelete: Cascade)
+  aiUsage       AiUsage[]
+  orders        Order[]
 
   members        WorkspaceMember[]
   projects       Project[]
@@ -97,20 +100,20 @@ model WorkspaceMember {
 }
 
 model Project {
-  id            String    @id @default(uuid()) @db.Uuid
-  workspaceId   String    @map("workspace_id") @db.Uuid
-  name          String
-  description   String?
-  defaultLocale String    @map("default_locale")
-  status        String    @default("draft")
-  revision      Int       @default(0)
-  settingsJson  Json      @map("settings_json")
-  createdAt     DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  updatedAt     DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
-  archivedAt    DateTime? @map("archived_at") @db.Timestamptz(3)
+  id                  String    @id @default(uuid()) @db.Uuid
+  workspaceId         String    @map("workspace_id") @db.Uuid
+  name                String
+  description         String?
+  defaultLocale       String    @map("default_locale")
+  status              String    @default("draft")
+  revision            Int       @default(0)
+  settingsJson        Json      @map("settings_json")
+  createdAt           DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  updatedAt           DateTime  @updatedAt @map("updated_at") @db.Timestamptz(3)
+  archivedAt          DateTime? @map("archived_at") @db.Timestamptz(3)
   /// Soft delete marker; storage cleanup runs before hard delete.
-  deletedAt     DateTime? @map("deleted_at") @db.Timestamptz(3)
-  latestExportAssetId String? @map("latest_export_asset_id") @db.Uuid
+  deletedAt           DateTime? @map("deleted_at") @db.Timestamptz(3)
+  latestExportAssetId String?   @map("latest_export_asset_id") @db.Uuid
 
   workspace Workspace        @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   segments  ProjectSegment[]
@@ -146,15 +149,15 @@ model ProjectSegment {
 }
 
 model TtsEngine {
-  id               String    @id
-  displayName      String    @map("display_name")
+  id               String     @id
+  displayName      String     @map("display_name")
   version          String
-  synthesisMethod  String    @map("synthesis_method")
-  complianceStatus String    @map("compliance_status")
-  enabled          Boolean   @default(true)
-  metadataJson     Json      @map("metadata_json")
-  licenseId        String    @map("license_id")
-  verifiedAt       DateTime? @map("verified_at") @db.Timestamptz(3)
+  synthesisMethod  String     @map("synthesis_method")
+  complianceStatus String     @map("compliance_status")
+  enabled          Boolean    @default(true)
+  metadataJson     Json       @map("metadata_json")
+  licenseId        String     @map("license_id")
+  verifiedAt       DateTime?  @map("verified_at") @db.Timestamptz(3)
   voices           TtsVoice[]
 
   @@map("tts_engines")
@@ -175,7 +178,7 @@ model TtsVoice {
   qaReportJson        Json      @map("qa_report_json")
   engine              TtsEngine @relation(fields: [engineId], references: [id], onDelete: Cascade)
 
-  datasets            TtsVoiceDataset[]
+  datasets TtsVoiceDataset[]
 
   @@index([locale])
   @@map("tts_voices")
@@ -279,30 +282,30 @@ model RenderJob {
 }
 
 model AudioAsset {
-  id               String    @id @default(uuid()) @db.Uuid
-  workspaceId      String    @map("workspace_id") @db.Uuid
+  id                 String    @id @default(uuid()) @db.Uuid
+  workspaceId        String    @map("workspace_id") @db.Uuid
   /// null for standalone previews
-  projectId        String?   @map("project_id") @db.Uuid
-  segmentId        String?   @map("segment_id") @db.Uuid
-  renderJobId      String?   @map("render_job_id") @db.Uuid
+  projectId          String?   @map("project_id") @db.Uuid
+  segmentId          String?   @map("segment_id") @db.Uuid
+  renderJobId        String?   @map("render_job_id") @db.Uuid
   /// 'segment' | 'preview' | 'export'
-  kind             String
-  storageKey       String    @unique @map("storage_key")
-  format           String
-  codec            String
-  sampleRate       Int       @map("sample_rate")
-  channels         Int
-  bitDepth         Int?      @map("bit_depth")
-  bitrate          Int?
-  durationMs       Int       @map("duration_ms")
-  fileSizeBytes    Int       @map("file_size_bytes")
-  checksumSha256   String    @map("checksum_sha256")
-  cacheKey         String?   @map("cache_key")
-  engineSnapshotJson Json    @map("engine_snapshot_json")
-  dspSnapshotJson  Json      @map("dsp_snapshot_json")
-  timelineJson     Json?     @map("timeline_json")
-  createdAt        DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
-  expiresAt        DateTime? @map("expires_at") @db.Timestamptz(3)
+  kind               String
+  storageKey         String    @unique @map("storage_key")
+  format             String
+  codec              String
+  sampleRate         Int       @map("sample_rate")
+  channels           Int
+  bitDepth           Int?      @map("bit_depth")
+  bitrate            Int?
+  durationMs         Int       @map("duration_ms")
+  fileSizeBytes      Int       @map("file_size_bytes")
+  checksumSha256     String    @map("checksum_sha256")
+  cacheKey           String?   @map("cache_key")
+  engineSnapshotJson Json      @map("engine_snapshot_json")
+  dspSnapshotJson    Json      @map("dsp_snapshot_json")
+  timelineJson       Json?     @map("timeline_json")
+  createdAt          DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  expiresAt          DateTime? @map("expires_at") @db.Timestamptz(3)
 
   workspace Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
   project   Project?  @relation(fields: [projectId], references: [id], onDelete: Cascade)
@@ -329,20 +332,68 @@ model ProjectVersion {
 }
 
 model AuditEvent {
-  id           String    @id @default(uuid()) @db.Uuid
+  id           String     @id @default(uuid()) @db.Uuid
   /// null for account-level and system events (sign-ins, lockouts, role changes)
-  workspaceId  String?   @map("workspace_id") @db.Uuid
-  actorUserId  String?   @map("actor_user_id") @db.Uuid
-  eventType    String    @map("event_type")
-  resourceType String    @map("resource_type")
-  resourceId   String    @map("resource_id")
-  metadataJson Json      @map("metadata_json")
-  createdAt    DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  workspaceId  String?    @map("workspace_id") @db.Uuid
+  actorUserId  String?    @map("actor_user_id") @db.Uuid
+  eventType    String     @map("event_type")
+  resourceType String     @map("resource_type")
+  resourceId   String     @map("resource_id")
+  metadataJson Json       @map("metadata_json")
+  createdAt    DateTime   @default(now()) @map("created_at") @db.Timestamptz(3)
   workspace    Workspace? @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
 
   @@index([workspaceId, createdAt(sort: Desc)])
   @@index([createdAt(sort: Desc)])
   @@map("audit_events")
+}
+
+/// A purchase of a paid plan for some months, paid by bank transfer (ADR 0010).
+model Order {
+  id                String    @id @default(uuid()) @db.Uuid
+  workspaceId       String    @map("workspace_id") @db.Uuid
+  userId            String    @map("user_id") @db.Uuid
+  plan              String
+  months            Int
+  /// Fixed when the order is created.
+  amountVnd         Int       @map("amount_vnd")
+  /// The code the payer writes in the transfer note; unique.
+  paymentCode       String    @unique @map("payment_code")
+  /// 'pending' | 'paid' | 'review' | 'cancelled' | 'expired'
+  status            String    @default("pending")
+  /// 'manual' (an administrator) or a provider id
+  paidVia           String?   @map("paid_via")
+  paidAmountVnd     Int?      @map("paid_amount_vnd")
+  paidAt            DateTime? @map("paid_at") @db.Timestamptz(3)
+  confirmedByUserId String?   @map("confirmed_by_user_id") @db.Uuid
+  note              String?
+  createdAt         DateTime  @default(now()) @map("created_at") @db.Timestamptz(3)
+  /// After this the order is shown as expired (a payment that still arrives is accepted).
+  expiresAt         DateTime  @map("expires_at") @db.Timestamptz(3)
+  workspace         Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([workspaceId, createdAt(sort: Desc)])
+  @@index([status, createdAt(sort: Desc)])
+  @@map("orders")
+}
+
+/// One payment notification from a provider. (provider, eventId) is unique, so a repeated delivery is harmless.
+model PaymentEvent {
+  id        String   @id @default(uuid()) @db.Uuid
+  provider  String
+  eventId   String   @map("event_id")
+  direction String
+  amountVnd Int      @map("amount_vnd")
+  /// The transfer note, kept short and never used as an instruction.
+  note      String
+  /// 'applied' | 'review' | 'unmatched' | 'ignored'
+  result    String
+  orderId   String?  @map("order_id") @db.Uuid
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(3)
+
+  @@unique([provider, eventId])
+  @@index([result, createdAt(sort: Desc)])
+  @@map("payment_events")
 }
 
 /// Single row (id = 1): the last disk measurement of the storage volume, written by the worker.
@@ -370,10 +421,10 @@ model AuthThrottle {
 }
 
 model WorkerHeartbeat {
-  workerId      String   @id @map("worker_id")
-  startedAt     DateTime @map("started_at") @db.Timestamptz(3)
-  lastSeenAt    DateTime @map("last_seen_at") @db.Timestamptz(3)
-  infoJson      Json     @map("info_json")
+  workerId   String   @id @map("worker_id")
+  startedAt  DateTime @map("started_at") @db.Timestamptz(3)
+  lastSeenAt DateTime @map("last_seen_at") @db.Timestamptz(3)
+  infoJson   Json     @map("info_json")
 
   @@map("worker_heartbeats")
 }

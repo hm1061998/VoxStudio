@@ -6,12 +6,13 @@ import type { MessageKey } from '../i18n/en';
 import { api, describeError } from '../api/client';
 import { useAuth } from '../app/auth';
 import { ModeSwitch, ThemeSwitch } from '../app/Shell';
-import { LanguageSelect } from '../components/ui';
+import { LanguageSelect, fmtDate } from '../components/ui';
 import { useI18n } from '../i18n';
 
 const SECTIONS: { to: string; label: MessageKey }[] = [
   { to: 'profile', label: 'acct.profile' },
   { to: 'plan', label: 'acct.plan' },
+  { to: 'upgrade', label: 'acct.upgrade' },
   { to: 'password', label: 'acct.password' },
   { to: 'devices', label: 'acct.devices' },
   { to: 'data', label: 'acct.data' },
@@ -333,6 +334,7 @@ export function PlanSection() {
       <ul className="max-w-xl space-y-1 text-sm text-muted">
         <li>{aiText}</li>
         <li>{t(p.heavyExports ? 'plan.heavyYes' : 'plan.heavyNo')}</li>
+        {p.planExpiresAt && <li>{t('plan.expires', { date: fmtDate(p.planExpiresAt, lang) })}</li>}
       </ul>
     </>
   );

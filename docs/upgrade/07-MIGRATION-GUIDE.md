@@ -77,3 +77,7 @@ Rollback: redeploy the previous build; the new columns and table are ignored. To
 | Docker          | the `vieneu` service is no longer behind a profile (never built by QA)                                    | set `VIENEU_SERVICE_TOKEN`                                                                                                                                 |
 
 Rollback: redeploy the previous build; the new tables are ignored.
+
+## 9. Addendum: optional billing (2026-11-01, ADR 0010)
+
+Migration `20261101200000_billing` adds `workspaces.plan_expires_at` (null = no expiry, so every existing plan keeps working), and the tables `orders` and `payment_events`. New environment variables: `PLAN_PRICES_VND_JSON`, `PAYMENT_BANK_NAME`, `PAYMENT_BANK_ACCOUNT`, `PAYMENT_BANK_HOLDER`, `PAYMENT_WEBHOOK_SECRET`; billing stays off until prices are set. Rollback: the new column and tables are ignored by the previous build.

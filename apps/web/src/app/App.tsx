@@ -2,6 +2,7 @@ import { Navigate, Route, Routes, useLocation } from 'react-router';
 import { Spinner } from '../components/ui';
 import { useAuth } from './auth';
 import { useI18n } from '../i18n';
+import { UpgradeSection } from '../pages/UpgradePage';
 import { RouteMeta } from './RouteMeta';
 import { Shell } from './Shell';
 import { LoginPage, RegisterPage, ResetPage } from '../pages/AuthPages';
@@ -60,6 +61,7 @@ export function App() {
             <Route index element={<SettingsIndex />} />
             <Route path="profile" element={<ProfileSection />} />
             <Route path="plan" element={<PlanSection />} />
+            <Route path="upgrade" element={<UpgradeSection />} />
             <Route path="password" element={<PasswordSection />} />
             <Route path="devices" element={<DevicesSection />} />
             <Route path="data" element={<DataSection />} />

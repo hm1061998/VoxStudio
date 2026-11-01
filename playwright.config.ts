@@ -45,6 +45,11 @@ export default defineConfig({
     env: {
       API_PORT: PORT,
       CORS_ORIGINS: `http://localhost:${PORT}`,
+      PLAN_PRICES_VND_JSON: '{"pro":100000,"business":300000}',
+      PAYMENT_WEBHOOK_SECRET: 'e2e-webhook-secret-123456',
+      PAYMENT_BANK_NAME: 'Test Bank',
+      PAYMENT_BANK_ACCOUNT: '0123456789',
+      PAYMENT_BANK_HOLDER: 'VOXSTUDIO',
       ENABLED_ENGINES: process.env.E2E_AI ? 'espeak,vieneu' : 'espeak',
     },
     timeout: 120_000,

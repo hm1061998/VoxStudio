@@ -10,6 +10,7 @@ export * from './engine/capabilities';
 export * from './engine/espeak';
 export * from './plans';
 export * from './disk';
+export * from './billing';
 export * from './engine/registry';
 export * from './engine/vieneu';
 export * from './text/pauses';

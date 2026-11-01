@@ -4,6 +4,7 @@ import {
   adminUserQuerySchema,
   adminUserUpdateSchema,
   engineToggleSchema,
+  orderDecisionSchema,
   voiceToggleSchema,
   workspacePlanSchema,
   ErrorCodes,
@@ -16,13 +17,14 @@ import {
   type AdminWorkspaceDto,
   type PlanId,
 } from '@voxstudio/contracts';
-import { isPlanId, usageMonth, type AppConfig } from '@voxstudio/core';
+import { effectivePlan, isPlanId, usageMonth, type AppConfig } from '@voxstudio/core';
 import { Inject } from '@nestjs/common';
 import { z } from 'zod';
 import { AdminOnly } from '../auth/guards';
 import { AuthService } from '../auth/auth.service';
 import { CatalogService } from '../catalog/catalog.service';
 import { AuditService } from '../common/audit';
+import { BillingService } from '../billing/billing.service';
 import { DiskService } from '../common/disk';
 import { CurrentUser, UuidPipe, ZodPipe, type SessionUser } from '../common/http';
 import { CONFIG, PrismaService } from '../common/infra';
@@ -43,6 +45,7 @@ export class AdminController {
     private readonly audit: AuditService,
     private readonly auth: AuthService,
     private readonly disk: DiskService,
+    private readonly billing: BillingService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -103,7 +106,7 @@ export class AdminController {
       this.prisma.workerHeartbeat.findFirst({ orderBy: { lastSeenAt: 'desc' } }),
       this.prisma.user.groupBy({ by: ['status', 'role'], _count: true }),
       this.prisma.user.count({ where: { createdAt: { gte: new Date(Date.now() - 7 * 24 * 3600_000) } } }),
-      this.prisma.workspace.groupBy({ by: ['plan'], _count: true }),
+      this.prisma.workspace.findMany({ select: { plan: true, planExpiresAt: true } }),
       this.prisma.aiUsage.aggregate({ where: { month }, _sum: { chars: true } }),
       this.prisma.authThrottle.aggregate({
         where: { key: { startsWith: 'acct:' }, lastFailureAt: { gte: since } },
@@ -114,7 +117,7 @@ export class AdminController {
     ]);
     const info = (hb?.infoJson ?? {}) as { ffmpegVersion?: string; espeakVersion?: string };
     const plans = { free: 0, pro: 0, business: 0 } as Record<PlanId, number>;
-    for (const g of planGroups) plans[planOf(g.plan)] += g._count;
+    for (const w of planGroups) plans[effectivePlan(w.plan, w.planExpiresAt)] += 1;
     const sum = (f: (g: (typeof userCounts)[number]) => boolean) =>
       userCounts.filter(f).reduce((a, g) => a + g._count, 0);
     const aiEnabled = this.config.enabledEngines.includes('vieneu');
@@ -394,7 +397,8 @@ export class AdminController {
       id: w.id,
       name: w.name,
       ownerEmail: w.owner.email,
-      plan: planOf(w.plan),
+      plan: effectivePlan(w.plan, w.planExpiresAt),
+      planExpiresAt: w.planExpiresAt?.toISOString() ?? null,
       aiUsedChars: u.get(w.id) ?? 0,
       pendingJobs: p.get(w.id) ?? 0,
     }));
@@ -411,16 +415,53 @@ export class AdminController {
       throw new VoxError(ErrorCodes.VALIDATION_FAILED, 'Unknown plan.');
     const w = await this.prisma.workspace.findUnique({ where: { id } });
     if (!w) throw new VoxError(ErrorCodes.NOT_FOUND, 'Workspace not found.');
-    await this.prisma.workspace.update({ where: { id }, data: { plan: body.plan } });
+    const expiresAt = body.plan === 'free' || !body.expiresAt ? null : new Date(body.expiresAt);
+    await this.prisma.workspace.update({
+      where: { id },
+      data: { plan: body.plan, planExpiresAt: expiresAt },
+    });
     await this.audit.record({
       eventType: 'workspace.plan_changed',
       resourceType: 'workspace',
       resourceId: id,
       actorUserId: user.id,
       workspaceId: id,
-      metadata: { from: w.plan, to: body.plan },
+      metadata: { from: w.plan, to: body.plan, expiresAt: expiresAt?.toISOString() ?? null },
     });
-    return { id, plan: body.plan };
+    return { id, plan: body.plan, planExpiresAt: expiresAt?.toISOString() ?? null };
+  }
+
+  /** Orders (optionally one status), newest first. */
+  @Get('orders')
+  orders(@Query('status') status?: string) {
+    return this.billing.adminOrders(status);
+  }
+
+  /** The administrator has seen the money: apply the plan to the workspace. */
+  @Post('orders/:id/confirm')
+  @HttpCode(200)
+  confirmOrder(
+    @CurrentUser() admin: SessionUser,
+    @Param('id', UuidPipe) id: string,
+    @Body(new ZodPipe(orderDecisionSchema)) body: z.infer<typeof orderDecisionSchema>,
+  ) {
+    return this.billing.adminConfirm(admin.id, id, body.note);
+  }
+
+  @Post('orders/:id/reject')
+  @HttpCode(200)
+  rejectOrder(
+    @CurrentUser() admin: SessionUser,
+    @Param('id', UuidPipe) id: string,
+    @Body(new ZodPipe(orderDecisionSchema)) body: z.infer<typeof orderDecisionSchema>,
+  ) {
+    return this.billing.adminReject(admin.id, id, body.note);
+  }
+
+  /** Transfers that matched no order or need a decision. */
+  @Get('payment-events')
+  paymentEvents() {
+    return this.billing.adminPaymentEvents();
   }
 
   /** Re-read installed voices and QA report (e.g. after running `pnpm qa:voices`). */

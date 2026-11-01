@@ -3,6 +3,8 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import {
   PLAN_IDS,
   type AdminAuditDto,
+  type AdminOrderDto,
+  type AdminPaymentEventDto,
   type AdminOverviewDto,
   type AdminUserDto,
   type AdminUserPageDto,
@@ -13,10 +15,11 @@ import { api, describeError } from '../api/client';
 import { useAuth } from '../app/auth';
 import { AiBadge } from '../components/VoiceProfilePanel';
 import { Confirm, ErrorNote, Spinner, TierBadge, fmtBytes, fmtDate } from '../components/ui';
+import { StatusBadge, useVnd } from './UpgradePage';
 import { useI18n } from '../i18n';
 import type { MessageKey } from '../i18n/en';
 
-const TABS = ['overview', 'users', 'plans', 'voices', 'audit'] as const;
+const TABS = ['overview', 'users', 'plans', 'orders', 'voices', 'audit'] as const;
 type Tab = (typeof TABS)[number];
 
 function Stat({
@@ -91,6 +94,7 @@ export function AdminPage() {
         {tab === 'overview' && <Overview />}
         {tab === 'users' && <Users />}
         {tab === 'plans' && <Plans />}
+        {tab === 'orders' && <Orders />}
         {tab === 'voices' && <VoicesAndEngines />}
         {tab === 'audit' && <Audit />}
       </div>
@@ -483,6 +487,7 @@ function Plans() {
             </th>
             <th scope="col">{t('admin.col.owner')}</th>
             <th scope="col">{t('admin.col.plan')}</th>
+            <th scope="col">{t('admin.col.expires')}</th>
             <th scope="col">{t('admin.col.aiUsed')}</th>
             <th scope="col">{t('admin.col.pending')}</th>
           </tr>
@@ -514,6 +519,27 @@ function Plans() {
                   ))}
                 </select>
               </td>
+              <td>
+                <input
+                  type="date"
+                  className="input w-40 py-0.5 text-xs"
+                  disabled={w.plan === 'free'}
+                  value={w.planExpiresAt?.slice(0, 10) ?? ''}
+                  aria-label={t('admin.setExpiry', { name: w.name })}
+                  onChange={(e) => {
+                    setErr(null);
+                    api(`/admin/workspaces/${w.id}/plan`, {
+                      method: 'PATCH',
+                      body: {
+                        plan: w.plan,
+                        expiresAt: e.target.value ? `${e.target.value}T23:59:59.000Z` : null,
+                      },
+                    })
+                      .then(() => qc.invalidateQueries({ queryKey: ['admin'] }))
+                      .catch((x) => setErr(describeError(x)));
+                  }}
+                />
+              </td>
               <td className="font-mono text-xs">{w.aiUsedChars.toLocaleString(lang)}</td>
               <td className="font-mono text-xs">{w.pendingJobs}</td>
             </tr>
@@ -521,6 +547,170 @@ function Plans() {
         </tbody>
       </table>
     </section>
+  );
+}
+
+function Orders() {
+  const { t, lang } = useI18n();
+  const vnd = useVnd();
+  const qc = useQueryClient();
+  const [status, setStatus] = useState('');
+  const [err, setErr] = useState<string | null>(null);
+  const [asking, setAsking] = useState<{ order: AdminOrderDto; action: 'confirm' | 'reject' } | null>(null);
+  const orders = useQuery({
+    queryKey: ['admin', 'orders', status],
+    queryFn: () => api<AdminOrderDto[]>(`/admin/orders${status ? `?status=${status}` : ''}`),
+    refetchInterval: 20_000,
+  });
+  const events = useQuery({
+    queryKey: ['admin', 'payment-events'],
+    queryFn: () => api<AdminPaymentEventDto[]>('/admin/payment-events'),
+  });
+  const decide = async (o: AdminOrderDto, action: 'confirm' | 'reject') => {
+    setErr(null);
+    try {
+      await api(`/admin/orders/${o.id}/${action}`, { method: 'POST', body: {} });
+      await qc.invalidateQueries({ queryKey: ['admin'] });
+    } catch (e) {
+      setErr(describeError(e));
+    }
+  };
+  if (orders.isLoading) return <Spinner />;
+  if (orders.error || !orders.data) return <ErrorNote error={orders.error ?? '—'} />;
+  return (
+    <div className="space-y-4">
+      <section className="card overflow-x-auto p-4" aria-labelledby="adm-orders-h">
+        <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
+          <h2 id="adm-orders-h" className="font-medium">
+            {t('adm.orders')}
+          </h2>
+          <label className="flex items-center gap-2 text-sm">
+            <span className="text-muted">{t('adm.orders.filter')}</span>
+            <select
+              className="input w-40 py-1 text-sm"
+              value={status}
+              onChange={(e) => setStatus(e.target.value)}
+            >
+              <option value="">{t('create.any')}</option>
+              {['pending', 'review', 'paid', 'expired', 'cancelled'].map((s) => (
+                <option key={s} value={s}>
+                  {t(`order.status.${s}` as MessageKey)}
+                </option>
+              ))}
+            </select>
+          </label>
+        </div>
+        <p className="mb-3 text-xs text-dim">{t('adm.orders.hint')}</p>
+        {err && <ErrorNote error={err} />}
+        {orders.data.length === 0 ? (
+          <p className="text-sm text-muted">{t('adm.orders.empty')}</p>
+        ) : (
+          <table className="w-full text-sm">
+            <caption className="sr-only">{t('adm.orders')}</caption>
+            <thead className="text-left text-xs text-dim">
+              <tr>
+                <th scope="col">{t('upgrade.col.date')}</th>
+                <th scope="col">{t('admin.col.owner')}</th>
+                <th scope="col">{t('upgrade.col.plan')}</th>
+                <th scope="col">{t('upgrade.amount')}</th>
+                <th scope="col">{t('upgrade.note')}</th>
+                <th scope="col">{t('upgrade.col.status')}</th>
+                <th scope="col">
+                  <span className="sr-only">{t('dash.col.actions')}</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {orders.data.map((o) => (
+                <tr key={o.id} className="border-t border-line align-top">
+                  <td className="py-1.5">{fmtDate(o.createdAt, lang)}</td>
+                  <td>
+                    {o.ownerEmail}
+                    <span className="block text-xs text-dim">{o.workspaceName}</span>
+                  </td>
+                  <td>
+                    {t(`plan.name.${o.plan}` as MessageKey)} · {o.months}
+                  </td>
+                  <td className="font-mono text-xs">
+                    {vnd(o.amountVnd)}
+                    {o.paidAmountVnd !== null && o.paidAmountVnd !== o.amountVnd && (
+                      <span className="block text-warn">
+                        {t('adm.orders.received', { amount: vnd(o.paidAmountVnd) })}
+                      </span>
+                    )}
+                  </td>
+                  <td className="font-mono text-xs">{o.paymentCode}</td>
+                  <td>
+                    <StatusBadge status={o.status} />
+                    {o.note && <span className="mt-1 block text-xs text-muted">{o.note}</span>}
+                  </td>
+                  <td>
+                    {o.status !== 'paid' && o.status !== 'cancelled' && (
+                      <div className="flex gap-1">
+                        <button
+                          className="btn btn-sm btn-primary"
+                          onClick={() => setAsking({ order: o, action: 'confirm' })}
+                        >
+                          {t('adm.orders.confirm')}
+                        </button>
+                        <button
+                          className="btn btn-sm"
+                          onClick={() => setAsking({ order: o, action: 'reject' })}
+                        >
+                          {t('adm.orders.reject')}
+                        </button>
+                      </div>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
+      {(events.data ?? []).length > 0 && (
+        <section className="card overflow-x-auto p-4" aria-labelledby="adm-events-h">
+          <h2 id="adm-events-h" className="mb-1 font-medium">
+            {t('adm.events')}
+          </h2>
+          <p className="mb-3 text-xs text-dim">{t('adm.events.hint')}</p>
+          <table className="w-full text-sm">
+            <caption className="sr-only">{t('adm.events')}</caption>
+            <thead className="text-left text-xs text-dim">
+              <tr>
+                <th scope="col">{t('upgrade.col.date')}</th>
+                <th scope="col">{t('upgrade.amount')}</th>
+                <th scope="col">{t('adm.events.note')}</th>
+                <th scope="col">{t('upgrade.col.status')}</th>
+              </tr>
+            </thead>
+            <tbody>
+              {(events.data ?? []).map((e) => (
+                <tr key={e.id} className="border-t border-line">
+                  <td className="py-1.5">{fmtDate(e.createdAt, lang)}</td>
+                  <td className="font-mono text-xs">{vnd(e.amountVnd)}</td>
+                  <td className="max-w-xs truncate">{e.note}</td>
+                  <td>{t(`adm.events.${e.result}` as MessageKey)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </section>
+      )}
+      {asking && (
+        <Confirm
+          danger={asking.action === 'reject'}
+          title={t(asking.action === 'confirm' ? 'adm.orders.confirmTitle' : 'adm.orders.rejectTitle')}
+          message={t(asking.action === 'confirm' ? 'adm.orders.confirmMsg' : 'adm.orders.rejectMsg', {
+            code: asking.order.paymentCode,
+            amount: vnd(asking.order.amountVnd),
+          })}
+          confirmLabel={t(asking.action === 'confirm' ? 'adm.orders.confirm' : 'adm.orders.reject')}
+          onClose={() => setAsking(null)}
+          onConfirm={() => void decide(asking.order, asking.action)}
+        />
+      )}
+    </div>
   );
 }
 

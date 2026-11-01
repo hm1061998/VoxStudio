@@ -1,3 +1,4 @@
+import { resolvePlanPrices, type PaidPlan } from './billing';
 import type { DiskThresholds } from './disk';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, mkdir, rm } from 'node:fs/promises';
@@ -101,6 +102,13 @@ const envSchema = z.object({
   /** Finished render jobs and audit events older than this are deleted daily. */
   JOB_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
   AUDIT_RETENTION_DAYS: z.coerce.number().int().min(7).max(3650).default(180),
+  /** Optional billing (ADR 0010). Empty prices = billing is off and administrators assign plans. */
+  PLAN_PRICES_VND_JSON: z.string().default(''),
+  PAYMENT_BANK_NAME: z.string().default(''),
+  PAYMENT_BANK_ACCOUNT: z.string().default(''),
+  PAYMENT_BANK_HOLDER: z.string().default(''),
+  /** Shared secret a payment provider (or the operator's bridge) sends to the webhook. Empty = webhook off. */
+  PAYMENT_WEBHOOK_SECRET: z.string().default(''),
   QUEUE_AGING_SECONDS: z.coerce.number().int().min(1).max(3600).default(30),
   /** Optional JSON overriding plan limits, e.g. {"pro":{"aiMonthlyChars":1000000}}. */
   PLAN_LIMITS_JSON: z.string().default(''),
@@ -137,6 +145,9 @@ export interface AppConfig {
   enabledEngines: string[];
   vnUnitDbDir: string | null;
   queueAgingSeconds: number;
+  planPrices: Partial<Record<PaidPlan, number>>;
+  bank: { name: string; account: string; holder: string } | null;
+  paymentWebhookSecret: string;
   disk: DiskThresholds;
   jobRetentionDays: number;
   auditRetentionDays: number;
@@ -159,6 +170,8 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error(`Invalid configuration: ${issues}`);
   }
   const e = parsed.data;
+  if (e.PAYMENT_WEBHOOK_SECRET && e.PAYMENT_WEBHOOK_SECRET.length < 16)
+    throw new Error('Invalid configuration: PAYMENT_WEBHOOK_SECRET must be at least 16 characters');
   if (e.DISK_BLOCK_FREE_PERCENT >= e.DISK_WARN_FREE_PERCENT)
     throw new Error(
       'Invalid configuration: DISK_BLOCK_FREE_PERCENT must be lower than DISK_WARN_FREE_PERCENT',
@@ -198,6 +211,12 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     enabledEngines: parseEnabledEngines(e.ENABLED_ENGINES),
     vnUnitDbDir: e.VN_UNIT_DB_DIR ? abs(e.VN_UNIT_DB_DIR) : null,
     queueAgingSeconds: e.QUEUE_AGING_SECONDS,
+    planPrices: resolvePlanPrices(e.PLAN_PRICES_VND_JSON),
+    bank:
+      e.PAYMENT_BANK_NAME && e.PAYMENT_BANK_ACCOUNT
+        ? { name: e.PAYMENT_BANK_NAME, account: e.PAYMENT_BANK_ACCOUNT, holder: e.PAYMENT_BANK_HOLDER }
+        : null,
+    paymentWebhookSecret: e.PAYMENT_WEBHOOK_SECRET,
     disk: {
       warnFreePercent: e.DISK_WARN_FREE_PERCENT,
       blockFreePercent: e.DISK_BLOCK_FREE_PERCENT,

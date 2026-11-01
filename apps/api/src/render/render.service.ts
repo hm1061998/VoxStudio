@@ -9,7 +9,7 @@ import {
   type RenderJobDto,
   type SynthesisSettings,
 } from '@voxstudio/contracts';
-import { defaultSettings, isPlanId, usageMonth, type AppConfig, type PlanLimits } from '@voxstudio/core';
+import { defaultSettings, effectivePlan, usageMonth, type AppConfig, type PlanLimits } from '@voxstudio/core';
 import { CatalogService } from '../catalog/catalog.service';
 import { Prisma, notifyJob, type RenderJob } from '@voxstudio/db';
 import { AccessService } from '../common/access';
@@ -40,15 +40,25 @@ export class RenderService {
   }
 
   /** Limits of the workspace's plan (unknown plan names fall back to the free plan). */
-  async planLimits(workspaceId: string): Promise<{ plan: string; limits: PlanLimits }> {
-    const w = await this.prisma.workspace.findUnique({ where: { id: workspaceId }, select: { plan: true } });
-    const plan = w && isPlanId(w.plan) ? w.plan : 'free';
-    return { plan, limits: this.config.planLimits[plan] };
+  async planLimits(
+    workspaceId: string,
+  ): Promise<{ plan: string; limits: PlanLimits; expiresAt: Date | null }> {
+    const w = await this.prisma.workspace.findUnique({
+      where: { id: workspaceId },
+      select: { plan: true, planExpiresAt: true },
+    });
+    // A paid plan past its expiry counts as free (nothing is deleted).
+    const plan = w ? effectivePlan(w.plan, w.planExpiresAt) : 'free';
+    return {
+      plan,
+      limits: this.config.planLimits[plan],
+      expiresAt: plan === 'free' ? null : (w?.planExpiresAt ?? null),
+    };
   }
 
   async planFor(user: SessionUser): Promise<PlanDto> {
     const workspaceId = this.access.defaultWorkspace(user);
-    const { plan, limits } = await this.planLimits(workspaceId);
+    const { plan, limits, expiresAt } = await this.planLimits(workspaceId);
     const month = usageMonth();
     const [agg, pending, stored] = await Promise.all([
       this.prisma.aiUsage.aggregate({ where: { workspaceId, month }, _sum: { chars: true } }),
@@ -66,6 +76,7 @@ export class RenderService {
       storageBytes: limits.storageBytes,
       storageUsedBytes: stored._sum.fileSizeBytes ?? 0,
       heavyExports: limits.heavyExports,
+      planExpiresAt: expiresAt?.toISOString() ?? null,
       month,
     };
   }

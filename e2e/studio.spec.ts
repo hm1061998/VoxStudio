@@ -579,6 +579,7 @@ test('accessibility: no serious or critical violations on the main screens', asy
     ['/renders', 'exports'],
     ['/settings', 'settings'],
     ['/settings/plan', 'settings plan'],
+    ['/settings/upgrade', 'settings upgrade'],
     ['/settings/password', 'settings password'],
     ['/settings/devices', 'settings devices'],
     ['/settings/data', 'settings data'],
@@ -588,7 +589,7 @@ test('accessibility: no serious or critical violations on the main screens', asy
     await page.waitForLoadState('networkidle');
     await check(name);
   }
-  for (const tab of ['Users', 'Plans and usage', 'Voices and engines', 'Audit log']) {
+  for (const tab of ['Users', 'Plans and usage', 'Orders', 'Voices and engines', 'Audit log']) {
     await page.getByRole('tab', { name: tab }).click();
     await page.waitForLoadState('networkidle');
     await check('admin ' + tab);
@@ -657,4 +658,62 @@ test('page titles follow the screen; sign-in pages are indexable, the signed-in 
   await expect(page).toHaveTitle(/Voices · VoxStudio/);
   await page.goto('/settings/plan');
   await expect(page).toHaveTitle(/Account · VoxStudio/);
+});
+
+test('buying a plan: order, bank details, payment notice activates it; an administrator can confirm by hand', async ({
+  page,
+  request,
+  context,
+}) => {
+  // Several sign-ins in one minute would hit the per-address limit; this test comes from its own address.
+  await context.setExtraHTTPHeaders({
+    'x-forwarded-for': `10.99.${Date.now() % 250}.${(Date.now() >> 3) % 250}`,
+  });
+  const u = await apiRegister(request, 'Plan Buyer');
+  await context.clearCookies();
+  await signIn(page, u.email, u.password);
+  await page.goto('/settings/upgrade');
+  await expect(page.getByRole('heading', { name: 'Upgrade plan' })).toBeVisible();
+  await page.getByLabel('Period').selectOption('3');
+  await expect(page.getByText(/^Total/)).toContainText(/300[.,]000/);
+  await page.getByRole('button', { name: 'Create payment order' }).click();
+  const code = (await page.locator('code').first().innerText()).trim();
+  expect(code).toMatch(/^VOX[A-HJ-NP-Z2-9]{8}$/);
+  await expect(page.getByText('Test Bank')).toBeVisible();
+  await expect(page.getByText('0123456789')).toBeVisible();
+  await expect(page.getByText(/activated automatically/)).toBeVisible();
+
+  // A payment notice with the wrong amount waits for a person; the right one activates the plan.
+  const hook = (eventId: string, amountVnd: number) =>
+    request.post('/api/v1/payments/webhook/generic', {
+      headers: { authorization: 'Bearer e2e-webhook-secret-123456' },
+      data: { eventId, direction: 'in', amountVnd, note: `ND ${code} thanh toan` },
+    });
+  expect(((await (await hook(`e2e-${code}-1`, 100_000)).json()) as { result: string }).result).toBe('review');
+  await page.goto('/settings/plan');
+  await expect(page.getByRole('heading', { name: /Your plan: Free/ })).toBeVisible();
+
+  const admin = await apiRegister(request, 'Order Admin');
+  operator('promote', admin.email);
+  await context.clearCookies();
+  await signIn(page, admin.email, admin.password);
+  await page.goto('/admin');
+  await page.getByRole('tab', { name: 'Orders' }).click();
+  const row = page.getByRole('table', { name: 'Orders' }).getByRole('row').filter({ hasText: code });
+  await expect(row).toBeVisible();
+  await row.getByRole('button', { name: 'Confirm payment' }).click();
+  await page.getByRole('dialog').getByRole('button', { name: 'Confirm payment' }).click();
+  await expect(row.getByText('Paid', { exact: true })).toBeVisible();
+
+  await context.clearCookies();
+  await signIn(page, u.email, u.password);
+  await page.goto('/settings/plan');
+  await expect(page.getByRole('heading', { name: /Your plan: Pro/ })).toBeVisible();
+  await expect(page.getByText(/paid plan ends on/)).toBeVisible();
+  await expect(page.getByText(/24-bit\): included\./)).toBeVisible();
+
+  // The same notice delivered again changes nothing.
+  expect(((await (await hook(`e2e-${code}-1`, 100_000)).json()) as { result: string }).result).toBe(
+    'duplicate',
+  );
 });
