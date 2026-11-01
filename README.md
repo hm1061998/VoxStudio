@@ -1,30 +1,28 @@
 # VoxStudio
 
-**Tiếng Việt:** VoxStudio là web studio tự lưu trữ để chuyển văn bản thành giọng đọc. Bản mặc định chỉ dùng giọng AI tiếng Việt (VieNeu-TTS) chạy trong một dịch vụ riêng trên máy chủ của bạn, chọn được vùng miền (Bắc, Trung, Nam) và giới tính, xuất MP3 hoặc WAV. Văn bản không gửi ra dịch vụ bên ngoài. Có phân quyền người dùng và quản trị viên, trang quản trị, gói dịch vụ có hạn mức, và bảo vệ ổ đĩa. Phần còn lại của tài liệu viết bằng tiếng Anh.
+VoxStudio là web studio giọng đọc tự lưu trữ. Ở cấu hình mặc định, sản phẩm chỉ cung cấp **giọng AI tiếng Việt**: mô hình VieNeu-TTS chạy trong một dịch vụ riêng, đặt ngay trên máy chủ của bạn (mạng nội bộ, có token, chỉ dùng các giọng có sẵn, không nhân bản giọng, không gọi API bên ngoài). Người dùng chọn vùng miền và giới tính, nghe thử bản thật, soạn dự án theo từng đoạn rồi xuất MP3 hoặc WAV.
 
-VoxStudio is a self-hosted web voice studio. In the default configuration it offers **Vietnamese AI voices** only: the VieNeu-TTS model runs in a separate, self-hosted service on your own server (internal network, token, preset voices only, no cloning, no outside API). Users choose region and gender, hear a real preview, edit a project paragraph by paragraph, and export MP3 or WAV.
-
-> **Voice policy (ADR 0007, 0008, 0009).** The rule-based engines in the code base (`espeak`: eSpeak NG 1.52.0 formant synthesis, and `vnunit`: a Vietnamese unit-selection experiment) are **not offered unless an operator lists them in `ENABLED_ENGINES`**. They stay strictly non-AI, are kept for development, tests and other languages, and are never a silent fallback for the AI engine. AI voices are labelled "AI" everywhere in the UI. Without the model service no voice is available and `/health/ready` returns 503.
+> **Chính sách giọng đọc (ADR 0007, 0008, 0009).** Hai bộ máy dựa trên quy tắc có trong mã nguồn là `espeak` (tổng hợp formant eSpeak NG 1.52.0) và `vnunit` (thử nghiệm ghép đơn vị tiếng Việt). Cả hai **không được cung cấp cho người dùng trừ khi người vận hành liệt kê chúng trong `ENABLED_ENGINES`**. Chúng vẫn hoàn toàn không dùng AI, được giữ lại cho phát triển, kiểm thử và các ngôn ngữ khác, và không bao giờ là phương án thay thế ngầm cho bộ máy AI. Giọng AI luôn được gắn nhãn "AI" trong giao diện. Khi không có dịch vụ mô hình thì không giọng nào dùng được và `/health/ready` trả về 503.
 >
-> VoxStudio makes no claim about how natural or human the voices sound: nobody has done a listening evaluation yet (tracker UP-045). Presets are deterministic parameter bundles, not emotional acting.
+> VoxStudio không khẳng định giọng đọc tự nhiên hay giống người: chưa có ai nghe và đánh giá (mục UP-045 trong bảng theo dõi). Các kiểu giọng chỉ là bộ tham số cố định, không phải diễn xuất cảm xúc.
 
-## What works
+## Tính năng đang chạy
 
-- **Studio:** projects with paragraphs, split/merge/reorder, `[pause 500ms]` markers, `.txt` import, undo/redo, autosave with conflict handling, version snapshots, pronunciation dictionary, voice styles (presets).
-- **Voices:** a gallery of six AI voices with per-voice real samples, filtered by region (Bắc, Trung, Nam) and gender. Simple mode shows voice, speed, pitch, volume and pause; Advanced mode shows every engine and DSP control, each labelled Engine or DSP.
-- **Rendering:** PostgreSQL-backed job queue with an isolated worker, progress over SSE, retry and cancel, content-addressed render cache (editing one paragraph re-synthesizes only that paragraph). Export to MP3, OGG or WAV; every file is probed and decoded before it is offered.
-- **Home:** "Hear it first" (paste text, choose region and gender, hear a real preview, then save as a project).
-- **Interface:** Vietnamese and English, light and dark themes (Auto follows the system), desktop rail and phone bottom bar, keyboard and screen-reader support (axe-core checks in both themes).
-- **Accounts and roles:** `user` and `admin`. Every project, asset and job is owner-scoped (other users' resources return 404). The account area has separate pages: Profile, Plan and usage, Password, Signed-in devices, My data.
-- **Admin dashboard (`/admin`, administrators only):** overview (users, queue, AI service, disk space, largest workspaces, security counters), users (role, status, plan), engines and voices, jobs, audit log. Ordinary users get 403 on every admin route.
-- **Plans:** free, pro, business. They set queue priority, pending-job limit, monthly AI characters, stored-audio allowance and whether large WAV exports are allowed. An administrator assigns them; there is no billing.
-- **Security:** scrypt passwords with a policy, account and address lockout, session limits and idle timeout, CSRF token plus Origin check, strict cookies, security headers, audit trail. See [docs/upgrade/10-SECURITY-AND-ACCESS.md](docs/upgrade/10-SECURITY-AND-ACCESS.md).
-- **Disk protection:** the worker measures the storage volume every minute. Low space shortens retention and warns the admin; critically low space refuses new audio jobs (`DISK_FULL`) while saved audio keeps playing. Old drafts, unreferenced audio, finished jobs and old audit events are cleaned up automatically.
-- **Search engines:** `robots.txt`, `sitemap.xml`, canonical and social-preview tags are generated from `PUBLIC_BASE_URL`; only the sign-in and registration pages are indexable; the signed-in app and the API ask not to be indexed.
+- **Studio:** dự án gồm các đoạn; tách, gộp, đổi thứ tự; dấu ngắt `[pause 500ms]`; nhập tệp `.txt`; hoàn tác và làm lại; tự lưu có xử lý xung đột; lưu phiên bản; từ điển phát âm; kiểu giọng (preset).
+- **Giọng đọc:** thư viện sáu giọng AI, mỗi giọng có bản nghe thử thật, lọc theo vùng miền (Bắc, Trung, Nam) và giới tính. Chế độ Đơn giản chỉ hiện giọng, tốc độ, cao độ, âm lượng và quãng nghỉ; chế độ Nâng cao hiện mọi điều khiển của bộ máy và xử lý âm thanh, mỗi điều khiển được ghi rõ là của Bộ máy hay của DSP.
+- **Xuất âm thanh:** hàng đợi việc trên PostgreSQL với worker tách biệt, tiến độ theo thời gian thực qua SSE, thử lại và hủy việc, bộ nhớ đệm theo nội dung (sửa một đoạn chỉ tổng hợp lại đúng đoạn đó). Xuất ra MP3, OGG hoặc WAV; mỗi tệp được kiểm tra và giải mã đầy đủ trước khi cung cấp cho người dùng.
+- **Trang chủ:** khối "Nghe thử trước": dán văn bản, chọn vùng miền và giới tính, nghe bản thử thật, sau đó lưu thành dự án.
+- **Giao diện:** tiếng Việt và tiếng Anh; chủ đề sáng và tối (Tự động theo hệ thống); thanh điều hướng bên trái trên máy tính, thanh dưới cùng trên điện thoại; hỗ trợ bàn phím và trình đọc màn hình (có kiểm tra axe-core ở cả hai chủ đề).
+- **Tài khoản và vai trò:** `user` và `admin`. Mọi dự án, tệp âm thanh và việc đều thuộc về chủ sở hữu (tài nguyên của người khác trả về 404). Khu vực tài khoản gồm các trang riêng: Hồ sơ, Gói và mức dùng, Mật khẩu, Thiết bị đăng nhập, Dữ liệu của tôi.
+- **Trang quản trị (`/admin`, chỉ dành cho quản trị viên):** tổng quan (người dùng, hàng đợi, dịch vụ AI, dung lượng ổ đĩa, workspace dùng nhiều nhất, số liệu bảo mật), người dùng (vai trò, trạng thái, gói), bộ máy và giọng đọc, các việc, nhật ký kiểm toán. Người dùng thường nhận 403 ở mọi đường dẫn quản trị.
+- **Gói dịch vụ:** free, pro, business. Gói quy định độ ưu tiên hàng đợi, số việc chờ tối đa, số ký tự AI mỗi tháng, dung lượng âm thanh được lưu và quyền xuất WAV dung lượng lớn. Quản trị viên gán gói; chưa có thanh toán.
+- **Bảo mật:** mật khẩu băm bằng scrypt kèm chính sách mật khẩu, khóa theo tài khoản và theo địa chỉ, giới hạn phiên và hết hạn khi không hoạt động, token CSRF kèm kiểm tra Origin, cookie nghiêm ngặt, các header bảo mật, nhật ký kiểm toán. Xem [docs/upgrade/10-SECURITY-AND-ACCESS.md](docs/upgrade/10-SECURITY-AND-ACCESS.md).
+- **Bảo vệ ổ đĩa:** worker đo ổ chứa dữ liệu mỗi phút. Khi dung lượng trống thấp, hệ thống rút ngắn thời gian lưu và cảnh báo quản trị viên; khi cực thấp, hệ thống từ chối việc tạo âm thanh mới (`DISK_FULL`) nhưng âm thanh đã lưu vẫn nghe được. Bản nháp cũ, âm thanh không còn được tham chiếu, việc đã xong và nhật ký kiểm toán cũ được dọn tự động.
+- **Công cụ tìm kiếm:** `robots.txt`, `sitemap.xml`, thẻ canonical và thẻ xem trước khi chia sẻ được tạo từ `PUBLIC_BASE_URL`; chỉ trang đăng nhập và đăng ký được phép lập chỉ mục; ứng dụng sau đăng nhập và API yêu cầu không lập chỉ mục.
 
-## Quick start (local, Windows, macOS or Linux)
+## Chạy nhanh (máy cục bộ: Windows, macOS hoặc Linux)
 
-Prerequisites: Node.js 22 or newer, pnpm, PostgreSQL binaries 16 or newer, and a **compliant FFmpeg** (no `flite` or `whisper`, see [ADR 0004](docs/decisions/0004-ffmpeg-dsp-toolchain.md)). eSpeak NG 1.52.0 is needed only if you enable the `espeak` engine. The AI voice service needs Python 3.12 and the model weights (see [services/vieneu/README.md](services/vieneu/README.md)); weights are never committed.
+Yêu cầu: Node.js 22 trở lên, pnpm, bộ chương trình PostgreSQL 16 trở lên và một bản **FFmpeg đạt chuẩn** (không có `flite` hay `whisper`, xem [ADR 0004](docs/decisions/0004-ffmpeg-dsp-toolchain.md)). Chỉ cần eSpeak NG 1.52.0 nếu bạn bật bộ máy `espeak`. Dịch vụ giọng AI cần Python 3.12 và tệp trọng số của mô hình (xem [services/vieneu/README.md](services/vieneu/README.md)); trọng số không bao giờ được đưa vào repo.
 
 ```bash
 pnpm install
@@ -34,22 +32,22 @@ pnpm install
 pnpm db:start
 ```
 
-`db:start` starts a project-local PostgreSQL on 127.0.0.1:5433 and writes `.env`. Open `.env` and set the AI service (the token is any random string of at least 16 characters, and must match on both sides):
+`db:start` khởi động một PostgreSQL riêng của dự án tại 127.0.0.1:5433 và ghi tệp `.env`. Mở `.env` và khai báo dịch vụ AI (token là một chuỗi ngẫu nhiên dài ít nhất 16 ký tự, phải giống nhau ở cả hai phía):
 
 ```bash
 ENABLED_ENGINES=vieneu
 VIENEU_SERVICE_URLS=http://127.0.0.1:8765
-VIENEU_SERVICE_TOKEN=<random token>
+VIENEU_SERVICE_TOKEN=<token ngẫu nhiên>
 VIENEU_APPROVED=true
 ```
 
-Start the model service in one terminal (it reads the token from `.env`; set `VIENEU_PYTHON` if your Python is not found automatically). Wait about a minute for the model to load:
+Chạy dịch vụ mô hình ở một cửa sổ terminal (script đọc token từ `.env`; đặt `VIENEU_PYTHON` nếu không tự tìm thấy Python). Đợi khoảng một phút để mô hình tải xong:
 
 ```bash
 node scripts/start-ai-service.mjs
 ```
 
-Then in another terminal (stop the app first whenever you rebuild: Prisma cannot replace its engine file while the app runs):
+Sau đó, ở một cửa sổ terminal khác (mỗi lần build lại phải tắt ứng dụng trước, vì Prisma không thay được tệp engine khi ứng dụng đang chạy):
 
 ```bash
 pnpm build
@@ -59,92 +57,92 @@ pnpm build
 pnpm start
 ```
 
-`pnpm start` runs the migrations, then the API (which also serves the web app) and the worker. Open http://localhost:4000 and register. The first account registered with an email listed in `ADMIN_EMAILS` becomes the administrator, only while no administrator exists. After that, promote people in the dashboard or with the operator command:
+`pnpm start` chạy migration, rồi chạy API (đồng thời phục vụ ứng dụng web) và worker. Mở http://localhost:4000 và đăng ký. Tài khoản đầu tiên đăng ký bằng email nằm trong `ADMIN_EMAILS` sẽ trở thành quản trị viên, và chỉ khi chưa có quản trị viên nào. Sau đó, thăng quyền cho người khác trong trang quản trị hoặc bằng lệnh của người vận hành:
 
 ```bash
 node scripts/user-admin.mjs list
 ```
 
-`node scripts/user-admin.mjs promote <email>` (also `demote`, `suspend`, `activate`, `revoke`) works on the database directly.
+`node scripts/user-admin.mjs promote <email>` (còn có `demote`, `suspend`, `activate`, `revoke`) thao tác trực tiếp trên cơ sở dữ liệu.
 
-For UI development with hot reload, run `pnpm dev:web` (port 5173, proxies `/api` to 4000) alongside `pnpm start`.
+Khi phát triển giao diện cần tải lại nóng, chạy `pnpm dev:web` (cổng 5173, chuyển `/api` sang cổng 4000) song song với `pnpm start`.
 
-## Configuration
+## Cấu hình
 
-Set in `.env` (local) or `.env.docker` (Compose). See `.env.example` for the full list.
+Đặt trong `.env` (chạy cục bộ) hoặc `.env.docker` (Compose). Danh sách đầy đủ nằm trong `.env.example`.
 
-| Variable                                                                | Default                 | Meaning                                                                          |
-| ----------------------------------------------------------------------- | ----------------------- | -------------------------------------------------------------------------------- |
-| `ENABLED_ENGINES`                                                       | `vieneu`                | Engines offered to users: `vieneu`, `espeak`, `vnunit`                           |
-| `VIENEU_SERVICE_URLS`, `VIENEU_SERVICE_TOKEN`, `VIENEU_APPROVED`        | empty                   | AI model service address, shared token, admin approval flag                      |
-| `PUBLIC_BASE_URL`                                                       | `http://localhost:4000` | Public address; used for canonical links, sitemap and the allowed origin         |
-| `ADMIN_EMAILS`                                                          | empty                   | Bootstraps the **first** administrator only                                      |
-| `ALLOW_REGISTRATION`                                                    | `true`                  | `false` closes self-registration                                                 |
-| `SESSION_IDLE_HOURS`                                                    | `24`                    | Idle session expiry                                                              |
-| `TRUST_PROXY`                                                           | `loopback`              | Which proxies may set `X-Forwarded-For` (set it correctly behind Caddy or a CDN) |
-| `PLAN_LIMITS_JSON`                                                      | empty                   | Override plan limits, e.g. `{"pro":{"aiMonthlyChars":1000000}}`                  |
-| `QUEUE_AGING_SECONDS`                                                   | `30`                    | Seconds of waiting that add one priority point to a queued job                   |
-| `DISK_WARN_FREE_PERCENT`, `DISK_BLOCK_FREE_PERCENT`, `DISK_MIN_FREE_MB` | `20`, `8`, `1024`       | Free-space thresholds for the disk guard                                         |
-| `JOB_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`                            | `30`, `180`             | Age after which finished jobs and audit events are deleted                       |
-| `STORAGE_LOCAL_ROOT`                                                    | `./storage`             | Where audio files are stored (put it on a volume you monitor)                    |
+| Biến                                                                    | Mặc định                | Ý nghĩa                                                                            |
+| ----------------------------------------------------------------------- | ----------------------- | ---------------------------------------------------------------------------------- |
+| `ENABLED_ENGINES`                                                       | `vieneu`                | Các bộ máy cung cấp cho người dùng: `vieneu`, `espeak`, `vnunit`                   |
+| `VIENEU_SERVICE_URLS`, `VIENEU_SERVICE_TOKEN`, `VIENEU_APPROVED`        | trống                   | Địa chỉ dịch vụ mô hình AI, token dùng chung, cờ quản trị viên phê duyệt           |
+| `PUBLIC_BASE_URL`                                                       | `http://localhost:4000` | Địa chỉ công khai; dùng cho thẻ canonical, sitemap và nguồn gốc (origin) được phép |
+| `ADMIN_EMAILS`                                                          | trống                   | Chỉ dùng để tạo quản trị viên **đầu tiên**                                         |
+| `ALLOW_REGISTRATION`                                                    | `true`                  | `false` để đóng đăng ký tự do                                                      |
+| `SESSION_IDLE_HOURS`                                                    | `24`                    | Số giờ không hoạt động thì phiên hết hạn                                           |
+| `TRUST_PROXY`                                                           | `loopback`              | Proxy nào được đặt `X-Forwarded-For` (cần đặt đúng khi chạy sau Caddy hoặc CDN)    |
+| `PLAN_LIMITS_JSON`                                                      | trống                   | Ghi đè hạn mức của gói, ví dụ `{"pro":{"aiMonthlyChars":1000000}}`                 |
+| `QUEUE_AGING_SECONDS`                                                   | `30`                    | Số giây chờ để việc trong hàng đợi được cộng thêm một điểm ưu tiên                 |
+| `DISK_WARN_FREE_PERCENT`, `DISK_BLOCK_FREE_PERCENT`, `DISK_MIN_FREE_MB` | `20`, `8`, `1024`       | Ngưỡng dung lượng trống để cảnh báo và để chặn                                     |
+| `JOB_RETENTION_DAYS`, `AUDIT_RETENTION_DAYS`                            | `30`, `180`             | Số ngày sau đó việc đã xong và nhật ký kiểm toán bị xóa                            |
+| `STORAGE_LOCAL_ROOT`                                                    | `./storage`             | Nơi lưu tệp âm thanh (nên đặt trên ổ bạn có theo dõi)                              |
 
-Set `PUBLIC_BASE_URL` to your real address before going public; it is what search engines and link previews see.
+Hãy đặt `PUBLIC_BASE_URL` thành địa chỉ thật trước khi đưa ra công khai; công cụ tìm kiếm và bản xem trước liên kết dùng địa chỉ này.
 
-## Docker Compose (production baseline)
+## Docker Compose (nền tảng cho môi trường chạy thật)
 
 ```bash
 cp .env.docker.example .env.docker
 ```
 
-Edit `.env.docker` and replace every `CHANGE_ME`, then:
+Sửa `.env.docker` và thay mọi giá trị `CHANGE_ME`, sau đó chạy:
 
 ```bash
 docker compose up -d --build
 ```
 
-Services: `caddy` (TLS reverse proxy), `api`, `worker` (internal network only), `vieneu` (the AI voice service, internal network only), `postgres`, and a one-shot `migrate`. Container logs rotate. FFmpeg is built from pinned, checksum-verified source. See [docs/10-DEPLOYMENT.md](docs/10-DEPLOYMENT.md) and [docs/upgrade/06-PRODUCTION-READINESS.md](docs/upgrade/06-PRODUCTION-READINESS.md). **Not verified:** Docker was not available on the development machine, so no image has ever been built.
+Các dịch vụ: `caddy` (reverse proxy có TLS), `api`, `worker` (chỉ ở mạng nội bộ), `vieneu` (dịch vụ giọng AI, chỉ ở mạng nội bộ), `postgres` và `migrate` (chạy một lần). Nhật ký container được xoay vòng. FFmpeg được biên dịch từ mã nguồn cố định phiên bản và có kiểm tra checksum. Xem [docs/10-DEPLOYMENT.md](docs/10-DEPLOYMENT.md) và [docs/upgrade/06-PRODUCTION-READINESS.md](docs/upgrade/06-PRODUCTION-READINESS.md). **Chưa kiểm chứng:** máy phát triển không có Docker nên chưa từng build image nào.
 
-## Commands
+## Các lệnh
 
-| Command                                              | Purpose                                                                                                                   |
-| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| `pnpm build`                                         | Generate the Prisma client and build all packages and the web app (stop the app first)                                    |
-| `pnpm test`                                          | Unit and API integration tests (Vitest, real PostgreSQL and FFmpeg; stop the model service first if memory is tight)      |
-| `pnpm test:e2e`                                      | Playwright journeys including accessibility. `E2E_PORT=4010 pnpm test:e2e` runs beside your own app, on the test database |
-| `E2E_AI=1 pnpm test:e2e`                             | Adds the real AI voice test (needs the model service and `VIENEU_*` variables)                                            |
-| `pnpm lint` / `pnpm format:check` / `pnpm typecheck` | Static checks                                                                                                             |
-| `pnpm audit:compliance`                              | Compliance audit: dependencies, endpoints, model files, FFmpeg filters, engine versions, AI service isolation             |
-| `node scripts/qa-security.mjs`                       | Black-box security probe against a running server (not a penetration test)                                                |
-| `node scripts/user-admin.mjs`                        | Operator commands: list, promote, demote, suspend, activate, revoke                                                       |
-| `pnpm user:reset-password <email>`                   | Issue a one-time password reset code (no email service is assumed)                                                        |
-| `node scripts/backup.mjs backup\|verify\|restore`    | Database and audio backup with restore verification                                                                       |
-| `node scripts/make-og-image.mjs`                     | Regenerate the social preview image                                                                                       |
+| Lệnh                                                 | Mục đích                                                                                                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| `pnpm build`                                         | Sinh Prisma client, build mọi gói và ứng dụng web (tắt ứng dụng trước)                                                                           |
+| `pnpm test`                                          | Kiểm thử đơn vị và tích hợp API (Vitest, dùng PostgreSQL và FFmpeg thật; tắt dịch vụ mô hình trước nếu bộ nhớ hạn chế)                           |
+| `pnpm test:e2e`                                      | Kiểm thử hành trình bằng Playwright, gồm cả khả năng truy cập. `E2E_PORT=4010 pnpm test:e2e` chạy cạnh ứng dụng của bạn, dùng cơ sở dữ liệu test |
+| `E2E_AI=1 pnpm test:e2e`                             | Thêm bài kiểm tra giọng AI thật (cần dịch vụ mô hình và các biến `VIENEU_*`)                                                                     |
+| `pnpm lint` / `pnpm format:check` / `pnpm typecheck` | Kiểm tra tĩnh                                                                                                                                    |
+| `pnpm audit:compliance`                              | Kiểm toán tuân thủ: phụ thuộc, endpoint, tệp mô hình, bộ lọc FFmpeg, phiên bản bộ máy, cách ly dịch vụ AI                                        |
+| `node scripts/qa-security.mjs`                       | Dò bảo mật kiểu hộp đen trên máy chủ đang chạy (không phải kiểm thử xâm nhập)                                                                    |
+| `node scripts/user-admin.mjs`                        | Lệnh của người vận hành: list, promote, demote, suspend, activate, revoke                                                                        |
+| `pnpm user:reset-password <email>`                   | Cấp mã đặt lại mật khẩu dùng một lần (không giả định có dịch vụ email)                                                                           |
+| `node scripts/backup.mjs backup\|verify\|restore`    | Sao lưu cơ sở dữ liệu và âm thanh, có kiểm tra khôi phục                                                                                         |
+| `node scripts/make-og-image.mjs`                     | Tạo lại ảnh xem trước khi chia sẻ                                                                                                                |
 
-## Architecture
+## Kiến trúc
 
 ```text
 apps/web          React 19 + Vite + Tailwind + TanStack Query + Zustand + WaveSurfer
-apps/api          NestJS 11: auth, roles, projects, catalog, render planning, SSE, assets, admin, SEO files
-apps/worker       Claims jobs (SKIP LOCKED), synthesizes, applies DSP, encodes, validates; disk guard and cleanup
-packages/core     Engine adapters (vieneu, espeak, vnunit), capabilities, text, DSP, plans, disk rules, storage
-packages/db       Prisma schema and migrations (PostgreSQL)
-packages/contracts  Shared zod schemas, DTOs, error codes
-services/vieneu   The AI voice model service (separate process, internal network, token)
-config/           Voice allowlist, QA corpus, QA reports
-docs/             Product and technical specifications, ADRs, upgrade notes, design prototype
+apps/api          NestJS 11: xác thực, vai trò, dự án, danh mục, lập kế hoạch xuất, SSE, tệp, quản trị, tệp SEO
+apps/worker       Nhận việc (SKIP LOCKED), tổng hợp, xử lý DSP, mã hóa, kiểm tra; bảo vệ ổ đĩa và dọn dẹp
+packages/core     Bộ chuyển đổi bộ máy (vieneu, espeak, vnunit), khả năng, văn bản, DSP, gói, quy tắc ổ đĩa, lưu trữ
+packages/db       Schema Prisma và migration (PostgreSQL)
+packages/contracts  Schema zod, DTO và mã lỗi dùng chung
+services/vieneu   Dịch vụ mô hình giọng AI (tiến trình riêng, mạng nội bộ, có token)
+config/           Danh sách giọng được phép, bộ văn bản QA, báo cáo QA
+docs/             Đặc tả sản phẩm và kỹ thuật, ADR, ghi chú nâng cấp, bản mẫu giao diện
 ```
 
-## Documentation
+## Tài liệu
 
-- Start with [AGENTS.md](AGENTS.md), then `docs/00`–`docs/12` (original specifications; they predate the AI-default decision, so read them with the ADRs).
-- Decisions: [docs/decisions](docs/decisions) (0007 AI data at development time, 0008 self-hosted AI engine, 0009 AI voices by default, roles and account security).
-- Current state: [docs/upgrade](docs/upgrade): `07-MIGRATION-GUIDE.md` (upgrading an existing install), `07-STUDIO-UI.md`, `09-AI-ENGINE-CAPACITY.md`, `10-SECURITY-AND-ACCESS.md`, and the [implementation tracker](docs/upgrade/IMPLEMENTATION-TRACKER.md) with evidence and open items.
-- UI prototype that was approved for the redesign: [docs/design/ui-prototype.html](docs/design/ui-prototype.html).
-- Third-party licenses: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+- Bắt đầu từ [AGENTS.md](AGENTS.md), sau đó đọc `docs/00` đến `docs/12` (đặc tả gốc, viết trước quyết định dùng AI làm mặc định, nên cần đọc cùng các ADR).
+- Quyết định kiến trúc: [docs/decisions](docs/decisions) (0007 dữ liệu do AI tạo ở giai đoạn phát triển, 0008 bộ máy AI tự lưu trữ, 0009 giọng AI làm mặc định cùng vai trò và bảo mật tài khoản).
+- Hiện trạng: [docs/upgrade](docs/upgrade): `07-MIGRATION-GUIDE.md` (nâng cấp bản đã cài), `07-STUDIO-UI.md`, `09-AI-ENGINE-CAPACITY.md`, `10-SECURITY-AND-ACCESS.md` và [bảng theo dõi triển khai](docs/upgrade/IMPLEMENTATION-TRACKER.md) kèm bằng chứng và các việc còn mở.
+- Bản mẫu giao diện đã được duyệt cho đợt thiết kế lại: [docs/design/ui-prototype.html](docs/design/ui-prototype.html).
+- Giấy phép của các thành phần bên thứ ba: [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
 
-## Known limitations
+## Hạn chế đã biết
 
-- The default product speaks Vietnamese only; other languages need the optional `espeak` engine.
-- If the AI model service is down, nothing can speak (by design: no silent fallback).
-- No listening evaluation of the AI voices has been done; no measurements on a real VPS; no billing; no 2FA, email verification or penetration test; no account deletion; Docker images never built.
-- The VoxStudio code is MIT-licensed ([LICENSE](LICENSE)). That does not cover third-party components: eSpeak NG (GPL-3.0, run as a separate program and not linked), the VieNeu model and its voices, FFmpeg and the npm dependencies keep their own licenses (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Check the model and voice licenses before redistributing weights or audio.
+- Bản mặc định chỉ đọc tiếng Việt; các ngôn ngữ khác cần bật bộ máy `espeak` (tùy chọn).
+- Nếu dịch vụ mô hình AI ngừng chạy thì không giọng nào đọc được (chủ ý: không có phương án thay thế ngầm).
+- Chưa có đánh giá bằng tai nghe cho giọng AI; chưa đo trên VPS thật; chưa có thanh toán; chưa có xác thực hai lớp, xác minh email hay kiểm thử xâm nhập; chưa có chức năng xóa tài khoản; chưa từng build image Docker.
+- Mã nguồn VoxStudio theo giấy phép MIT ([LICENSE](LICENSE)). Giấy phép này không bao trùm các thành phần bên thứ ba: eSpeak NG (GPL-3.0, chạy như một chương trình riêng, không liên kết vào mã), mô hình VieNeu cùng các giọng, FFmpeg và các thư viện npm vẫn giữ giấy phép riêng (xem [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Hãy kiểm tra giấy phép của mô hình và giọng trước khi phân phối lại trọng số hoặc âm thanh.
