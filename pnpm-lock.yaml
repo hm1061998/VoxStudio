@@ -269,6 +269,9 @@ importers:
 
   apps/web:
     dependencies:
+      '@fontsource/be-vietnam-pro':
+        specifier: 5.2.8
+        version: 5.2.8
       '@tanstack/react-query':
         specifier: 5.105.0
         version: 5.105.0(@types/react@19.2.2)(react@19.2.0)
@@ -650,6 +653,9 @@ packages:
   '@eslint/plugin-kit@0.4.1':
     resolution: {integrity: sha512-43/qtrDUokr7LJqoF2c3+RInu/t4zfrpYdoSDfYyhg52rwLV6TnOvdG4fXm7IkSB3wErkcmJS9iEhjVtOSEjjA==}
     engines: {node: ^18.18.0 || ^20.9.0 || >=21.1.0}
+
+  '@fontsource/be-vietnam-pro@5.2.8':
+    resolution: {integrity: sha512-lqTtfpkAy0GdFH0fqwR0sW4VP+3CNGaQV6SpW2TSZaNmixZMlou+2dp5ErGidrS1MPiDDPfPbfW2i358PVFLZA==}
 
   '@humanfs/core@0.19.2':
     resolution: {integrity: sha512-UhXNm+CFMWcbChXywFwkmhqjs3PRCmcSa/hfBgLIb7oQ5HNb1wS0icWsGtSAUNgefHeI+eBrA8I1fxmbHsGdvA==}
@@ -2818,6 +2824,8 @@ snapshots:
     dependencies:
       '@eslint/core': 0.17.0
       levn: 0.4.1
+
+  '@fontsource/be-vietnam-pro@5.2.8': {}
 
   '@humanfs/core@0.19.2':
     dependencies:

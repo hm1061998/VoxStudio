@@ -15,6 +15,7 @@ import { Confirm, Dialog, Empty, ErrorNote, JobBadge, Spinner, fmtDate, fmtMs } 
 import { accentName, languageName, useI18n } from '../i18n';
 import type { MessageKey } from '../i18n/en';
 import { VoiceGallery } from '../components/VoiceGallery';
+import { VoiceSample } from '../components/VoiceSample';
 import { availableAccents, availableGenders, defaultVoiceFor, type Gender } from '../studio/voicePick';
 
 const SEGMENT_MAX = 5000;
@@ -26,6 +27,7 @@ export function DashboardPage() {
   const [sort, setSort] = useState('updated');
   const [archived, setArchived] = useState(false);
   const [creating, setCreating] = useState(false);
+  const [draftText, setDraftText] = useState('');
   const [confirmDelete, setConfirmDelete] = useState<ProjectSummaryDto | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const projects = useProjects(workspaceId, q, sort, archived);
@@ -74,6 +76,12 @@ export function DashboardPage() {
           {t('dash.new')}
         </button>
       </header>
+      <QuickListen
+        onSave={(text) => {
+          setDraftText(text);
+          setCreating(true);
+        }}
+      />
       {actionError && (
         <div className="mb-3">
           <ErrorNote error={actionError} />
@@ -176,7 +184,11 @@ export function DashboardPage() {
         </div>
       )}
       {creating && (
-        <CreateProjectDialog onClose={() => setCreating(false)} onCreated={(id) => nav(`/projects/${id}`)} />
+        <CreateProjectDialog
+          initialText={draftText}
+          onClose={() => setCreating(false)}
+          onCreated={(id) => nav(`/projects/${id}`)}
+        />
       )}
       {confirmDelete && (
         <Confirm
@@ -189,6 +201,112 @@ export function DashboardPage() {
         />
       )}
     </div>
+  );
+}
+
+const QUICK_MAX = 1000;
+
+/**
+ * Listen first, save later: paste a few sentences, pick a region and gender, hear it. The audio is a real
+ * preview job on the server (the same one the studio uses), so what you hear is what the project will sound like.
+ */
+function QuickListen({ onSave }: { onSave: (text: string) => void }) {
+  const { t, lang } = useI18n();
+  const voices = useVoices();
+  const [text, setText] = useState('');
+  const [accent, setAccent] = useState<string | null>(null);
+  const [gender, setGender] = useState<Gender | null>(null);
+  const locale = lang === 'vi' ? 'vi-VN' : 'en-US';
+  const all = voices.data ?? [];
+  const effectiveLocale = all.some((v) => v.locale === locale) ? locale : (all[0]?.locale ?? locale);
+  const forLocale = all.filter((v) => v.locale === effectiveLocale);
+  const shown = forLocale.filter((v) => (!accent || v.accent === accent) && (!gender || v.gender === gender));
+  const voice = shown[0] ?? defaultVoiceFor(forLocale, effectiveLocale);
+  const accents = availableAccents(all, effectiveLocale, gender);
+  const genders = availableGenders(all, effectiveLocale, accent);
+  const chip = (on: boolean) =>
+    `rounded-full border px-3 py-1 text-sm font-medium ${on ? 'border-accent bg-accent/15 text-accent-strong' : 'border-line bg-panel text-muted hover:border-accent'}`;
+  if (voices.isLoading || all.length === 0) return null;
+  return (
+    <section
+      className="card mb-6 grid gap-5 p-5 lg:grid-cols-[minmax(0,1.6fr)_minmax(0,1fr)]"
+      aria-labelledby="ql-h"
+    >
+      <div className="space-y-3">
+        <h2 id="ql-h" className="text-lg font-semibold">
+          {t('quick.listenTitle')}
+        </h2>
+        <label className="sr-only" htmlFor="ql-text">
+          {t('quick.listenText')}
+        </label>
+        <textarea
+          id="ql-text"
+          className="input h-28 resize-y leading-relaxed"
+          lang={effectiveLocale}
+          maxLength={QUICK_MAX}
+          placeholder={t('quick.listenPlaceholder')}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <span className="font-mono text-xs text-dim">
+            {text.length.toLocaleString(lang)} / {QUICK_MAX.toLocaleString(lang)}
+          </span>
+          <button className="btn btn-primary" disabled={!text.trim()} onClick={() => onSave(text)}>
+            {t('quick.save')}
+          </button>
+        </div>
+        {voice && text.trim() && (
+          <VoiceSample voiceId={voice.id} locale={voice.locale} text={text.slice(0, QUICK_MAX)} />
+        )}
+      </div>
+      <div className="space-y-4">
+        {accents.length > 1 && (
+          <div>
+            <p className="label">{t('create.accent')}</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t('create.accent')}>
+              <button className={chip(!accent)} aria-pressed={!accent} onClick={() => setAccent(null)}>
+                {t('create.any')}
+              </button>
+              {accents.map((a) => (
+                <button
+                  key={a}
+                  className={chip(accent === a)}
+                  aria-pressed={accent === a}
+                  onClick={() => setAccent(a)}
+                >
+                  {accentName(a, lang)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        {genders.length > 0 && (
+          <div>
+            <p className="label">{t('create.gender')}</p>
+            <div className="flex flex-wrap gap-2" role="group" aria-label={t('create.gender')}>
+              <button className={chip(!gender)} aria-pressed={!gender} onClick={() => setGender(null)}>
+                {t('create.any')}
+              </button>
+              {genders.map((g) => (
+                <button
+                  key={g}
+                  className={chip(gender === g)}
+                  aria-pressed={gender === g}
+                  onClick={() => setGender(g)}
+                >
+                  {t(`profile.gender.${g}` as MessageKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        <p className="rounded-[10px] bg-accent/10 px-3 py-2 text-sm text-accent-strong">
+          {voice ? t('quick.listenVoice', { name: voice.displayName }) : t('create.noMatch')}
+          {voice?.usesAi && <span className="badge ml-2 bg-accent/20">AI</span>}
+        </p>
+      </div>
+    </section>
   );
 }
 
@@ -219,9 +337,11 @@ function QuickStart({ onCreate }: { onCreate: () => void }) {
 function CreateProjectDialog({
   onClose,
   onCreated,
+  initialText = '',
 }: {
   onClose: () => void;
   onCreated: (id: string) => void;
+  initialText?: string;
 }) {
   const { workspaceId } = useAuth();
   const { t, lang } = useI18n();
@@ -229,7 +349,7 @@ function CreateProjectDialog({
   const [name, setName] = useState(() => t('create.untitled'));
   const [wantedLocale, setLocale] = useState(lang === 'vi' ? 'vi-VN' : 'en-US');
   const [voiceId, setVoiceId] = useState('');
-  const [text, setText] = useState('');
+  const [text, setText] = useState(initialText);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const locales = useMemo(

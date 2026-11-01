@@ -6,6 +6,7 @@ import { AuthProvider } from './app/auth';
 import { I18nProvider } from './i18n';
 import { App } from './app/App';
 import { ApiError } from './api/client';
+import './app/theme';
 import './index.css';
 
 const queryClient = new QueryClient({

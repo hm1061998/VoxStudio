@@ -42,3 +42,15 @@ The existing design system, routes and workflows are unchanged. Everything below
 - Engine display names come from a small client table.
 - The tone table is orthographic: it does not model dialect tone merging or predict how any engine pronounces a syllable.
 - Two full `pnpm test` runs failed with a vitest "Channel closed" worker error immediately after Playwright runs; four later runs passed (231/231). I did not find the cause; it did not reproduce in isolation.
+
+## Redesign (2026-11-01, UP-057)
+
+Approved prototype: `docs/design/ui-prototype.html`. Implemented in the real app:
+
+- One token set for a light and a dark theme (Auto follows the system; the choice is kept in the browser). The self-hosted Be Vietnam Pro font (OFL-1.1) is bundled; nothing is loaded from another site.
+- New navigation: a left rail on desktop and tablet, a bottom bar on phones; the stored-audio meter sits in the rail.
+- Home: "Hear it first" (paste text, choose region and gender, hear a real preview, then save as a project) above the project list.
+- Account: Profile, Plan and usage, Password, Signed-in devices and My data are separate pages (`/settings/...`).
+- Light-theme text colours were darkened for contrast; the axe-core test now also checks the dark theme and the account pages.
+
+Not done: the studio, voices, presets, pronunciation and admin pages got the new look through the tokens but were not restructured; the export dialog does not grey out large WAV options for plans without them; the device list shows only "sign out other devices" because the API has no session list; there is no account deletion; the prototype's per-device table and delete button are therefore not in the app. The screens were checked in headless Chromium screenshots and axe-core, not by a person.

@@ -1,6 +1,7 @@
 import { useEffect, useState, type FormEvent, type ReactNode } from 'react';
 import { Link, useNavigate } from 'react-router';
 import { api, describeError } from '../api/client';
+import { ThemeSwitch } from '../app/Shell';
 import { useAuth } from '../app/auth';
 import { ErrorNote, LanguageSelect } from '../components/ui';
 import { useI18n } from '../i18n';
@@ -9,19 +10,34 @@ function AuthCard({ title, children, footer }: { title: string; children: ReactN
   const { t } = useI18n();
   return (
     <main className="flex min-h-full items-center justify-center p-6">
-      <div className="w-full max-w-sm">
-        <div className="mb-3 flex justify-end">
+      <div className="w-full max-w-md">
+        <div className="mb-4 flex flex-wrap items-center justify-end gap-3">
+          <ThemeSwitch />
           <LanguageSelect />
         </div>
-        <div className="mb-6 text-center">
-          <h1 className="text-xl font-semibold">VoxStudio</h1>
-          <p className="mt-1 text-sm text-muted">{t('app.tagline')}</p>
+        <div className="mb-6 flex flex-col items-center gap-3 text-center">
+          <span className="grid h-12 w-12 place-items-center rounded-2xl bg-accent text-accent-ink">
+            <svg
+              viewBox="0 0 24 24"
+              className="h-6 w-6"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2.4"
+              strokeLinecap="round"
+              aria-hidden
+            >
+              <path d="M4 10v4M8 6v12M12 3v18M16 7v10M20 10v4" />
+            </svg>
+          </span>
+          <h1 className="text-2xl font-bold tracking-tight">VoxStudio</h1>
+          <p className="max-w-sm text-muted">{t('app.tagline')}</p>
         </div>
-        <div className="card p-6">
-          <h2 className="mb-4 text-base font-semibold">{title}</h2>
+        <div className="card p-6 sm:p-8">
+          <h2 className="mb-5 text-lg font-semibold">{title}</h2>
           {children}
         </div>
         <p className="mt-4 text-center text-sm text-muted">{footer}</p>
+        <p className="mt-3 text-center text-xs text-dim">{t('auth.privacyNote')}</p>
       </div>
     </main>
   );

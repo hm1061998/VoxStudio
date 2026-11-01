@@ -394,7 +394,7 @@ test('AI voice: labelled AI, simple controls, real playback, engine shown, plan 
   expect(wav.length).toBeGreaterThan(20_000);
 
   // Plan and usage are visible to the user.
-  await page.goto('/settings');
+  await page.goto('/settings/plan');
   await expect(page.getByRole('heading', { name: /Your plan: Free/ })).toBeVisible();
   await expect(page.getByText(/AI voices this month: [1-9]\d* of 20,000 characters/)).toBeVisible();
   expect(errors, errors.join('\n')).toEqual([]);
@@ -578,6 +578,10 @@ test('accessibility: no serious or critical violations on the main screens', asy
     ['/pronunciation', 'pronunciation'],
     ['/renders', 'exports'],
     ['/settings', 'settings'],
+    ['/settings/plan', 'settings plan'],
+    ['/settings/password', 'settings password'],
+    ['/settings/devices', 'settings devices'],
+    ['/settings/data', 'settings data'],
     ['/admin', 'admin'],
   ] as const) {
     await page.goto(path);
@@ -589,4 +593,49 @@ test('accessibility: no serious or critical violations on the main screens', asy
     await page.waitForLoadState('networkidle');
     await check('admin ' + tab);
   }
+  // The dark theme has its own palette: check the main screens there too.
+  await page.emulateMedia({ colorScheme: 'dark' });
+  for (const [path, name] of [
+    ['/', 'dark home'],
+    ['/voices', 'dark voices'],
+    ['/settings/plan', 'dark plan'],
+    ['/admin', 'dark admin'],
+  ] as const) {
+    await page.goto(path);
+    await page.waitForLoadState('networkidle');
+    await check(name);
+  }
+});
+
+test('account sections are separate pages, and the theme can be chosen', async ({
+  page,
+  request,
+  context,
+}) => {
+  const u = await apiRegister(request, 'Account Tester');
+  await context.clearCookies();
+  await signIn(page, u.email, u.password);
+  await page.getByRole('link', { name: 'Account' }).first().click();
+  await expect(page).toHaveURL(/\/settings\/profile$/);
+  const menu = page.getByRole('navigation', { name: 'Account sections' });
+  await expect(page.getByRole('heading', { name: 'Profile', level: 2 })).toBeVisible();
+  await expect(page.getByLabel('Current password')).toHaveCount(0);
+  await menu.getByRole('link', { name: 'Password' }).click();
+  await expect(page).toHaveURL(/\/settings\/password$/);
+  await expect(page.getByLabel('Current password')).toBeVisible();
+  await expect(page.getByLabel('Display name')).toHaveCount(0);
+  await menu.getByRole('link', { name: 'Plan and usage' }).click();
+  await expect(page.getByRole('heading', { name: /Your plan: Free/ })).toBeVisible();
+  await expect(page.getByText(/Large WAV exports .* not included/)).toBeVisible();
+  await menu.getByRole('link', { name: 'Signed-in devices' }).click();
+  await expect(page.getByRole('button', { name: 'Sign out of all other devices' })).toBeVisible();
+  await menu.getByRole('link', { name: 'My data' }).click();
+  await expect(page.getByText(/ask an administrator/)).toBeVisible();
+  // Theme: explicit choice is applied and survives a reload.
+  await page.getByRole('radio', { name: 'Dark' }).first().click();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.reload();
+  await expect(page.locator('html')).toHaveAttribute('data-theme', 'dark');
+  await page.getByRole('radio', { name: 'Auto' }).first().click();
+  await expect(page.locator('html')).not.toHaveAttribute('data-theme', /.+/);
 });

@@ -1,3 +1,4 @@
+import { cssColor } from '../app/theme';
 import { useEffect, useRef, useState } from 'react';
 import WaveSurfer from 'wavesurfer.js';
 import RegionsPlugin from 'wavesurfer.js/dist/plugins/regions.esm.js';
@@ -32,9 +33,9 @@ export function Player() {
     const w = WaveSurfer.create({
       container: container.current,
       height: 72,
-      waveColor: '#3b4a5f',
-      progressColor: '#3ecfb2',
-      cursorColor: '#e6edf3',
+      waveColor: cssColor('--c-wave'),
+      progressColor: cssColor('--c-accent'),
+      cursorColor: cssColor('--c-fg'),
       cursorWidth: 1,
       barWidth: 2,
       barGap: 1,

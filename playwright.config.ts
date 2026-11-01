@@ -1,4 +1,24 @@
+import { readFileSync } from 'node:fs';
 import { defineConfig, devices } from '@playwright/test';
+
+/**
+ * E2E_PORT runs the suite beside an application that already uses :4000 (for example your own `pnpm start`).
+ * That mode also uses the test database (TEST_DATABASE_URL), so the other application's worker cannot pick up
+ * the test jobs and the tests never touch your real projects.
+ */
+const PORT = process.env.E2E_PORT ?? '4000';
+if (process.env.E2E_PORT) {
+  let url = process.env.TEST_DATABASE_URL;
+  if (!url) {
+    try {
+      url = /^TEST_DATABASE_URL=(.*)$/m.exec(readFileSync('.env', 'utf8'))?.[1]?.trim();
+    } catch {
+      /* no .env */
+    }
+  }
+  if (!url) throw new Error('E2E_PORT needs TEST_DATABASE_URL (run `pnpm db:start`).');
+  process.env.DATABASE_URL = url;
+}
 
 export default defineConfig({
   testDir: './e2e',
@@ -8,7 +28,7 @@ export default defineConfig({
   workers: 1,
   reporter: [['list'], ['html', { open: 'never' }]],
   use: {
-    baseURL: process.env.E2E_BASE_URL ?? 'http://localhost:4000',
+    baseURL: process.env.E2E_BASE_URL ?? `http://localhost:${PORT}`,
     trace: 'retain-on-failure',
     acceptDownloads: true,
     viewport: { width: 1440, height: 900 },
@@ -16,13 +36,17 @@ export default defineConfig({
   projects: [
     { name: 'chromium', use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } } },
   ],
-  // Uses the built app (pnpm build). Reuses a server already running on :4000.
+  // Uses the built app (pnpm build). Reuses a server already running on the port.
   webServer: {
     command: 'node scripts/start-all.mjs',
-    url: 'http://localhost:4000/api/v1/health/ready',
+    url: `http://localhost:${PORT}/api/v1/health/ready`,
     reuseExistingServer: true,
     // Rule-based voices are not offered by default; the suites that exercise them enable the engine explicitly.
-    env: { ENABLED_ENGINES: process.env.E2E_AI ? 'espeak,vieneu' : 'espeak' },
+    env: {
+      API_PORT: PORT,
+      CORS_ORIGINS: `http://localhost:${PORT}`,
+      ENABLED_ENGINES: process.env.E2E_AI ? 'espeak,vieneu' : 'espeak',
+    },
     timeout: 120_000,
   },
 });

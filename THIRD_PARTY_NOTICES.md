@@ -41,6 +41,7 @@ Not part of the application packages or image. Only present where an operator ru
 | React, React DOM, React Router                                 | MIT                    |
 | TanStack Query, Zustand                                        | MIT                    |
 | WaveSurfer.js                                                  | BSD-3-Clause           |
+| Be Vietnam Pro font (@fontsource/be-vietnam-pro, bundled)      | OFL-1.1                |
 | Tailwind CSS, Vite                                             | MIT                    |
 | Vitest, Playwright, TypeScript, ESLint, Prettier               | MIT / Apache-2.0       |
 

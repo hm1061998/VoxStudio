@@ -10,7 +10,15 @@ import { VoicesPage } from '../pages/VoicesPage';
 import { PresetsPage } from '../pages/PresetsPage';
 import { PronunciationPage } from '../pages/PronunciationPage';
 import { RenderCenterPage } from '../pages/RenderCenterPage';
-import { SettingsPage } from '../pages/SettingsPage';
+import {
+  DataSection,
+  DevicesSection,
+  PasswordSection,
+  PlanSection,
+  ProfileSection,
+  SettingsIndex,
+  SettingsLayout,
+} from '../pages/SettingsPage';
 import { AdminPage } from '../pages/AdminPage';
 
 export function App() {
@@ -42,7 +50,14 @@ export function App() {
         <Route path="/presets" element={<PresetsPage />} />
         <Route path="/pronunciation" element={<PronunciationPage />} />
         <Route path="/renders" element={<RenderCenterPage />} />
-        <Route path="/settings" element={<SettingsPage />} />
+        <Route path="/settings" element={<SettingsLayout />}>
+          <Route index element={<SettingsIndex />} />
+          <Route path="profile" element={<ProfileSection />} />
+          <Route path="plan" element={<PlanSection />} />
+          <Route path="password" element={<PasswordSection />} />
+          <Route path="devices" element={<DevicesSection />} />
+          <Route path="data" element={<DataSection />} />
+        </Route>
         <Route path="/admin" element={<AdminPage />} />
         <Route path="/login" element={<Navigate to="/" replace />} />
         <Route path="/register" element={<Navigate to="/" replace />} />
