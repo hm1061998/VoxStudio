@@ -147,4 +147,4 @@ docs/             Product and technical specifications, ADRs, upgrade notes, des
 - The default product speaks Vietnamese only; other languages need the optional `espeak` engine.
 - If the AI model service is down, nothing can speak (by design: no silent fallback).
 - No listening evaluation of the AI voices has been done; no measurements on a real VPS; no billing; no 2FA, email verification or penetration test; no account deletion; Docker images never built.
-- No LICENSE file has been chosen yet; until one is added, all rights are reserved by the author.
+- The VoxStudio code is MIT-licensed ([LICENSE](LICENSE)). That does not cover third-party components: eSpeak NG (GPL-3.0, run as a separate program and not linked), the VieNeu model and its voices, FFmpeg and the npm dependencies keep their own licenses (see [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)). Check the model and voice licenses before redistributing weights or audio.
