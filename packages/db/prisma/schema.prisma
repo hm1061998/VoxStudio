@@ -345,6 +345,18 @@ model AuditEvent {
   @@map("audit_events")
 }
 
+/// Single row (id = 1): the last disk measurement of the storage volume, written by the worker.
+model DiskStatus {
+  id         Int      @id
+  totalBytes BigInt   @map("total_bytes")
+  freeBytes  BigInt   @map("free_bytes")
+  /// 'ok' | 'warn' | 'block'
+  state      String
+  checkedAt  DateTime @map("checked_at") @db.Timestamptz(3)
+
+  @@map("disk_status")
+}
+
 /// Sign-in failure counters used for lockout. One row per account key ("acct:<sha256 of email>") and per client
 /// address ("ip:<address>"). Unknown emails get rows too, so locking never reveals whether an account exists.
 model AuthThrottle {

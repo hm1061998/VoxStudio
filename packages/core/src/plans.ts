@@ -17,15 +17,35 @@ export interface PlanLimits {
   aiMonthlyChars: number | null;
   /** Bytes of stored audio (segments, exports, previews) a workspace may hold. */
   storageBytes: number;
+  /** May export large uncompressed WAV (above 22.05 kHz mono 16-bit). */
+  heavyExports: boolean;
 }
 
 const MB = 1024 * 1024;
 const GB = 1024 * MB;
 
 export const DEFAULT_PLAN_LIMITS: Record<PlanId, PlanLimits> = {
-  free: { priority: 0, maxPendingJobs: 5, aiMonthlyChars: 20_000, storageBytes: 300 * MB },
-  pro: { priority: 10, maxPendingJobs: 15, aiMonthlyChars: 500_000, storageBytes: 5 * GB },
-  business: { priority: 20, maxPendingJobs: 20, aiMonthlyChars: null, storageBytes: 50 * GB },
+  free: {
+    priority: 0,
+    maxPendingJobs: 5,
+    aiMonthlyChars: 20_000,
+    storageBytes: 300 * MB,
+    heavyExports: false,
+  },
+  pro: {
+    priority: 10,
+    maxPendingJobs: 15,
+    aiMonthlyChars: 500_000,
+    storageBytes: 5 * GB,
+    heavyExports: true,
+  },
+  business: {
+    priority: 20,
+    maxPendingJobs: 20,
+    aiMonthlyChars: null,
+    storageBytes: 50 * GB,
+    heavyExports: true,
+  },
 };
 
 const limitsSchema = z.strictObject({
@@ -33,6 +53,7 @@ const limitsSchema = z.strictObject({
   maxPendingJobs: z.number().int().min(1).max(1000),
   aiMonthlyChars: z.number().int().min(0).nullable(),
   storageBytes: z.number().int().min(0),
+  heavyExports: z.boolean(),
 });
 
 /** Parse PLAN_LIMITS_JSON (partial overrides per plan). Throws on invalid input so a typo never goes unnoticed. */

@@ -1,6 +1,10 @@
 # VoxStudio single-node production baseline. See docs/10-DEPLOYMENT.md.
 name: voxstudio
 
+x-logging: &logging
+  driver: json-file
+  options: { max-size: '10m', max-file: '3' }
+
 x-server: &server
   image: voxstudio-server:0.1.0
   build: { context: ., dockerfile: infra/docker/Dockerfile }
@@ -14,6 +18,7 @@ x-server: &server
   security_opt: [no-new-privileges:true]
   cap_drop: [ALL]
   restart: unless-stopped
+  logging: *logging
 
 services:
   postgres:
@@ -23,6 +28,7 @@ services:
       POSTGRES_DB: voxstudio
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env.docker}
     volumes: [pgdata:/var/lib/postgresql/data]
+    logging: *logging
     networks: [backend]
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U voxstudio']
@@ -75,6 +81,7 @@ services:
       VIENEU_INSTANCES: ${VIENEU_INSTANCES:-1}
       VIENEU_THREADS: ${VIENEU_THREADS:-4}
     networks: [backend]
+    logging: *logging
     read_only: true
     tmpfs: [/tmp]
     security_opt: [no-new-privileges:true]
@@ -92,6 +99,7 @@ services:
       - caddy_data:/data
       - caddy_config:/config
     networks: [frontend]
+    logging: *logging
     depends_on: [api]
     restart: unless-stopped
 

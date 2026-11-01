@@ -417,6 +417,15 @@ export interface AdminOverviewDto {
   engines: EngineDto[];
   voices: VoiceDto[];
   storage: { assetCount: number; totalBytes: number; root: 'local' };
+  /** Free space of the storage volume (worker measurement). `block` = new audio jobs are refused. */
+  disk: {
+    state: 'ok' | 'warn' | 'block';
+    totalBytes: number;
+    freeBytes: number;
+    checkedAt: string;
+    measuredHere: boolean;
+  };
+  topWorkspaces: { workspaceId: string; name: string; plan: PlanId; bytes: number }[];
   jobs: { queued: number; running: number; failed24h: number; succeeded24h: number };
   recentFailures: {
     id: string;

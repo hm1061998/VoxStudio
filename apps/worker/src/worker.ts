@@ -12,6 +12,7 @@ import { randomUUID } from 'node:crypto';
 import { JobExecutor } from './executor';
 import { createLogger, type WorkerLogger } from './logger';
 import { claimJob, extendLease, reapExpired } from './queue';
+import { checkDisk, purgeOldRecords } from './disk';
 import { cleanupExpiredAssets } from './retention';
 
 export interface WorkerOptions {
@@ -33,6 +34,7 @@ export class RenderWorker {
   private timers: NodeJS.Timeout[] = [];
   private listener: Client | null = null;
   private stopping = false;
+  private diskState: string = 'ok';
   private versions = { engines: {} as Record<string, string>, ffmpeg: '' };
 
   constructor(private readonly o: WorkerOptions) {
@@ -85,12 +87,39 @@ export class RenderWorker {
     this.timers.push(
       setInterval(
         () =>
-          void cleanupExpiredAssets(prisma, new LocalStorageDriver(config.storageRoot)).catch(
-            () => undefined,
-          ),
+          void cleanupExpiredAssets(prisma, new LocalStorageDriver(config.storageRoot), {
+            urgent: this.diskState !== 'ok',
+          }).catch(() => undefined),
         10 * 60_000,
       ),
     );
+    // Disk protection: measure the storage volume every minute; when it is filling up clean up faster.
+    const measureDisk = async () => {
+      try {
+        const state = await checkDisk(prisma, config);
+        if (state && state !== this.diskState) {
+          this.log(state === 'ok' ? 'info' : 'warn', 'disk state changed', {
+            from: this.diskState,
+            to: state,
+          });
+          this.diskState = state;
+          if (state !== 'ok')
+            void cleanupExpiredAssets(prisma, new LocalStorageDriver(config.storageRoot), {
+              urgent: true,
+            }).catch(() => undefined);
+        }
+      } catch (e) {
+        this.log('warn', 'disk check failed', { err: (e as Error).message });
+      }
+    };
+    await measureDisk();
+    this.timers.push(setInterval(() => void measureDisk(), 60_000));
+    const purge = () =>
+      void purgeOldRecords(prisma, config).catch((e) =>
+        this.log('warn', 'record purge failed', { err: (e as Error).message }),
+      );
+    purge();
+    this.timers.push(setInterval(purge, 24 * 3600_000));
     await this.listen();
     this.log('info', 'worker started', {
       workerId: this.id,

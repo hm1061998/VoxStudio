@@ -2,6 +2,7 @@ import { Inject, Injectable } from '@nestjs/common';
 import {
   ErrorCodes,
   VoxError,
+  isHeavyOutputProfile,
   synthesisSettingsSchema,
   type OutputProfile,
   type PlanDto,
@@ -12,6 +13,7 @@ import { defaultSettings, isPlanId, usageMonth, type AppConfig, type PlanLimits 
 import { CatalogService } from '../catalog/catalog.service';
 import { Prisma, notifyJob, type RenderJob } from '@voxstudio/db';
 import { AccessService } from '../common/access';
+import { DiskService } from '../common/disk';
 import { CONFIG, PrismaService } from '../common/infra';
 import { jobDto } from '../common/mappers';
 import type { SessionUser } from '../common/http';
@@ -26,6 +28,7 @@ export class RenderService {
     private readonly planner: PlannerService,
     private readonly projects: ProjectsService,
     private readonly catalog: CatalogService,
+    private readonly disk: DiskService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
 
@@ -62,6 +65,7 @@ export class RenderService {
       aiUsedChars: agg._sum.chars ?? 0,
       storageBytes: limits.storageBytes,
       storageUsedBytes: stored._sum.fileSizeBytes ?? 0,
+      heavyExports: limits.heavyExports,
       month,
     };
   }
@@ -191,6 +195,7 @@ export class RenderService {
       return this.toDto(job);
     }
     const { limits } = await this.planLimits(workspaceId);
+    await this.disk.assertWritable();
     await this.enforceQueueLimit(workspaceId, limits);
     await this.enforceStorageQuota(workspaceId, limits);
     await this.enforceAiQuota(workspaceId, data.plan, limits);
@@ -303,6 +308,13 @@ export class RenderService {
       );
     const settings = this.projects.parseSettings(p.settingsJson);
     const profile = outputProfile ?? settings.outputProfile;
+    const { limits: planLimits } = await this.planLimits(p.workspaceId);
+    if (isHeavyOutputProfile(profile) && !planLimits.heavyExports)
+      throw new VoxError(
+        ErrorCodes.PLAN_FEATURE_UNAVAILABLE,
+        'Large WAV exports (above 22.05 kHz, stereo or 24-bit) are not included in your plan. Choose MP3, OGG or the default WAV.',
+        { feature: 'heavyExports' },
+      );
     const segments = await this.prisma.projectSegment.findMany({
       where: { projectId },
       orderBy: { position: 'asc' },

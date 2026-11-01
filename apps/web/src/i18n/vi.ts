@@ -742,6 +742,19 @@ export const vi: Record<MessageKey, string> = {
   'plan.storageMeter': 'Dung lượng âm thanh đã dùng',
   'error.STORAGE_QUOTA_EXCEEDED':
     'Dung lượng âm thanh đã lưu đã chạm mức của gói. Hãy xóa dự án hoặc bản xuất cũ, hoặc nhờ quản trị viên nâng gói.',
+  'adm.disk.free': 'Ổ đĩa còn trống',
+  'adm.disk.state.ok': 'Bình thường',
+  'adm.disk.state.warn': 'Sắp đầy: bản nháp cũ đang được dọn nhanh hơn',
+  'adm.disk.state.block': 'Cạn nghiêm trọng: không tạo âm thanh mới',
+  'adm.disk.warnMsg':
+    'Ổ đĩa lưu trữ đang đầy dần (còn {free} trên {total}). Bản nháp cũ và âm thanh không dùng đang được xóa sớm hơn. Hãy giải phóng chỗ hoặc thêm ổ lớn hơn.',
+  'adm.disk.blockMsg':
+    'Ổ đĩa lưu trữ gần đầy (còn {free} trên {total}). Việc tạo âm thanh mới bị từ chối cho đến khi có chỗ trống. Âm thanh đã lưu vẫn nghe được.',
+  'adm.disk.top': 'Lưu trữ âm thanh nhiều nhất',
+  'error.DISK_FULL':
+    'Máy chủ gần hết dung lượng lưu trữ nên chưa thể tạo âm thanh mới. Âm thanh đã lưu vẫn nghe được. Hãy thử lại sau.',
+  'error.PLAN_FEATURE_UNAVAILABLE':
+    'Gói của bạn không gồm xuất WAV dung lượng lớn (trên 22,05 kHz, stereo hoặc 24 bit). Hãy chọn MP3, OGG hoặc WAV mặc định.',
   'plan.pending': 'Việc đang chờ hoặc chạy: {n}/{max}',
   'plan.ai': 'Giọng AI trong tháng này: {used}/{limit} ký tự',
   'plan.aiUnlimited': 'Giọng AI trong tháng này: {used} ký tự (không giới hạn)',

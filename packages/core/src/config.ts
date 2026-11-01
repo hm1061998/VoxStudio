@@ -1,3 +1,4 @@
+import type { DiskThresholds } from './disk';
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdtemp, mkdir, rm } from 'node:fs/promises';
 import path from 'node:path';
@@ -93,6 +94,13 @@ const envSchema = z.object({
    */
   TRUST_PROXY: z.string().default('loopback'),
   /** Seconds of waiting that add one priority point to a queued job (anti-starvation). */
+  /** Disk protection (docs/superpowers/specs/2026-11-01-disk-protection-design.md). */
+  DISK_WARN_FREE_PERCENT: z.coerce.number().min(1).max(90).default(20),
+  DISK_BLOCK_FREE_PERCENT: z.coerce.number().min(0.5).max(80).default(8),
+  DISK_MIN_FREE_MB: z.coerce.number().int().min(0).default(1024),
+  /** Finished render jobs and audit events older than this are deleted daily. */
+  JOB_RETENTION_DAYS: z.coerce.number().int().min(1).max(3650).default(30),
+  AUDIT_RETENTION_DAYS: z.coerce.number().int().min(7).max(3650).default(180),
   QUEUE_AGING_SECONDS: z.coerce.number().int().min(1).max(3600).default(30),
   /** Optional JSON overriding plan limits, e.g. {"pro":{"aiMonthlyChars":1000000}}. */
   PLAN_LIMITS_JSON: z.string().default(''),
@@ -129,6 +137,9 @@ export interface AppConfig {
   enabledEngines: string[];
   vnUnitDbDir: string | null;
   queueAgingSeconds: number;
+  disk: DiskThresholds;
+  jobRetentionDays: number;
+  auditRetentionDays: number;
   planLimits: Record<PlanId, PlanLimits>;
   vieneuServiceUrls: string[];
   vieneuServiceToken: string;
@@ -148,6 +159,10 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     throw new Error(`Invalid configuration: ${issues}`);
   }
   const e = parsed.data;
+  if (e.DISK_BLOCK_FREE_PERCENT >= e.DISK_WARN_FREE_PERCENT)
+    throw new Error(
+      'Invalid configuration: DISK_BLOCK_FREE_PERCENT must be lower than DISK_WARN_FREE_PERCENT',
+    );
   if (e.AUTH_SECRET.length < 32 || /change-me/i.test(e.AUTH_SECRET))
     throw new Error('Invalid configuration: AUTH_SECRET must be at least 32 random characters.');
   if (e.NODE_ENV === 'production' && e.COOKIE_SECURE !== 'true')
@@ -183,6 +198,13 @@ export function loadConfig(env: NodeJS.ProcessEnv = process.env): AppConfig {
     enabledEngines: parseEnabledEngines(e.ENABLED_ENGINES),
     vnUnitDbDir: e.VN_UNIT_DB_DIR ? abs(e.VN_UNIT_DB_DIR) : null,
     queueAgingSeconds: e.QUEUE_AGING_SECONDS,
+    disk: {
+      warnFreePercent: e.DISK_WARN_FREE_PERCENT,
+      blockFreePercent: e.DISK_BLOCK_FREE_PERCENT,
+      minFreeBytes: e.DISK_MIN_FREE_MB * 1024 * 1024,
+    },
+    jobRetentionDays: e.JOB_RETENTION_DAYS,
+    auditRetentionDays: e.AUDIT_RETENTION_DAYS,
     planLimits: resolvePlanLimits(e.PLAN_LIMITS_JSON),
     vieneuServiceUrls: e.VIENEU_SERVICE_URLS.split(',')
       .map((u) => u.trim().replace(/\/$/, ''))

@@ -48,6 +48,10 @@ Operator CLI (needs database access): `node scripts/user-admin.mjs` to list user
 
 No 2FA, email verification or mailed password reset; no CAPTCHA; no WAF/volumetric DDoS protection (use the reverse proxy or a CDN); no TLS in the application itself (Caddy terminates it in the compose stack, never built here); no independent penetration test; the Docker images have not been built.
 
+## Disk protection
+
+The worker measures the storage volume every minute (`disk_status`). Free space below `DISK_WARN_FREE_PERCENT` (20) is **warn**: previews live 2 h and unreferenced project audio 1 h instead of 24 h, the admin dashboard shows a banner, and the change is audited. Below `DISK_BLOCK_FREE_PERCENT` (8) or `DISK_MIN_FREE_MB` (1024) is **block**: creating any new audio job fails with 503 `DISK_FULL` (only an export served from the render cache still succeeds); saved audio, downloads and sign-in keep working; it recovers on its own. A measurement older than 5 minutes is replaced by the API's own. Daily, finished render jobs older than `JOB_RETENTION_DAYS` (30) and audit events older than `AUDIT_RETENTION_DAYS` (180) are deleted; container logs rotate (10 MB × 3). Large WAV exports (above 22.05 kHz, stereo or 24-bit) need a plan with `heavyExports` (free: no). Verified by unit and API tests with a faked measurement; a really full disk was not tried. The export dialog does not yet grey out heavy options for plans without them (the server refuses with a clear message).
+
 ## Stored audio (disk) limits
 
 - Each plan has a `storageBytes` allowance (free 300 MB, pro 5 GB, business 50 GB; override with `PLAN_LIMITS_JSON`). New render and preview jobs are refused with `STORAGE_QUOTA_EXCEEDED` (402) once a workspace has used it; results already stored still play. Usage is shown in Settings and returned by `GET /me/plan`.

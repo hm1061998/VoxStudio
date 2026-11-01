@@ -123,6 +123,11 @@ export const DEFAULT_OUTPUT_PROFILE: OutputProfile = {
   bitDepth: 16,
 };
 
+/** Large uncompressed output (48 kHz, stereo or 24-bit WAV): up to 4.4 times the default size. Plans may exclude it. */
+export function isHeavyOutputProfile(p: OutputProfile): boolean {
+  return p.format === 'wav' && (p.sampleRate > 22050 || p.channels > 1 || (p.bitDepth ?? 16) > 16);
+}
+
 /** Fill format-specific defaults so equivalent profiles produce identical cache keys. */
 export function normalizeOutputProfile(
   p: OutputProfile,

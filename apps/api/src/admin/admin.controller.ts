@@ -23,6 +23,7 @@ import { AdminOnly } from '../auth/guards';
 import { AuthService } from '../auth/auth.service';
 import { CatalogService } from '../catalog/catalog.service';
 import { AuditService } from '../common/audit';
+import { DiskService } from '../common/disk';
 import { CurrentUser, UuidPipe, ZodPipe, type SessionUser } from '../common/http';
 import { CONFIG, PrismaService } from '../common/infra';
 
@@ -41,8 +42,32 @@ export class AdminController {
     private readonly catalog: CatalogService,
     private readonly audit: AuditService,
     private readonly auth: AuthService,
+    private readonly disk: DiskService,
     @Inject(CONFIG) private readonly config: AppConfig,
   ) {}
+
+  /** The five workspaces holding the most stored audio. */
+  private async topWorkspaces(): Promise<AdminOverviewDto['topWorkspaces']> {
+    const groups = await this.prisma.audioAsset.groupBy({
+      by: ['workspaceId'],
+      _sum: { fileSizeBytes: true },
+      orderBy: { _sum: { fileSizeBytes: 'desc' } },
+      take: 5,
+    });
+    const names = await this.prisma.workspace.findMany({
+      where: { id: { in: groups.map((g) => g.workspaceId) } },
+      select: { id: true, name: true, plan: true },
+    });
+    return groups.map((g) => {
+      const w = names.find((n) => n.id === g.workspaceId);
+      return {
+        workspaceId: g.workspaceId,
+        name: w?.name ?? '',
+        plan: planOf(w?.plan ?? 'free'),
+        bytes: g._sum.fileSizeBytes ?? 0,
+      };
+    });
+  }
 
   @Get('overview')
   async overview(): Promise<AdminOverviewDto> {
@@ -117,6 +142,8 @@ export class AdminController {
       engines: await this.catalog.engines(),
       voices: await this.catalog.listVoices({ admin: true }),
       storage: { assetCount: storage._count, totalBytes: storage._sum.fileSizeBytes ?? 0, root: 'local' },
+      disk: await this.disk.info(),
+      topWorkspaces: await this.topWorkspaces(),
       jobs: { queued, running, failed24h, succeeded24h },
       recentFailures: failures.map((f) => ({
         id: f.id,

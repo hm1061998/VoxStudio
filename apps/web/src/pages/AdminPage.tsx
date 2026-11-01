@@ -130,6 +130,17 @@ function Overview() {
           <Stat label={t('adm.ov.new7')} value={d.users.newLast7Days} />
         </div>
       </section>
+      {d.disk.state !== 'ok' && (
+        <div
+          role="alert"
+          className={`card p-3 text-sm ${d.disk.state === 'block' ? 'border-danger text-danger' : 'border-warn text-warn'}`}
+        >
+          {t(d.disk.state === 'block' ? 'adm.disk.blockMsg' : 'adm.disk.warnMsg', {
+            free: fmtBytes(d.disk.freeBytes, lang),
+            total: fmtBytes(d.disk.totalBytes, lang),
+          })}
+        </div>
+      )}
       <section aria-labelledby="adm-ov-sys">
         <h2 id="adm-ov-sys" className="mb-2 text-sm font-semibold text-muted">
           {t('adm.ov.system')}
@@ -163,12 +174,35 @@ function Overview() {
             value={`${d.storage.assetCount} · ${fmtBytes(d.storage.totalBytes, lang)}`}
           />
           <Stat
+            label={t('adm.disk.free')}
+            value={`${fmtBytes(d.disk.freeBytes, lang)} / ${fmtBytes(d.disk.totalBytes, lang)}`}
+            tone={d.disk.state === 'ok' ? 'ok' : d.disk.state === 'warn' ? 'warn' : 'bad'}
+            hint={t(`adm.disk.state.${d.disk.state}` as MessageKey)}
+          />
+          <Stat
             label={t('admin.heartbeat')}
             value={d.worker.lastHeartbeatAt ? fmtDate(d.worker.lastHeartbeatAt, lang) : '—'}
             tone={d.worker.lastHeartbeatAt ? undefined : 'bad'}
           />
         </div>
       </section>
+      {d.topWorkspaces.length > 0 && (
+        <section aria-labelledby="adm-ov-top">
+          <h2 id="adm-ov-top" className="mb-2 text-sm font-semibold text-muted">
+            {t('adm.disk.top')}
+          </h2>
+          <ul className="card divide-y divide-line text-sm">
+            {d.topWorkspaces.map((w) => (
+              <li key={w.workspaceId} className="flex items-center justify-between gap-3 px-3 py-2">
+                <span className="truncate">
+                  {w.name} <span className="text-dim">· {t(`plan.name.${w.plan}` as MessageKey)}</span>
+                </span>
+                <span className="tabular-nums">{fmtBytes(w.bytes, lang)}</span>
+              </li>
+            ))}
+          </ul>
+        </section>
+      )}
       <section aria-labelledby="adm-ov-sec">
         <h2 id="adm-ov-sec" className="mb-2 text-sm font-semibold text-muted">
           {t('adm.ov.security')}

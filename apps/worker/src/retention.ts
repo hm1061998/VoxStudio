@@ -4,21 +4,30 @@ import type { PrismaClient } from '@voxstudio/db';
 /** Superseded segment audio and old exports are kept this long (undo, comparing, a render still running). */
 export const ORPHAN_GRACE_MS = 24 * 3600_000;
 const PAGE = 500;
+/** When the disk is filling up: previews live 2 h and unreferenced project audio 1 h. */
+export const URGENT_PREVIEW_MS = 2 * 3600_000;
+export const URGENT_ORPHAN_MS = 3600_000;
 
 /**
  * Delete assets that nothing references: expired standalone previews, and project audio/exports that are no
  * longer a segment's latest audio or a project's latest export once the grace period has passed (the old take
  * of a re-rendered segment, a replaced export). Referenced assets are never deleted.
  */
-export async function cleanupExpiredAssets(prisma: PrismaClient, storage: StorageDriver): Promise<number> {
+export async function cleanupExpiredAssets(
+  prisma: PrismaClient,
+  storage: StorageDriver,
+  opts: { urgent?: boolean } = {},
+): Promise<number> {
   const now = Date.now();
+  const graceMs = opts.urgent ? URGENT_ORPHAN_MS : ORPHAN_GRACE_MS;
   const where = {
     OR: [
       { expiresAt: { lt: new Date(now) } },
+      ...(opts.urgent ? [{ kind: 'preview', createdAt: { lt: new Date(now - URGENT_PREVIEW_MS) } }] : []),
       {
         expiresAt: null,
         kind: { in: ['segment', 'export'] },
-        createdAt: { lt: new Date(now - ORPHAN_GRACE_MS) },
+        createdAt: { lt: new Date(now - graceMs) },
       },
     ],
   };

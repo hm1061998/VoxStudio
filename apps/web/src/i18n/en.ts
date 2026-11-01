@@ -743,6 +743,19 @@ export const en = {
   'plan.storageMeter': 'Stored audio used',
   'error.STORAGE_QUOTA_EXCEEDED':
     'Your stored audio has reached the limit of your plan. Delete old projects or exports, or ask an administrator for a larger plan.',
+  'adm.disk.free': 'Free disk space',
+  'adm.disk.state.ok': 'Healthy',
+  'adm.disk.state.warn': 'Filling up: old drafts are being cleaned faster',
+  'adm.disk.state.block': 'Critically low: new audio is refused',
+  'adm.disk.warnMsg':
+    'The storage disk is filling up ({free} free of {total}). Old drafts and unused audio are being removed sooner. Free space or add a larger disk.',
+  'adm.disk.blockMsg':
+    'The storage disk is almost full ({free} free of {total}). New audio jobs are refused until space is freed. Saved audio still plays.',
+  'adm.disk.top': 'Largest stored audio',
+  'error.DISK_FULL':
+    'The server is almost out of storage space, so new audio cannot be created right now. Saved audio still plays. Try again later.',
+  'error.PLAN_FEATURE_UNAVAILABLE':
+    'Large WAV exports (above 22.05 kHz, stereo or 24-bit) are not included in your plan. Choose MP3, OGG or the default WAV.',
   'plan.pending': 'Jobs waiting or running: {n} of {max}',
   'plan.ai': 'AI voices this month: {used} of {limit} characters',
   'plan.aiUnlimited': 'AI voices this month: {used} characters (no limit)',

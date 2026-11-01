@@ -19,6 +19,8 @@ export interface PlanDto {
   /** Bytes of stored audio allowed / currently stored for the workspace. */
   storageBytes: number;
   storageUsedBytes: number;
+  /** May export large uncompressed WAV. */
+  heavyExports: boolean;
   /** 'YYYY-MM' (UTC) the usage refers to */
   month: string;
 }
